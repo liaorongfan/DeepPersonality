@@ -1,6 +1,3 @@
-# DeepShareCV
-Learning CV based on neural networks
-## classification
-## segmentation
-## detection
-## gan
+# DeepPersonality
+Personality prediction with neural networks
+
