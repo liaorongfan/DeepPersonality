@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from collections import Counter
-from dscv.data.augment.mixup import mixup_data, mixup_criterion
+from dpcv.data.augment.mixup import mixup_data, mixup_criterion
 
 
 class ModelTrainer(object):

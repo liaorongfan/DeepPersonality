@@ -7,15 +7,15 @@ import pickle
 import argparse
 import torch.optim as optim
 from datetime import datetime
-from dscv.engine.model_trainer import ModelTrainer
-from dscv.utiles.common import setup_seed
-from dscv.utiles.draw import show_confMat, plot_line
-from dscv.utiles.logger import make_logger
-from dscv.modeling.build import get_model
-from dscv.config.flower_config import cfg
-from dscv.checkpoint.save import save_model
-from dscv.data.datasets.flower_102 import make_data_loader
-from dscv.modeling.loss.label_smooth import LabelSmoothLoss
+from dpcv.engine.model_trainer import ModelTrainer
+from dpcv.utiles.common import setup_seed
+from dpcv.utiles.draw import show_confMat, plot_line
+from dpcv.utiles.logger import make_logger
+from dpcv.modeling.build import get_model
+from dpcv.config.flower_config import cfg
+from dpcv.checkpoint.save import save_model
+from dpcv.data.datasets.flower_102 import make_data_loader
+from dpcv.modeling.loss.label_smooth import LabelSmoothLoss
 
 # import sys
 # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
