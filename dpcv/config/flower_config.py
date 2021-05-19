@@ -24,7 +24,7 @@ cfg.path_resnet18 = os.path.join(data_dir, "pretrained", "resnet18-5c106cde.pth"
 cfg.path_vgg16bn = os.path.join(data_dir, "pretrained", "vgg16_bn-6c64b313.pth")
 cfg.path_se_res50 = os.path.join(data_dir, "pretrained", "seresnet50-60a8950a85b2b.pkl")
 
-cfg.train_bs = 8
+cfg.train_bs = 24
 cfg.valid_bs = 8
 cfg.workers = 0
 
@@ -33,7 +33,7 @@ cfg.momentum = 0.9
 cfg.weight_decay = 1e-4
 cfg.factor = 0.1
 cfg.milestones = [30, 45]
-cfg.max_epoch = 20
+cfg.max_epoch = 30
 
 cfg.log_interval = 50
 

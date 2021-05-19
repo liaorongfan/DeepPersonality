@@ -81,8 +81,7 @@ def make_data_loader(cfg, mode):
 
 if __name__ == "__main__":
 
-    # root_dir = r"G:\deep_learning_data\102flowers\train"
-    root_dir = r"F:\23-deepshare\09-deep_share_cv_code\datasets\102flowers"
+    root_dir = r"path/to/102flowers"
 
     test_dataset = FlowerDataset(root_dir)
 

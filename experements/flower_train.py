@@ -29,7 +29,7 @@ def main(analysis_bad_case=False):
     parser.add_argument('--lr', default=None, help='learning rate')
     parser.add_argument('--bs', default=None, help='training batch size')
     parser.add_argument('--max_epoch', default=None)
-    parser.add_argument('--data_root_dir', default=r"F:\23-deepshare\09-deep_share_cv_code\datasets\102flowers",
+    parser.add_argument('--data_root_dir', default=r"../datasets/102flowers",
                         help="path to your dataset")
     args = parser.parse_args()
     cfg.flower_data_root = args.data_root_dir if args.data_root_dir else cfg.flower_data_root

@@ -15,7 +15,7 @@ import numpy as np
 from collections import Counter
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from datasets.cifar_longtail import CifarLTDataset
-from tools.common_tools import check_data_dir
+from experements.common_tools import check_data_dir
 from config.cifar_config import cfg
 import matplotlib.pyplot as plt
 
