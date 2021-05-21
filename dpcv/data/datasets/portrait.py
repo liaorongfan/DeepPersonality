@@ -72,7 +72,7 @@ class PortraitDataset(Dataset):
 
 def set_transform_op():
     import torchvision.transforms as transforms
-    norm_mean = [0.485, 0.456, 0.406]  # imagenet 120万图像统计得来
+    norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
     norm_std = [0.229, 0.224, 0.225]
     transforms = transforms.Compose([
         transforms.ToTensor(),
@@ -97,13 +97,13 @@ if __name__ == "__main__":
     dataset = PortraitDataset(data_path, mode="train", transforms=trans)
     print(len(dataset))
     # print(dataset[1])
-    # for i in range(3):
-    #     sample = dataset[i]
-    #     img, label = sample["image"], sample["label"]
-    #     print(img.dtype, label.dtype)
-    #     image = dataset.get_image(i)
-    #     plt.imshow(image, cmap='gray')
-    #     plt.show()
+    for i in range(3):
+        sample = dataset[i]
+        img, label = sample["image"], sample["label"]
+        print(img.dtype, label.dtype)
+        image = dataset.get_image(i)
+        plt.imshow(image, cmap='gray')
+        plt.show()
 
     data_loader = DataLoader(dataset=dataset, batch_size=4, shuffle=True)
     for i, batch in enumerate(data_loader):

@@ -2,8 +2,8 @@ import os
 import torch
 import torch.nn as nn
 from torchvision.models import resnet18
-from ..modeling.backbone.vgg_tv import vgg16_bn
-from ..modeling.backbone.se_resnet import se_resnet50
+from ..modeling.networks.vgg_tv import vgg16_bn
+from ..modeling.networks.se_resnet import se_resnet50
 
 
 def get_model(cfg, cls_num, logger):
