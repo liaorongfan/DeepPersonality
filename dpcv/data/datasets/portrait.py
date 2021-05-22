@@ -85,8 +85,12 @@ def make_data_loader(cfg, mode):
     assert (mode in ["train", "test"]), " 'mode' only supports 'train' and 'test'"
 
     transforms = set_transform_op()
-    dataset = PortraitDataset(cfg.flower_data_root, mode, transforms)
-    data_loader = DataLoader(dataset=dataset, batch_size=cfg.train_bs, shuffle=True, num_workers=cfg.workers)
+    dataset = PortraitDataset(cfg.DATA_ROOT, mode, transforms)
+    data_loader = DataLoader(dataset=dataset,
+                             batch_size=cfg.TRAIN_BATCH_SIZE,
+                             shuffle=True,
+                             num_workers=cfg.NUM_WORKS
+    )
     return data_loader
 
 

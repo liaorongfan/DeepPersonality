@@ -4,6 +4,7 @@ import torch.nn as nn
 from torchvision.models import resnet18
 from ..modeling.networks.vgg_tv import vgg16_bn
 from ..modeling.networks.se_resnet import se_resnet50
+from ..modeling.networks.portrait_cnn import PortraitNet
 
 
 def get_model(cfg, cls_num, logger):
@@ -40,4 +41,10 @@ def get_model(cfg, cls_num, logger):
         model.fc = nn.Linear(in_feat_num, cls_num)
     else:
         raise Exception("Invalid model name. got {}".format(cfg.model_name))
+    return model
+
+
+def get_portrait_model():
+    model = PortraitNet()
+    model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
