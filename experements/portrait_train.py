@@ -53,15 +53,12 @@ def main(analysis_bad_case=False):
     model = get_portrait_model()
 
     # step3: loss functions and optimizer
-    # if cfg.label_smooth:
-    #     loss_f = LabelSmoothLoss(cfg.label_smooth_eps)
-    # else:
     loss_f = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 
-    # step4: 迭代训练
-    # 记录训练所采用的模型、损失函数、优化器、配置参数cfg
+    # step4: training iteratively
+    # record info including model structure, loss function, optimizer and configs
     logger.info(
         "cfg:\n{}\n loss_f:\n{}\n scheduler:\n{}\n optimizer:\n{}\n model:\n{}".format(
             cfg, loss_f, scheduler, optimizer, model
@@ -73,48 +70,40 @@ def main(analysis_bad_case=False):
     best_acc, best_epoch = 0, 0
     for epoch in range(cfg.MAX_EPOCH):
         # train for one epoch
-        loss_train, acc_train, mat_train, path_error_train = ModelTrainer.train(
+        loss_train, acc_train = ModelTrainer.train(
             train_loader, model, loss_f, optimizer, scheduler, epoch, device, cfg, logger
         )
+        # loss_train = 0
+        # acc_train = 0
         # eval for after training for a epoch
-        loss_valid, acc_valid, mat_valid, path_error_valid = ModelTrainer.valid(
+        loss_valid, ocean_acc_valid, acc_avg_valid = ModelTrainer.valid(
             valid_loader, model, loss_f, device
         )
         # display info for that training epoch
         logger.info(
-            "Epoch[{:0>3}/{:0>3}] Train Acc: {:.2%} Valid Acc:{:.2%} Train loss:{:.4f} Valid loss:{:.4f} LR:{}".
-            format(
-                epoch + 1, cfg.max_epoch, acc_train,
-                acc_valid, loss_train, loss_valid,
+            "Epoch[{:0>3}/{:0>3}] Train Acc: {:.2%} Valid Mean_Acc:{:.2%} OCEAN_ACC:{} \n"
+            "Train loss:{:.4f} Valid loss:{:.4f} LR:{}".format(
+                epoch + 1, cfg.MAX_EPOCH, acc_train, float(acc_avg_valid), ocean_acc_valid,
+                loss_train, loss_valid,
                 optimizer.param_groups[0]["lr"]
             )
         )
         # update training lr every epoch
         scheduler.step()
 
-        # # 记录训练信息
-        # loss_rec["train"].append(loss_train), loss_rec["valid"].append(loss_valid)
-        # acc_rec["train"].append(acc_train), acc_rec["valid"].append(acc_valid)
-        # # 保存混淆矩阵图
-        # show_confMat(mat_train, cfg.flower_cls_names, "train", log_dir, epoch=epoch, verbose=(epoch == cfg.max_epoch - 1))
-        # show_confMat(mat_valid, cfg.flower_cls_names, "valid", log_dir, epoch=epoch, verbose=(epoch == cfg.max_epoch - 1))
-        # # 保存loss曲线， acc曲线
-        # plt_x = np.arange(1, epoch + 2)
-        # plot_line(plt_x, loss_rec["train"], plt_x, loss_rec["valid"], mode="loss", out_dir=log_dir)
-        # plot_line(plt_x, acc_rec["train"], plt_x, acc_rec["valid"], mode="acc", out_dir=log_dir)
-        #
-        # # 模型保存
-        # if acc_valid > best_acc:
-        #     save_model(epoch, best_acc, model, optimizer, log_dir, cfg)
-        #     best_epoch = epoch
-        #     best_acc = acc_valid
-        #
-        # if analysis_bad_case:
-        #     # 保存错误图片的路径
-        #     err_ims_name = "error_imgs_{}.pkl".format(epoch) if epoch == (cfg.max_epoch - 1) else "error_imgs_best.pkl"
-        #     path_err_imgs = os.path.join(log_dir, err_ims_name)
-        #     error_info = {"train": path_error_train, "valid": path_error_valid}
-        #     pickle.dump(error_info, open(path_err_imgs, 'wb'))
+        # save model
+        if acc_avg_valid > best_acc:
+            save_model(epoch, best_acc, model, optimizer, log_dir, cfg)
+            best_epoch = epoch
+            best_acc = acc_avg_valid
+
+        # plot loss and acc every epoch
+        loss_rec["train"].append(loss_train), loss_rec["valid"].append(loss_valid)
+        acc_rec["train"].append(acc_train), acc_rec["valid"].append(acc_avg_valid)
+
+        plt_x = np.arange(1, epoch + 2)
+        plot_line(plt_x, loss_rec["train"], plt_x, loss_rec["valid"], mode="loss", out_dir=log_dir)
+        plot_line(plt_x, acc_rec["train"], plt_x, acc_rec["valid"], mode="acc", out_dir=log_dir)
 
     logger.info(
         "{} done, best acc: {} in :{}".format(

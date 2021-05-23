@@ -11,14 +11,14 @@ __C = cfg
 
 __C.DATA_ROOT = "/home/rongfan/11-personality_traits/DeepPersonality/datasets/portrait"
 
-__C.TRAIN_BATCH_SIZE = 24
-__C.VALID_BATCH_SIZE = 8
-__C.NUM_WORKS = 2
+__C.TRAIN_BATCH_SIZE = 24  # 24
+__C.VALID_BATCH_SIZE = 8  # 8
+__C.NUM_WORKS = 0
 __C.LR_INIT = 0.01
 __C.MOMENTUM = 0.9
 __C.WEIGHT_DECAY = 1e-4
 __C.FACTOR = 0.1
-__C.MILESTONE = [20, 25]
+__C.MILESTONE = [5, 10, 20, 25]
 __C.MAX_EPOCH = 30
 __C.LOG_INTERVAL = 50
 

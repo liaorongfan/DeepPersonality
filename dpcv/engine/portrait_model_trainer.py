@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 from collections import Counter
-from dpcv.data.augment.mixup import mixup_data, mixup_criterion
 
 
 class ModelTrainer(object):
@@ -10,79 +9,65 @@ class ModelTrainer(object):
     def train(data_loader, model, loss_f, optimizer, scheduler, epoch_idx, device, cfg, logger):
         model.train()
 
-        loss_sigma = []
+        loss_list = []
+        acc_avg_list = []
         loss_mean = 0
         acc_avg = 0
-        path_error = []
-        label_list = []
         for i, data in enumerate(data_loader):
 
-            # _, labels = data
             inputs, labels = data["image"], data["label"]
-            # label_list.extend(labels.tolist())
-
-            # inputs, labels = data
-            # inputs, labels = data
             inputs, labels = inputs.to(device), labels.to(device)
 
             # forward & backward
             outputs = model(inputs)
             optimizer.zero_grad()
-            # mix_up loss calculation
             loss = loss_f(outputs.cpu(), labels.cpu())
             loss.backward()
             optimizer.step()
 
-            # 统计loss
-            loss_sigma.append(loss.item())
-            loss_mean = np.mean(loss_sigma)
-            #
-            # _, predicted = torch.max(outputs.data, 1)
-            # for j in range(len(labels)):
-            #     cate_i = labels[j].cpu().numpy()
-            #     pre_i = predicted[j].cpu().numpy()
-            #     conf_mat[cate_i, pre_i] += 1.
-            #     if cate_i != pre_i:
-            #         path_error.append((cate_i, pre_i, path_imgs[j]))    # 记录错误样本的信息
-            # acc_avg = conf_mat.trace() / conf_mat.sum()
+            # collect loss
+            loss_list.append(loss.item())
+            loss_mean = np.mean(loss_list)
 
-            # 每10个iteration 打印一次训练信息
+            acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean()
+            acc_avg = acc_avg.detach().numpy()
+            if acc_avg < 0:
+                acc_avg = 0
+            acc_avg_list.append(acc_avg)
+            # print loss info for an interval
             if i % cfg.LOG_INTERVAL == cfg.LOG_INTERVAL - 1:
-                logger.info("Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.2%}".
-                            format(epoch_idx + 1, cfg.MAX_EPOCH, i + 1, len(data_loader), loss_mean, acc_avg))
-        logger.info("epoch:{} sampler: {}".format(epoch_idx, Counter(label_list)))
-        return loss_mean, acc_avg,  path_error
+                logger.info(
+                    "Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.2}".
+                    format(epoch_idx + 1, cfg.MAX_EPOCH, i + 1, len(data_loader), float(loss_mean), float(acc_avg))
+                )
+            # debug
+            # if i > 10:
+            #     break
+        logger.info("epoch:{}".format(epoch_idx))
+        acc_avg = np.mean(acc_avg_list)  # return average accuracy of this training epoch
+        return loss_mean, acc_avg
 
     @staticmethod
     def valid(data_loader, model, loss_f, device):
         model.eval()
 
-        class_num = data_loader.dataset.cls_num
-        conf_mat = np.zeros((class_num, class_num))
-        loss_sigma = []
+        loss_list = []
         path_error = []
-
+        loss_mean = 0
+        acc_batch_list = []
         for i, data in enumerate(data_loader):
-            inputs, labels, path_imgs = data
-            # inputs, labels = data
+            inputs, labels = data["image"], data["label"]
             inputs, labels = inputs.to(device), labels.to(device)
 
             outputs = model(inputs)
             loss = loss_f(outputs.cpu(), labels.cpu())
+            loss_list.append(loss.item())
+            loss_mean = np.mean(loss_list)
+            acc_batch_list.append((1 - np.abs(outputs.cpu().detach().numpy() - labels.cpu().detach().numpy())))
 
-            # 统计混淆矩阵
-            _, predicted = torch.max(outputs.data, 1)
-            for j in range(len(labels)):
-                cate_i = labels[j].cpu().numpy()
-                pre_i = predicted[j].cpu().numpy()
-                conf_mat[cate_i, pre_i] += 1.
-                if cate_i != pre_i:
-                    path_error.append((cate_i, pre_i, path_imgs[j]))   # 记录错误样本的信息
+        ocean_acc = np.concatenate(acc_batch_list, axis=0).mean(axis=0)
+        acc_avg = ocean_acc.mean()
 
-            # 统计loss
-            loss_sigma.append(loss.item())
+        return loss_mean, ocean_acc, acc_avg
 
-        acc_avg = conf_mat.trace() / conf_mat.sum()
-
-        return np.mean(loss_sigma), acc_avg, conf_mat, path_error
 

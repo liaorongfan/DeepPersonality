@@ -6,6 +6,7 @@ def conv_block(in_channel, out_channel):
 
     layer = nn.Sequential(
         nn.Conv2d(in_channel, out_channel, kernel_size=3, padding=1),
+        nn.BatchNorm2d(out_channel),
         nn.ReLU(),
         nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True)
     )
