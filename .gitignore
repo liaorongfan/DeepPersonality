@@ -2,6 +2,8 @@
 results/
 
 # project dirs
+datasets/
+datasets/chalearn
 datasets/102flowers
 pretrained/
 /snippet
