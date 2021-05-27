@@ -1,14 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-# @file name  : evaluate.py
-# @author     : https://github.com/TingsongYu
-# @date       : 2021-03-07
-# @brief      : 模型在test上进行指标计算
-"""
 import torch
 import numpy as np
 import torch.nn as nn
-from datasets.flower_102 import FlowerDataset
+from dpcv.data.datasets.flower_102 import FlowerDataset
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.models import resnet18
@@ -20,7 +13,7 @@ if __name__ == '__main__':
     data_dir = r"G:\deep_learning_data\flowers102\test"
     path_state_dict = r"F:\prj_class\results\04-23_23-46\checkpoint_best.pkl"
 
-    norm_mean = [0.485, 0.456, 0.406]  # imagenet 120万图像统计得来
+    norm_mean = [0.485, 0.456, 0.406]
     norm_std = [0.229, 0.224, 0.225]
     normTransform = transforms.Normalize(norm_mean, norm_std)
     transforms_valid = transforms.Compose([
@@ -56,7 +49,6 @@ if __name__ == '__main__':
 
         outputs = model(inputs)
 
-        # 统计混淆矩阵
         _, predicted = torch.max(outputs.data, 1)
         for j in range(len(labels)):
             cate_i = labels[j].cpu().numpy()

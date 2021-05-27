@@ -36,7 +36,6 @@ class VGG(nn.Module):
             nn.Dropout(),
             nn.Linear(4096, num_classes),
         )
-        self.xxx = nn.XXXX
 
         if init_weights:
             self._initialize_weights()
@@ -201,10 +200,9 @@ def vgg19_bn(pretrained=False, **kwargs):
 if __name__ == "__main__":
 
     model = vgg16_bn()
-
-    # 替换网络层
-    for name, module in model.named_modules():
-        print("layer name:{}, layer instance:{}".format(name, module))
+    print(model)
+    # for name, module in model.named_modules():
+    #     print("layer name:{}, layer instance:{}".format(name, module))
     in_feat_num = model.classifier[6].in_features
     model.classifier[6] = nn.Linear(in_feat_num, 102)
 

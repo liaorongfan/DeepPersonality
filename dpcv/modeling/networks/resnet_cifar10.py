@@ -28,10 +28,6 @@ import torch.nn.init as init
 
 
 __all__ = ['ResNet', 'resnet20', 'resnet32', 'resnet44', 'resnet56', 'resnet110', 'resnet1202']
-"""
-__all__ 是针对模块公开接口的一种约定，以提供了”白名单“的形式暴露接口
-使用from xxx import *导入该文件时，只会导入 __all__ 列出的成员
-"""
 
 
 def _weights_init(m):
