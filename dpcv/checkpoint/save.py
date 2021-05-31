@@ -12,3 +12,11 @@ def save_model(epoch, best_acc, model, optimizer, output_dir, cfg):
     pkl_name = "checkpoint_{}.pkl".format(epoch) if epoch != (cfg.MAX_EPOCH - 1) else "checkpoint_last.pkl"
     path_checkpoint = os.path.join(output_dir, pkl_name)
     torch.save(checkpoint, path_checkpoint)
+
+
+def resume_training(checkpoint_path, model, optimizer):
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+    epoch = checkpoint["epoch"]
+    return model, optimizer, epoch

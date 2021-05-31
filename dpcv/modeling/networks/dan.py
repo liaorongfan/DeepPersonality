@@ -19,6 +19,8 @@ class DAN(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
         self.maxpool = nn.AdaptiveMaxPool2d((7, 7))
         self.linear_1 = nn.Linear(50176, 1024)
+        self.leaky_relu = nn.LeakyReLU(inplace=True)
+        self.dropout = nn.Dropout(0.5)
         self.linear_2 = nn.Linear(1024, num_classes)
 
         if init_weights:
@@ -33,6 +35,8 @@ class DAN(nn.Module):
         x = torch.cat([x1, x2], dim=1)
         x = x.view(x.size(0), -1)
         x = self.linear_1(x)
+        x = self.leaky_relu(x)
+        x = self.dropout(x)
         x = self.linear_2(x)
         return x
 
@@ -85,7 +89,7 @@ def get_dan_model(pretrained=False, **kwargs):
         model_dict.update(pretrained_dict)
         dan.load_state_dict(model_dict)
         # model.load_state_dict(model_zoo.load_url(model_urls['vgg16']))
-
+    dan.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return dan
 
 
@@ -100,6 +104,7 @@ questions:
     1) concatenate or add ,if add more weights saved
     2) hidden layers 50176 --> 1024 --> 5, mapping efficient
     3) L2 norm vs batch norm
-    4) freeze batch norm or not when training 
-    5) pre-trained models from imagenet or face-net 
+    4) dropout or not
+    5) freeze batch norm or not when training 
+    6) pre-trained models from imagenet or face-net 
 """

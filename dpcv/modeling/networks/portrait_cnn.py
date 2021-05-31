@@ -46,6 +46,12 @@ class PortraitNet(nn.Module):
         return y
 
 
+def get_portrait_model():
+    model = PortraitNet()
+    model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return model
+
+
 if __name__ == "__main__":
     inputs = torch.rand((4, 1, 208, 208))
     net = PortraitNet()

@@ -8,13 +8,12 @@ import torch.optim as optim
 from datetime import datetime
 from dpcv.engine.portrait_model_trainer import ModelTrainer
 from dpcv.utiles.common import setup_seed
-from dpcv.utiles.draw import show_confMat, plot_line
+from dpcv.utiles.draw import plot_line
 from dpcv.utiles.logger import make_logger
-from dpcv.modeling.networks.portrait_cnn import get_portrait_model
-from dpcv.config.portraint_config import cfg
-from dpcv.checkpoint.save import save_model
-from dpcv.data.datasets.portrait import make_data_loader
-from dpcv.modeling.loss.label_smooth import LabelSmoothLoss
+from dpcv.modeling.networks.dan import get_dan_model
+from dpcv.config.deep_bimodal_regression_cfg import cfg
+from dpcv.checkpoint.save import save_model, resume_training
+from dpcv.data.datasets.chalearn import make_data_loader
 
 # import sys
 # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -27,9 +26,10 @@ def main(analysis_bad_case=False):
     parser = argparse.ArgumentParser(description='Training')
     parser.add_argument('--lr', default=None, help='learning rate')
     parser.add_argument('--bs', default=None, help='training batch size')
+    parser.add_argument("--resume", default="../results/05-30_19-01/checkpoint_0.pkl", help="saved model path to last training epoch")
     parser.add_argument('--max_epoch', default=None)
     parser.add_argument('--data_root_dir',
-                        default=r"/home/rongfan/11-personality_traits/DeepPersonality/datasets/portrait",
+                        default=r"/home/rongfan/11-personality_traits/DeepPersonality/datasets",
                         help="path to your dataset")
     args = parser.parse_args()
 
@@ -46,16 +46,21 @@ def main(analysis_bad_case=False):
 
     # step1： get dataset
     train_loader = make_data_loader(cfg, mode="train")
-    valid_loader = make_data_loader(cfg, mode="test")
+    valid_loader = make_data_loader(cfg, mode="val")
 
     # step2: set model
-    model = get_portrait_model()
+    model = get_dan_model(pretrained=True)
 
     # step3: loss functions and optimizer
     loss_f = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
+    # optimizer = optim.Adam(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
+    optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
-
+    start_epoch = 1
+    if args.resume:
+        model, optimizer, epoch = resume_training(args.resume, model, optimizer)
+        start_epoch = epoch
+        logger.info(f"resume training from {args.resume}")
     # step4: training iteratively
     # record info including model structure, loss function, optimizer and configs
     logger.info(
@@ -66,8 +71,10 @@ def main(analysis_bad_case=False):
 
     loss_rec = {"train": [], "valid": []}
     acc_rec = {"train": [], "valid": []}
+    batch_loss = []
+    batch_acc = []
     best_acc, best_epoch = 0, 0
-    for epoch in range(cfg.MAX_EPOCH):
+    for epoch in range(start_epoch, cfg.MAX_EPOCH + 1):
         # train for one epoch
         loss_train, acc_train, loss_list, acc_avg_list = ModelTrainer.train(
             train_loader, model, loss_f, optimizer, scheduler, epoch, device, cfg, logger
@@ -99,10 +106,14 @@ def main(analysis_bad_case=False):
         # plot loss and acc every epoch
         loss_rec["train"].append(loss_train), loss_rec["valid"].append(loss_valid)
         acc_rec["train"].append(acc_train), acc_rec["valid"].append(acc_avg_valid)
+        batch_loss.extend(loss_list), batch_acc.extend(acc_avg_list)
 
         plt_x = np.arange(1, epoch + 2)
         plot_line(plt_x, loss_rec["train"], plt_x, loss_rec["valid"], mode="loss", out_dir=log_dir)
         plot_line(plt_x, acc_rec["train"], plt_x, acc_rec["valid"], mode="acc", out_dir=log_dir)
+
+        plt_x_batch = np.arange(1, len(batch_loss) + 1)
+        plot_line(plt_x_batch, batch_loss, plt_x_batch, batch_acc, mode="batch info", out_dir=log_dir)
 
     logger.info(
         "{} done, best acc: {} in :{}".format(

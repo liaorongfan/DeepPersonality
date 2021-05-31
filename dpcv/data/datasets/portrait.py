@@ -89,8 +89,7 @@ def make_data_loader(cfg, mode):
     data_loader = DataLoader(dataset=dataset,
                              batch_size=cfg.TRAIN_BATCH_SIZE,
                              shuffle=True,
-                             num_workers=cfg.NUM_WORKS
-    )
+                             num_workers=cfg.NUM_WORKS)
     return data_loader
 
 

@@ -2,7 +2,10 @@
 results/
 
 # project dirs
-datasets/
+datasets/ImageData
+datasets/portrait
+datasets/unzippedData
+datasets/VoiceData
 datasets/chalearn
 datasets/102flowers
 pretrained/
