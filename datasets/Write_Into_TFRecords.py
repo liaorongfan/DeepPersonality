@@ -22,6 +22,7 @@ def _float_feature(value):
 def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
+
 # df.loc[df['column_name'] == some_value]
 def load_pickle(pickle_file):
     with open(pickle_file, 'rb') as f:
@@ -32,6 +33,7 @@ def load_pickle(pickle_file):
         df.columns = ["VideoName", "ValueExtraversion", "ValueNeuroticism", "ValueAgreeableness",
                       "ValueConscientiousness", "ValueOpenness"]
     return df
+
 
 # ############################################### write tf ########################################################
 df = load_pickle('annotation_training.pkl')

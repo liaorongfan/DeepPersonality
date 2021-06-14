@@ -36,8 +36,9 @@ class DAN(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.linear_1(x)
         x = self.leaky_relu(x)
-        x = self.dropout(x)
-        x = self.linear_2(x)
+        x = self.dropout(x)  # add dropout to enhance generalization ability
+        x = self.linear_2(x)  # add another linear lay and activation function to enhance nonlinear mapping
+        x = F.sigmoid(x)
         return x
 
     def _initialize_weights(self):

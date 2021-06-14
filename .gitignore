@@ -2,6 +2,8 @@
 results/
 
 # project dirs
+datasets/trainingData_face
+datasets/trainingData_face.zip
 datasets/ImageData
 datasets/portrait
 datasets/unzippedData
