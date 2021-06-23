@@ -1,7 +1,8 @@
+import torch
 import torch.nn as nn
-from dpcv.modeling.networks.bi_modal_resnet_module import AudioVisualResNet, AudInitStage
-from dpcv.modeling.networks.bi_modal_resnet_module import BiModalBasicBlock, VisInitStage
-from dpcv.modeling.networks.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1, vis_conv3x3, vis_conv1x1
+from dpcv.modeling.module.bi_modal_resnet_module import AudioVisualResNet, AudInitStage
+from dpcv.modeling.module.bi_modal_resnet_module import BiModalBasicBlock, VisInitStage
+from dpcv.modeling.module.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1, vis_conv3x3, vis_conv1x1
 
 
 # import torch.utils.model_zoo as model_zoo
@@ -11,9 +12,9 @@ from dpcv.modeling.networks.bi_modal_resnet_module import aud_conv1x9, aud_conv1
 
 
 class CRNet(nn.Module):
-    def __init__(self, train_guider=False):
+    def __init__(self, only_train_guider=False):
         super(CRNet, self).__init__()
-        self.train_guider = train_guider
+        self.train_guider = only_train_guider
         self.global_img_branch = AudioVisualResNet(
             in_channels=3, init_stage=VisInitStage,
             block=BiModalBasicBlock, conv=[vis_conv3x3, vis_conv1x1],
@@ -50,8 +51,9 @@ class CRNet(nn.Module):
         glo_cls = glo_cls.view(glo_cls.size(0), 5, -1)
         loc_cls = loc_cls.view(loc_cls.size(0), 5, -1)
         wav_cls = wav_cls.view(wav_cls.size(0), 5, -1)
+        cls_guide = torch.stack([glo_cls + loc_cls + wav_cls], dim=-1).mean(dim=-1).squeeze()
         if self.train_guider:
-            return glo_cls, loc_cls, wav_cls
+            return cls_guide
         # --- second training stage guided regress ---
         glo_cls_feature = glo_feature.view(glo_feature.size(0), 512, 4).permute(0, 2, 1)
         loc_cls_feature = loc_feature.view(loc_feature.size(0), 512, 4).permute(0, 2, 1)
@@ -69,13 +71,13 @@ class CRNet(nn.Module):
         out = self.out_map(out_reg)
         out = out.view(out.size(0), -1)
 
-        return glo_cls, loc_cls, wav_cls, out
-        # return glo_feature.shape, loc_feature.shape, aud_feature.shape, \
-        #        glo_cls.shape, loc_cls.shape, wav_cls.shape, \
-        #        glo_cls_score.shape, loc_cls_score.shape, wav_cls_score.shape, \
-        #         glo_cls_feature.shape, loc_cls_feature.shape, wav_cls_feature.shape, \
-        #         guided_glo_reg.shape, guided_loc_reg.shape, guided_wav_reg.shape, \
-        #         out.shape
+        return cls_guide, out
+
+
+def get_crnet_model(only_train_guider=True):
+    cr_net = CRNet(only_train_guider)
+    cr_net.to(device=torch.device("cuda" if torch.cuda.is_available() else "cup"))
+    return cr_net
 
 
 if __name__ == "__main__":
@@ -84,12 +86,10 @@ if __name__ == "__main__":
     global_img_input = torch.randn(2, 3, 112, 112)
     local_img_input = torch.randn(2, 3, 112, 112)
     wav_input = torch.randn(2, 1, 1, 244832)
-    model = CRNet(train_guider=True)
+    model = CRNet(only_train_guider=True)
     y = model(global_img_input, local_img_input, wav_input)
-    for item in y:
-        print(item.shape)
-    model.train_guider = False
+    print(y.shape)
 
-    y = model(global_img_input, local_img_input, wav_input)
-    for item in y:
-        print(item.shape)
+    model.train_guider = False
+    cls, reg = model(global_img_input, local_img_input, wav_input)
+    print(cls.shape, reg.shape)

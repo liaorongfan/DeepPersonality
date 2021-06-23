@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from dpcv.modeling.networks.bi_modal_resnet_module import AudioVisualResNet, AudInitStage
-from dpcv.modeling.networks.bi_modal_resnet_module import VisInitStage, BiModalBasicBlock
-from dpcv.modeling.networks.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1, vis_conv3x3, vis_conv1x1
+from dpcv.modeling.module.bi_modal_resnet_module import AudioVisualResNet, AudInitStage
+from dpcv.modeling.module.bi_modal_resnet_module import VisInitStage, BiModalBasicBlock
+from dpcv.modeling.module.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1, vis_conv3x3, vis_conv1x1
 
 
 class AudioVisualResNet18(nn.Module):

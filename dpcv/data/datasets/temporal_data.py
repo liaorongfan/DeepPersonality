@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from PIL import Image
 import random
 import numpy as np
+from transforms import set_transform_op
 
 
 class TemporalData(Dataset):
@@ -85,15 +86,15 @@ class TemporalData(Dataset):
         return wav_ft
 
 
-def set_transform_op():
-    import torchvision.transforms as transforms
-    # norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
-    # norm_std = [0.229, 0.224, 0.225]
-    transforms = transforms.Compose([
-        transforms.ToTensor(),
-        # transforms.Normalize(norm_mean, norm_std)
-    ])
-    return transforms
+# def set_transform_op():
+#     import torchvision.transforms as transforms
+#     # norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
+#     # norm_std = [0.229, 0.224, 0.225]
+#     transforms = transforms.Compose([
+#         transforms.ToTensor(),
+#         # transforms.Normalize(norm_mean, norm_std)
+#     ])
+#     return transforms
 
 
 def make_data_loader(cfg, mode):

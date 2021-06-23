@@ -30,7 +30,7 @@ class ModelTrainer(object):
             # mix_up
             if cfg.mixup:
                 mixed_inputs, label_a, label_b, lam = mixup_data(inputs, labels, cfg.mixup_alpha, device)
-                inputs = mixed_inputs  # 保持接口一致
+                inputs = mixed_inputs
 
             # forward & backward
             outputs = model(inputs)
@@ -43,20 +43,19 @@ class ModelTrainer(object):
             loss.backward()
             optimizer.step()
 
-            # 统计loss
+            # loss
             loss_sigma.append(loss.item())
             loss_mean = np.mean(loss_sigma)
-            #
+
             _, predicted = torch.max(outputs.data, 1)
             for j in range(len(labels)):
                 cate_i = labels[j].cpu().numpy()
                 pre_i = predicted[j].cpu().numpy()
                 conf_mat[cate_i, pre_i] += 1.
                 if cate_i != pre_i:
-                    path_error.append((cate_i, pre_i, path_imgs[j]))    # 记录错误样本的信息
+                    path_error.append((cate_i, pre_i, path_imgs[j]))
             acc_avg = conf_mat.trace() / conf_mat.sum()
 
-            # 每10个iteration 打印一次训练信息
             if i % cfg.log_interval == cfg.log_interval - 1:
                 logger.info("Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.2%}".
                             format(epoch_idx + 1, cfg.max_epoch, i + 1, len(data_loader), loss_mean, acc_avg))
@@ -80,16 +79,14 @@ class ModelTrainer(object):
             outputs = model(inputs)
             loss = loss_f(outputs.cpu(), labels.cpu())
 
-            # 统计混淆矩阵
             _, predicted = torch.max(outputs.data, 1)
             for j in range(len(labels)):
                 cate_i = labels[j].cpu().numpy()
                 pre_i = predicted[j].cpu().numpy()
                 conf_mat[cate_i, pre_i] += 1.
                 if cate_i != pre_i:
-                    path_error.append((cate_i, pre_i, path_imgs[j]))   # 记录错误样本的信息
+                    path_error.append((cate_i, pre_i, path_imgs[j]))
 
-            # 统计loss
             loss_sigma.append(loss.item())
 
         acc_avg = conf_mat.trace() / conf_mat.sum()

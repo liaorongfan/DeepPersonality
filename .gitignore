@@ -10,6 +10,7 @@ datasets/unzippedData
 datasets/VoiceData
 datasets/chalearn
 datasets/102flowers
+datasets/missed_files.txt
 pretrained/
 /snippet
 
