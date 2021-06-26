@@ -8,44 +8,8 @@ import librosa
 from PIL import Image
 import random
 import numpy as np
+from dpcv.data.datasets.chalearn_data import BimodalData
 from dpcv.data.datasets.transforms import set_crnet_transform
-
-
-class BimodalData(Dataset):
-    def __init__(self, data_root, img_dir, audio_dir, label_file):
-        self.data_root = data_root
-        self.img_dir = img_dir
-        self.audio_dir = audio_dir
-        self.img_dir_ls = self.parse_img_dir(img_dir)  # every directory name indeed a video
-        self.annotation = self.parse_annotation(label_file)
-
-    def parse_img_dir(self, img_dir):
-        img_dir_ls = os.listdir(os.path.join(self.data_root, img_dir))
-        # img_dir_ls = [img_dir.replace("_aligned", "") for img_dir in img_dir_ls if "aligned" in img_dir]
-        return img_dir_ls
-
-    def parse_annotation(self, label_file):
-        label_path = os.path.join(self.data_root, label_file)
-        with open(label_path, "rb") as f:
-            annotation = pickle.load(f, encoding="latin1")
-        return annotation
-
-    def _find_ocean_score(self, index):
-        video_name = self.img_dir_ls[index] + ".mp4"
-        score = [
-            self.annotation["openness"][video_name],
-            self.annotation["conscientiousness"][video_name],
-            self.annotation["extraversion"][video_name],
-            self.annotation["agreeableness"][video_name],
-            self.annotation["neuroticism"][video_name],
-        ]
-        return score
-
-    def __getitem__(self, index):
-        raise NotImplementedError
-
-    def __len__(self):
-        return 3000  # len(self.img_dir_ls)
 
 
 class CRNetData(BimodalData):
@@ -96,8 +60,15 @@ class CRNetData(BimodalData):
         loc_imgs = glob.glob(loc_img_dir_path + "/*.bmp")
 
         separate = [idx for idx in range(0, 96, 3)]  # according to the paper sample 32 frames per video
-        img_index = random.choice(separate)
-        loc_img_pt = loc_imgs[img_index]
+        while True:
+            img_index = random.choice(separate)
+            try:
+                loc_img_pt = loc_imgs[img_index]
+            except IndexError:
+                print(loc_img_dir_path)
+                print(loc_imgs)
+                continue
+            break
         glo_img_pt = self._match_img(loc_img_pt)
 
         loc_img_arr = Image.open(loc_img_pt).convert("RGB")
@@ -136,9 +107,9 @@ def make_data_loader(cfg, mode=None):
     )
     data_loader = DataLoader(
         dataset=dataset,
-        batch_size=2,
+        batch_size=30,
         shuffle=True,
-        num_workers=0  # cfg.NUM_WORKS
+        num_workers=2  # cfg.NUM_WORKS
     )
     return data_loader
 

@@ -34,8 +34,7 @@ class BiModalTrainer(object):
             acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean()
             acc_avg = acc_avg.detach().numpy()
             acc_avg = acc_avg if acc_avg > 0 else 0  # do not concern negative value
-            # if acc_avg < 0:
-            #     acc_avg = 0
+            # acc_avg = 0
             acc_avg_list.append(acc_avg)
             # print loss info for an interval
             if i % cfg.LOG_INTERVAL == cfg.LOG_INTERVAL - 1:
@@ -43,9 +42,7 @@ class BiModalTrainer(object):
                     "Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.2}".
                     format(epoch_idx + 1, cfg.MAX_EPOCH, i + 1, len(data_loader), float(loss_mean), float(acc_avg))
                 )
-            # debug
-            # if i > 10:
-            #     break
+
         logger.info("epoch:{}".format(epoch_idx))
         acc_avg = np.mean(acc_avg_list)  # return average accuracy of this training epoch
         return loss_mean, acc_avg, loss_list, acc_avg_list

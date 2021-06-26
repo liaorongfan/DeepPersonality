@@ -89,7 +89,7 @@ if __name__ == "__main__":
     extract_face_feature(
         "~/11-personality_traits/OpenFace/build/bin",
         "ImageData/trainingData",
-        "ImageData/trainingData_face",
+        "../../../datasets/ImageData/trainingData_face",
         # "test_out",
     )
     # check("ImageData/trainingData_face", "ImageData_trainingData.txt")

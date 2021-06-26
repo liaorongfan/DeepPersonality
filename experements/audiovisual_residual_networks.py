@@ -6,14 +6,14 @@ import pickle
 import argparse
 import torch.optim as optim
 from datetime import datetime
-from dpcv.engine.bi_modal_lstm_train import BiModalTrainer
+from dpcv.engine.audio_visual_trainer import BiModalTrainer
 from dpcv.tools.common import setup_seed
 from dpcv.tools.draw import plot_line
 from dpcv.tools.logger import make_logger
-from dpcv.modeling.networks.bi_modal_lstm import get_bi_modal_lstm_model
+from dpcv.modeling.networks.audio_visual_residual import get_model
 from dpcv.config.deep_bimodal_regression_cfg import cfg
 from dpcv.checkpoint.save import save_model, resume_training
-from dpcv.data.datasets.temporal_data import make_data_loader
+from dpcv.data.datasets.audio_visual_data import make_data_loader
 
 # import sys
 # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -46,16 +46,16 @@ def main():
     logger, log_dir = make_logger(res_dir)
 
     # step1： get dataset
-    train_loader = make_data_loader(cfg, mode="train")
+    train_loader = make_data_loader()
     # valid_loader = make_data_loader(cfg, mode="val")
 
     # step2: set model
-    model = get_bi_modal_lstm_model()
+    model = get_model()
 
     # step3: loss functions and optimizer
     loss_f = nn.MSELoss()
     # optimizer = optim.Adam(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
-    optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
+    optimizer = optim.Adam(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
     start_epoch = 1
     if args.resume:

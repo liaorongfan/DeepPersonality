@@ -13,7 +13,7 @@ from dpcv.utiles.logger import make_logger
 from dpcv.modeling.networks.dan import get_dan_model
 from dpcv.config.deep_bimodal_regression_cfg import cfg
 from dpcv.checkpoint.save import save_model, resume_training
-from dpcv.data.datasets.chalearn import make_data_loader
+from dpcv.data.datasets.chalearn_data import make_data_loader
 
 # import sys
 # BASE_DIR = os.path.dirname(os.path.abspath(__file__))

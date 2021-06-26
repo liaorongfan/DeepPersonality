@@ -1,55 +1,74 @@
 import torch
+import torch.nn as nn
 import numpy as np
+from dpcv.modeling.loss.cr_loss import one_hot_CELoss, BellLoss
+
+bell_loss = BellLoss()
+mse_loss = nn.MSELoss()
+l1_loss = nn.L1Loss()
 
 
 class ModelTrainer(object):
 
     @staticmethod
-    def train_classification(data_loader, model, loss_func, optimizer, scheduler, device, cfg, logger):
-        model.train_guide = True
+    def train(data_loader, model, optimizer, epochs, scheduler, device, cfg, logger):
         model.train()
 
-        loss_list = []
-        acc_avg_list = []
-        loss_mean = 0
-        acc_avg = 0
-        for i, data in enumerate(data_loader):
-            for k, v in data.items():
-                data[k] = v.to(device)
-            glo_img, loc_img, wav_aud = data["glo_img"], data["loc_img"], data["wav_aud"]
-            # glo_img, loc_img, wav_aud = glo_img.to(device), loc_img.to(device), wav_aud.to(device)
+        if model.train_guider:
+            logger.info("Training: classification phrase")
+        else:
+            logger.info("Training: regression phrase")
 
-            cls_label, reg_label = data["cls_label"], data["reg_label"]
+        for epo in range(epochs):
+            lambda_ = (4 * epochs) / (epo + 1)
+            for i, data in enumerate(data_loader):
+                for k, v in data.items():
+                    data[k] = v.to(device)
 
-            # forward & backward
-            cls_score = model(glo_img, loc_img, wav_aud)
-            optimizer.zero_grad()
+                # forward
+                if model.train_guider:
+                    cls_score = model(data["glo_img"], data["loc_img"], data["wav_aud"])
+                    loss = one_hot_CELoss(cls_score, data["cls_label"])
+                else:
+                    cls_score, reg_pred = model(data["glo_img"], data["loc_img"], data["wav_aud"])
+                    loss_1 = l1_loss(reg_pred, data["reg_label"])
+                    loss_2 = mse_loss(reg_pred, data["reg_label"])
+                    loss_3 = bell_loss(reg_pred, data["reg_label"])
+                    loss_4 = lambda_ * one_hot_CELoss(cls_score, data["cls_label"])
+                    # loss_4 = one_hot_CELoss(cls_score, data["cls_label"])
+                    loss = loss_1 + loss_2 + loss_3 + loss_4
+                # backward
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                # print(loss)
 
-            loss = loss_func(cls_score, cls_label)
-            loss.backward()
-            optimizer.step()
-            print(loss)
-            # collect loss
-            loss_list.append(loss.item())
-            loss_mean = np.mean(loss_list)
+                if i % cfg.LOG_INTERVAL == cfg.LOG_INTERVAL - 1:
+                    if model.train_guider:
+                        cls_soft_max = torch.softmax(cls_score, dim=-1)
+                        matched = torch.as_tensor(
+                            torch.argmax(cls_soft_max, -1) == torch.argmax(data["cls_label"], -1),
+                            dtype=torch.int8
+                        )
+                        acc = matched.sum() / matched.numel()
+                    else:
+                        acc = (1 - torch.abs(reg_pred - data["reg_label"])).mean(dim=0).clip(min=0)
 
-            # acc_avg = (1 - torch.abs(outputs.cpu() - loc_img.cpu())).mean()
-            # acc_avg = acc_avg.detach().numpy()
-            # if acc_avg < 0:
-            #     acc_avg = 0
-            # acc_avg_list.append(acc_avg)
-            # print loss info for an interval
-            if i % cfg.LOG_INTERVAL == cfg.LOG_INTERVAL - 1:
-                logger.info(
-                    "Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.2}".
-                    format(1 + 1, cfg.MAX_EPOCH, i + 1, len(data_loader), float(loss_mean), float(acc_avg))
-                )
-            # debug
-            # if i > 10:
-            #     break
-        logger.info("epoch:{}".format(1))
-        acc_avg = np.mean(acc_avg_list)  # return average accuracy of this training epoch
-
+                    logger.info(
+                        "Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{}".
+                        format(epo + 1, cfg.MAX_EPOCH, i + 1, len(data_loader),
+                               float(loss.cpu().detach().numpy()),
+                               acc.cpu().detach().numpy().round(2))
+                    )
+                # acc_avg = acc_avg.detach().numpy()
+                # if acc_avg < 0:
+                #     acc_avg = 0
+                # acc_avg_list.append(acc_avg)
+                # print loss info for an interval
+                # debug
+                # if i > 10:
+                #     break
+            logger.info("epoch:{}".format(1))
 
     @staticmethod
     def valid(data_loader, model, loss_f, device):
@@ -73,5 +92,3 @@ class ModelTrainer(object):
             acc_avg = ocean_acc.mean()
 
         return loss_mean, ocean_acc, acc_avg
-
-

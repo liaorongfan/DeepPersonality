@@ -13,9 +13,9 @@ from dpcv.utiles.logger import make_logger
 from dpcv.modeling.networks.cr_net import get_crnet_model
 from dpcv.modeling.loss.cr_loss import BellLoss
 from dpcv.modeling.loss.cr_loss import one_hot_CELoss
-from dpcv.config.deep_bimodal_regression_cfg import cfg
+from dpcv.config.crnet_cfg import cfg
 from dpcv.checkpoint.save import save_model, resume_training
-from dpcv.data.datasets.crdataset import make_data_loader
+from dpcv.data.datasets.cr_data import make_data_loader
 
 # import sys
 # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -77,11 +77,19 @@ def main():
     batch_loss = []
     batch_acc = []
     best_acc, best_epoch = 0, 0
+    cls_epochs = 1
+    reg_epochs = 1
     # for epoch in range(start_epoch, cfg.MAX_EPOCH + 1):
     # train for one epoch
-    ModelTrainer.train_classification(
-        train_loader, model, one_hot_CELoss, optimizer_fir, scheduler, device, cfg, logger
+    model.train_classifier()
+    ModelTrainer.train(
+        train_loader, model, optimizer_fir, cls_epochs, scheduler, device, cfg, logger
     )
+    model.train_regressor()
+    ModelTrainer.train(
+        train_loader, model, optimizer_sec, reg_epochs, scheduler, device, cfg, logger
+    )
+    # loss_train = 0
     # loss_train = 0
     # acc_train = 0
     # eval for after training for a epoch

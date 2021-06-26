@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from PIL import Image
 import random
 import numpy as np
-from transforms import set_transform_op
+from dpcv.data.datasets.transforms import set_transform_op
 
 
 class TemporalData(Dataset):

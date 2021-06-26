@@ -1,3 +1,6 @@
+"""
+transform operation for different networks
+"""
 
 
 def set_transform_op():
@@ -19,5 +22,15 @@ def set_crnet_transform():
         transforms.ToTensor(),
         transforms.CenterCrop((112, 112))
         # transforms.Normalize(norm_mean, norm_std)
+    ])
+    return transforms
+
+
+def set_audio_visual_transform():
+    import torchvision.transforms as transforms
+    transforms = transforms.Compose([
+        transforms.RandomVerticalFlip(0.5),
+        transforms.CenterCrop((224, 224)),
+        transforms.ToTensor(),
     ])
     return transforms

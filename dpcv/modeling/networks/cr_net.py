@@ -39,6 +39,12 @@ class CRNet(nn.Module):
         self.wav_cls_guide = nn.Conv2d(512, 20, (1, 4))
         self.out_map = nn.Linear(512, 1)
 
+    def train_classifier(self):
+        self.train_guider = True
+
+    def train_regressor(self):
+        self.train_guider = False
+
     def forward(self, global_img, local_img, audio_wav):
         glo_feature = self.global_img_branch(global_img)
         loc_feature = self.local_img_branch(local_img)

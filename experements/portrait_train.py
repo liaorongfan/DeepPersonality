@@ -13,7 +13,7 @@ from dpcv.utiles.logger import make_logger
 from dpcv.modeling.networks.portrait_cnn import get_portrait_model
 from dpcv.config.portraint_config import cfg
 from dpcv.checkpoint.save import save_model
-from dpcv.data.datasets.portrait import make_data_loader
+from dpcv.data.datasets.portrait_data import make_data_loader
 from dpcv.modeling.loss.label_smooth import LabelSmoothLoss
 
 # import sys
