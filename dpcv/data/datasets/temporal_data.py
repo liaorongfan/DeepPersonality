@@ -67,6 +67,9 @@ class TemporalData(Dataset):
         img_dir_path = os.path.join(self.data_root, self.img_dir_pt, img_dir_name)
         imgs = glob.glob(img_dir_path + "/*.bmp")
         separate = [idx for idx in range(0, 100, 16)]  # according to the paper separate the video into 6 sessions
+        if len(imgs) < 100:
+            imgs_nums = len(imgs)
+            separate = [idx for idx in range(0, imgs_nums, int(imgs_nums / 6))]
         selected = [random.randint(separate[idx], separate[idx + 1]) for idx in range(6)]
         img_array_ls = []
         for idx in selected:
@@ -75,7 +78,7 @@ class TemporalData(Dataset):
                 img_array = Image.open(img_pt).convert("RGB")
                 img_array_ls.append(img_array)
             except:
-                print(imgs)
+                print("encounter bad image:", imgs[idx])
         # video_imgs = np.stack(img_array_ls, axis=0)
         return img_array_ls
 
@@ -86,30 +89,30 @@ class TemporalData(Dataset):
         return wav_ft
 
 
-# def set_transform_op():
-#     import torchvision.transforms as transforms
-#     # norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
-#     # norm_std = [0.229, 0.224, 0.225]
-#     transforms = transforms.Compose([
-#         transforms.ToTensor(),
-#         # transforms.Normalize(norm_mean, norm_std)
-#     ])
-#     return transforms
-
-
 def make_data_loader(cfg, mode):
-    assert (mode in ["train", "val"]), " 'mode' only supports 'train' and 'val'"
+    assert (mode in ["train", "valid"]), " 'mode' only supports 'train' and 'valid'"
     transforms = set_transform_op()
-    dataset = TemporalData(
-        "../datasets",
-        "ImageData/trainingData_face",
-        "VoiceData/trainingData_mfcc",
-        "annotation_training.pkl",
-        transforms
-    )
+    if mode == "train":
+        dataset = TemporalData(
+            cfg.DATA_ROOT,
+            cfg.TRAIN_IMG_DATA,
+            cfg.TRAIN_AUD_DATA,
+            cfg.TRAIN_LABEL_DATA,
+            transforms
+        )
+        batch_size = cfg.TRAIN_BATCH_SIZE
+    else:
+        dataset = TemporalData(
+            cfg.DATA_ROOT,
+            cfg.VALID_IMG_DATA,
+            cfg.VALID_AUD_DATA,
+            cfg.VALID_LABEL_DATA,
+            transforms
+        )
+        batch_size = cfg.VALID_BATCH_SIZE
     data_loader = DataLoader(
         dataset=dataset,
-        batch_size=2,
+        batch_size=batch_size,
         shuffle=True,
         num_workers=0  # cfg.NUM_WORKS
     )

@@ -19,7 +19,7 @@ __C.WEIGHT_DECAY = 1e-4
 __C.FACTOR = 0.1
 __C.MILESTONE = [1, 2, ]
 __C.MAX_EPOCH = 4
-__C.LOG_INTERVAL = 50
+__C.LOG_INTERVAL = 5
 
 # norm_mean = [0.485, 0.456, 0.406]
 # norm_std = [0.229, 0.224, 0.225]

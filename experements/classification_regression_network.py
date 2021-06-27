@@ -7,9 +7,9 @@ import argparse
 import torch.optim as optim
 from datetime import datetime
 from dpcv.engine.crnet_trainer import ModelTrainer
-from dpcv.utiles.common import setup_seed
-from dpcv.utiles.draw import plot_line
-from dpcv.utiles.logger import make_logger
+from dpcv.tools.common import setup_seed
+from dpcv.tools.draw import plot_line
+from dpcv.tools.logger import make_logger
 from dpcv.modeling.networks.cr_net import get_crnet_model
 from dpcv.modeling.loss.cr_loss import BellLoss
 from dpcv.modeling.loss.cr_loss import one_hot_CELoss
