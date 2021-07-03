@@ -1,17 +1,17 @@
-import torch.nn as nn
 import os
+import torch.nn as nn
 import torch.optim as optim
 from datetime import datetime
-from dpcv.config.bi_modal_lstm_cfg import cfg
-# from dpcv.engine.bi_modal_lstm_train import BiModalTrainer_
-from dpcv.engine.bi_modal_trainer import BimodalLSTMTrain
+from dpcv.config.crnet_cfg import cfg
+from dpcv.engine.crnet_trainer import CRNetTrainer
 from dpcv.tools.common import setup_seed
 from dpcv.tools.logger import make_logger
-from dpcv.modeling.networks.bi_modal_lstm import get_bi_modal_lstm_model
+from dpcv.modeling.networks.cr_net import get_crnet_model
 from dpcv.checkpoint.save import save_model, resume_training
-from dpcv.data.datasets.temporal_data import make_data_loader
+from dpcv.data.datasets.cr_data import make_data_loader
 from dpcv.tools.common import parse_args
 from dpcv.evaluation.summary import TrainSummary
+from dpcv.modeling.loss.cr_loss import one_hot_CELoss, BellLoss
 
 
 def setup_config(args):
@@ -32,13 +32,17 @@ def main(cfg):
     train_loader = make_data_loader(cfg, mode="train")
     valid_loader = make_data_loader(cfg, mode="valid")
 
-    model = get_bi_modal_lstm_model()
-    loss_f = nn.MSELoss()
-    optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
+    model = get_crnet_model(only_train_guider=True)
+
+    loss_f = {"ce_loss": one_hot_CELoss, "bell_loss": BellLoss(), "mse_loss": nn.MSELoss(), "l1_loss": nn.L1Loss()}
+
+    optimizer_fir = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
+    optimizer_sec = optim.Adam(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
+    optimizer = [optimizer_fir, optimizer_sec]
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer_sec, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 
     collector = TrainSummary()
-    trainer = BimodalLSTMTrain(collector)
+    trainer = CRNetTrainer(cfg, collector, logger)
 
     start_epoch = cfg.START_EPOCH
     if cfg.RESUME:
@@ -46,28 +50,24 @@ def main(cfg):
         start_epoch = epoch
         logger.info(f"resume training from {cfg.RESUME}")
 
+    for epoch in range(start_epoch, cfg.TRAIN_CLS_EPOCH):
+        model.train_classifier()
+        trainer.train(train_loader, model, loss_f, optimizer, epoch)
+
     for epoch in range(start_epoch, cfg.MAX_EPOCH):
+        model.train_regressor()
         # train for one epoch
-        trainer.train(train_loader, model, loss_f, optimizer, scheduler, epoch, cfg, logger)
+        trainer.train(train_loader, model, loss_f, optimizer, epoch)
         # eval after training an epoch
-        trainer.valid(valid_loader, model, loss_f)
-        # display info for that training epoch
-        logger.info(
-            "Epoch[{:0>3}/{:0>3}] Train Mean_Acc: {:.2%} Valid Mean_Acc:{:.2%} OCEAN_ACC:{}\n Current lr:{} \n".format(
-                epoch + 1, cfg.MAX_EPOCH,
-                float(collector.mean_train_acc),
-                float(collector.mean_valid_acc),
-                collector.valid_ocean_acc,
-                optimizer.param_groups[0]["lr"])
-        )
+        trainer.valid(valid_loader, model, loss_f, epoch)
         # update training lr every epoch
         scheduler.step()
         # save model
         if collector.model_save:
-            save_model(epoch, collector.best_acc, model, optimizer, log_dir, cfg)
+            save_model(epoch, collector.best_acc, model, optimizer[1], log_dir, cfg)
             collector.update_best_epoch(epoch)
 
-    collector.draw_epo_info(cfg.MAX_EPOCH, log_dir)
+    collector.draw_epo_info(cfg.MAX_EPOCH - start_epoch, log_dir)
     logger.info(
         "{} done, best acc: {} in :{}".format(
             datetime.strftime(datetime.now(), '%m-%d_%H-%M'), collector.best_acc, collector.best_epoch)

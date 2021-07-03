@@ -8,7 +8,7 @@ import librosa
 from PIL import Image
 import random
 import numpy as np
-from dpcv.data.datasets.chalearn_data import BimodalData
+from dpcv.data.datasets.bi_modal_data import BimodalData
 from dpcv.data.datasets.transforms import set_crnet_transform
 
 
@@ -58,17 +58,20 @@ class CRNetData(BimodalData):
 
         loc_img_dir_path = os.path.join(self.data_root, self.img_dir + "_face", loc_img_dir)
         loc_imgs = glob.glob(loc_img_dir_path + "/*.bmp")
-
-        separate = [idx for idx in range(0, 96, 3)]  # according to the paper sample 32 frames per video
-        while True:
-            img_index = random.choice(separate)
-            try:
-                loc_img_pt = loc_imgs[img_index]
-            except IndexError:
-                print(loc_img_dir_path)
-                print(loc_imgs)
-                continue
-            break
+        # according to the paper sample 32 frames per video
+        separate = np.linspace(0, len(loc_imgs), 32, endpoint=False, dtype=np.int8)
+        img_index = random.choice(separate)
+        loc_img_pt = loc_imgs[img_index]
+        # while True:
+        #     img_index = random.choice(separate)
+        #     try:
+        #         loc_img_pt = loc_imgs[img_index]
+        #     except IndexError:
+        #         print(loc_img_dir_path)
+        #         print(separate)
+        #         print(img_index)
+        #         continue
+        #     break
         glo_img_pt = self._match_img(loc_img_pt)
 
         loc_img_arr = Image.open(loc_img_pt).convert("RGB")
@@ -85,55 +88,60 @@ class CRNetData(BimodalData):
         return os.path.join(img_dir, glo_img_name)
 
     def get_wav_aud(self, index):
-        img_dir_name = self.img_dir_ls[index] + ".wav"
+        img_dir_name = f"{self.img_dir_ls[index]}.wav.npy"
         wav_path = os.path.join(self.data_root, self.audio_dir, img_dir_name)
-        wav_ft = librosa.load(wav_path, 16000)[0][None, None, :]
-        if wav_ft.shape[-1] < 244832:
-            wav_temp = np.zeros((1, 1, 244832))
-            wav_temp[..., :wav_ft.shape[-1]] = wav_ft
-            return wav_temp
+        wav_ft = np.load(wav_path, allow_pickle=True)
         return wav_ft
 
 
 def make_data_loader(cfg, mode=None):
-    # assert (mode in ["train", "val"]), " 'mode' only supports 'train' and 'val'"
+    assert (mode in ["train", "valid"]), " 'mode' only supports 'train' and 'valid'"
     transforms = set_crnet_transform()
-    dataset = CRNetData(
-        "../datasets",
-        "ImageData/trainingData",
-        "VoiceData/trainingData",
-        "annotation_training.pkl",
-        transforms
-    )
+    if mode == "train":
+        dataset = CRNetData(
+            "../datasets",
+            "ImageData/trainingData",
+            "VoiceData/trainingData_244832",
+            "annotation_training.pkl",
+            transforms
+        )
+    else:
+        dataset = CRNetData(
+            "../datasets",
+            "ImageData/validationData",
+            "VoiceData/validationData_244832",
+            "annotation_validation.pkl",
+            transforms
+        )
     data_loader = DataLoader(
         dataset=dataset,
         batch_size=30,
         shuffle=True,
-        num_workers=2  # cfg.NUM_WORKS
+        num_workers=0  # cfg.NUM_WORKS
     )
     return data_loader
 
 
 if __name__ == "__main__":
-    trans = set_crnet_transform()
-    data_set = CRNetData(
-        "../../../datasets",
-        "ImageData/trainingData",
-        "VoiceData/trainingData",
-        "annotation_training.pkl",
-        trans
-    )
-    # print(len(data_set))
-    print(data_set[2])
-    for item in data_set[2].values():
-        print(item.shape)
+    # trans = set_crnet_transform()
+    # data_set = CRNetData(
+    #     "../../../datasets",
+    #     "ImageData/trainingData",
+    #     "VoiceData/trainingData_244832",
+    #     "annotation_training.pkl",
+    #     trans
+    # )
+    # # print(len(data_set))
+    # # print(data_set[2])
+    # for item in data_set[2].values():
+    #     print(item.shape)
     # # print(data_set._statistic_img_sample(1))
     # # print(data_set._get_wav_sample(1))
 
 
-    # loader = make_data_loader("")
-    # for i, sample in enumerate(loader):
-    #     if i > 5:
-    #         break
-    #     for item in sample.values():
-    #         print(item.shape)
+    loader = make_data_loader("", mode="train")
+    for i, sample in enumerate(loader):
+        # if i > 5:
+        #     break
+        for item in sample.values():
+            print(item.shape)

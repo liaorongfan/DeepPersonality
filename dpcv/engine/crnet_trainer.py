@@ -2,93 +2,123 @@ import torch
 import torch.nn as nn
 import numpy as np
 from dpcv.modeling.loss.cr_loss import one_hot_CELoss, BellLoss
+from dpcv.engine.bi_modal_trainer import BiModalTrainer
 
-bell_loss = BellLoss()
-mse_loss = nn.MSELoss()
-l1_loss = nn.L1Loss()
+# bell_loss = BellLoss()
+# mse_loss = nn.MSELoss()
+# l1_loss = nn.L1Loss()
+# loss_f = {"ce_loss": one_hot_CELoss, "bess_loss": bell_loss, "mes_loss": mse_loss, "l1_loss": l1_loss}
 
 
-class ModelTrainer(object):
+class CRNetTrainer(BiModalTrainer):
 
-    @staticmethod
-    def train(data_loader, model, optimizer, epochs, scheduler, device, cfg, logger):
+    def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
         model.train()
 
         if model.train_guider:
-            logger.info("Training: classification phrase")
+            self.logger.info(f"Training: classification phrase, learning rate:{optimizer[0].param_groups[0]['lr']}")
         else:
-            logger.info("Training: regression phrase")
+            self.logger.info(f"Training: regression phrase, learning rate:{optimizer[1].param_groups[0]['lr']}")
 
-        for epo in range(epochs):
-            lambda_ = (4 * epochs) / (epo + 1)
-            for i, data in enumerate(data_loader):
-                for k, v in data.items():
-                    data[k] = v.to(device)
-
-                # forward
-                if model.train_guider:
-                    cls_score = model(data["glo_img"], data["loc_img"], data["wav_aud"])
-                    loss = one_hot_CELoss(cls_score, data["cls_label"])
-                else:
-                    cls_score, reg_pred = model(data["glo_img"], data["loc_img"], data["wav_aud"])
-                    loss_1 = l1_loss(reg_pred, data["reg_label"])
-                    loss_2 = mse_loss(reg_pred, data["reg_label"])
-                    loss_3 = bell_loss(reg_pred, data["reg_label"])
-                    loss_4 = lambda_ * one_hot_CELoss(cls_score, data["cls_label"])
-                    # loss_4 = one_hot_CELoss(cls_score, data["cls_label"])
-                    loss = loss_1 + loss_2 + loss_3 + loss_4
-                # backward
-                optimizer.zero_grad()
+        loss_list = []
+        acc_avg_list = []
+        for i, data in enumerate(data_loader):
+            inputs, cls_label, reg_label = self.data_fmt(data)
+            # forward
+            if model.train_guider:
+                cls_score = model(*inputs)
+                loss = loss_f["ce_loss"](cls_score, cls_label)
+                optimizer[0].zero_grad()
                 loss.backward()
-                optimizer.step()
-                # print(loss)
+                optimizer[0].step()
+            else:
+                cls_score, reg_pred = model(*inputs)
+                loss = self.loss_compute(loss_f, reg_pred, reg_label, cls_score, cls_label, epoch_idx)
+                # backward
+                optimizer[1].zero_grad()
+                loss.backward()
+                optimizer[1].step()
 
-                if i % cfg.LOG_INTERVAL == cfg.LOG_INTERVAL - 1:
-                    if model.train_guider:
-                        cls_soft_max = torch.softmax(cls_score, dim=-1)
-                        matched = torch.as_tensor(
-                            torch.argmax(cls_soft_max, -1) == torch.argmax(data["cls_label"], -1),
-                            dtype=torch.int8
-                        )
-                        acc = matched.sum() / matched.numel()
-                    else:
-                        acc = (1 - torch.abs(reg_pred - data["reg_label"])).mean(dim=0).clip(min=0)
-
-                    logger.info(
-                        "Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{}".
-                        format(epo + 1, cfg.MAX_EPOCH, i + 1, len(data_loader),
-                               float(loss.cpu().detach().numpy()),
-                               acc.cpu().detach().numpy().round(2))
-                    )
-                # acc_avg = acc_avg.detach().numpy()
-                # if acc_avg < 0:
-                #     acc_avg = 0
-                # acc_avg_list.append(acc_avg)
-                # print loss info for an interval
-                # debug
-                # if i > 10:
-                #     break
-            logger.info("epoch:{}".format(1))
-
-    @staticmethod
-    def valid(data_loader, model, loss_f, device):
-        model.eval()
-        with torch.no_grad():
-            loss_list = []
-            loss_mean = 0
-            acc_batch_list = []
-            for i, data in enumerate(data_loader):
-                inputs, labels = data["image"], data["label"]
-                inputs, labels = inputs.to(device), labels.to(device)
-
-                outputs = model(inputs)
-                loss = loss_f(outputs.cpu(), labels.cpu())
                 loss_list.append(loss.item())
-                loss_mean = np.mean(loss_list)
-                acc_batch_list.append((1 - np.abs(outputs.cpu().detach().numpy() - labels.cpu().detach().numpy())))
-                if i % 50 == 0:
-                    print(f"computing {i} batches ...")
-            ocean_acc = np.concatenate(acc_batch_list, axis=0).mean(axis=0)
-            acc_avg = ocean_acc.mean()
+                acc_avg = (1 - torch.abs(reg_pred.cpu() - reg_label.cpu())).mean().clip(min=0)
+                acc_avg = acc_avg.detach().numpy()
+                acc_avg_list.append(acc_avg)
 
-        return loss_mean, ocean_acc, acc_avg
+            if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1:
+                if model.train_guider:
+                    cls_soft_max = torch.softmax(cls_score, dim=-1)
+                    matched = torch.as_tensor(
+                        torch.argmax(cls_soft_max, -1) == torch.argmax(cls_label, -1),
+                        dtype=torch.int8
+                    )
+                    acc = matched.sum() / matched.numel()
+                else:
+                    acc = (1 - torch.abs(reg_pred - reg_label)).mean(dim=0).clip(min=0)
+
+                self.logger.info(
+                    "Train: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{}".
+                    format(epoch_idx, self.cfg.MAX_EPOCH, i + 1, len(data_loader),
+                           float(loss.cpu().detach().numpy()),
+                           acc.cpu().detach().numpy().round(2))
+                )
+
+        if not model.train_guider:
+            self.clt.record_train_loss(loss_list)
+            self.clt.record_train_acc(acc_avg_list)
+
+    def valid(self, data_loader, model, loss_f, epoch_idx):
+        model.eval()
+        if not model.train_guider:
+            with torch.no_grad():
+                loss_list = []
+                acc_batch_list = []
+                ocean_list = []
+                for i, data in enumerate(data_loader):
+                    inputs, cls_label, reg_label = self.data_fmt(data)
+                    cls_score, reg_pred = model(*inputs)
+                    loss = self.loss_compute(loss_f, reg_pred, reg_label, cls_score, cls_label, epoch_idx)
+                    loss_list.append(loss.item())
+                    acc_batch = (1 - torch.abs(reg_pred.cpu() - reg_label.cpu())).mean(dim=0).clip(min=0)
+                    ocean_list.append(acc_batch)
+                    acc_batch_avg = acc_batch.mean()
+                    acc_batch_list.append(acc_batch_avg)
+                ocean_acc = torch.stack(ocean_list, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
+                ocean_acc_avg = ocean_acc.mean()
+
+            self.clt.record_valid_loss(loss_list)  # acc over batches
+            self.clt.record_valid_acc(acc_batch_list)  # acc over batches
+            self.clt.record_valid_ocean_acc(ocean_acc)
+
+            if ocean_acc_avg > self.clt.best_acc:
+                self.clt.update_best_acc(ocean_acc_avg)
+                self.clt.update_model_save_flag(1)
+            else:
+                self.clt.update_model_save_flag(0)
+
+        else:
+            print("only test regression accuracy")
+
+        self.logger.info(
+            "Valid: Epoch[{:0>3}/{:0>3}] Train Mean_Acc: {:.2%} Valid Mean_Acc:{:.2%} OCEAN_ACC:{}\n".
+            format(
+                epoch_idx + 1, self.cfg.MAX_EPOCH,
+                float(self.clt.mean_train_acc),
+                float(self.clt.mean_valid_acc),
+                self.clt.valid_ocean_acc)
+        )
+
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs = data["glo_img"], data["loc_img"], data["wav_aud"]
+        cls_label, reg_label = data["cls_label"], data["reg_label"]
+        return inputs, cls_label, reg_label
+
+    def loss_compute(self, loss_f, reg_pred, reg_label, cls_score, cls_label, epoch_idx):
+        loss_1 = loss_f["l1_loss"](reg_pred, reg_label)
+        loss_2 = loss_f["mse_loss"](reg_pred, reg_label)
+        loss_3 = loss_f["bell_loss"](reg_pred, reg_label)
+        lambda_ = (4 * epoch_idx) / (self.cfg.MAX_EPOCH + 1)
+        loss_4 = lambda_ * loss_f["ce_loss"](cls_score, cls_label)
+        loss = loss_1 + loss_2 + loss_3 + loss_4
+        return loss

@@ -6,6 +6,7 @@ from dpcv.modeling.module.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1
 
 
 class AudioVisualResNet18(nn.Module):
+
     def __init__(self):
         super(AudioVisualResNet18, self).__init__()
         self.audio_branch = AudioVisualResNet(
@@ -22,12 +23,12 @@ class AudioVisualResNet18(nn.Module):
         )
         self.linear = nn.Linear(512, 5)
 
-    def forward(self, vis_input, aud_input):
-        vis_x = self.visual_branch(vis_input)
+    def forward(self, aud_input, vis_input):
         aud_x = self.audio_branch(aud_input)
+        vis_x = self.visual_branch(vis_input)
 
-        vis_x = vis_x.view(vis_x.size(0), -1)
         aud_x = aud_x.view(aud_x.size(0), -1)
+        vis_x = vis_x.view(vis_x.size(0), -1)
 
         x = torch.cat([aud_x, vis_x], dim=-1)
         x = self.linear(x)
@@ -35,7 +36,7 @@ class AudioVisualResNet18(nn.Module):
         return x
 
 
-def get_model():
+def get_audiovisual_resnet_model():
     multi_modal_model = AudioVisualResNet18()
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
@@ -45,6 +46,6 @@ if __name__ == "__main__":
     aud = torch.randn(2, 1, 1, 50176)
     vis = torch.randn(2, 3, 224, 224)
     multi_model = AudioVisualResNet18()
-    y = multi_model(vis, aud)
+    y = multi_model(aud, vis)
     print(y)
 

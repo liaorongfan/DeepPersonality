@@ -49,7 +49,7 @@ def main():
 
     # step1： get dataset
     train_loader = make_data_loader(cfg, mode="train")
-    # valid_loader = make_data_loader(cfg, mode="val")
+    valid_loader = make_data_loader(cfg, mode="valid")
 
     # step2: set model
     model = get_crnet_model(only_train_guider=True)
