@@ -1,3 +1,6 @@
+"""
+TODO: merge temporal data to bi_modal_data
+"""
 import torch
 import os
 import pickle
@@ -31,7 +34,7 @@ class TemporalData(Dataset):
         return annotation
 
     def _find_ocean_score(self, index):
-        video_name = self.img_dir_ls[index] + ".mp4"
+        video_name = f"{self.img_dir_ls[index]}.mp4"
         score = [
             self.annotation["openness"][video_name],
             self.annotation["conscientiousness"][video_name],
@@ -63,7 +66,7 @@ class TemporalData(Dataset):
         return len(self.img_dir_ls)
 
     def _get_statistic_img_sample(self, index):
-        img_dir_name = self.img_dir_ls[index] + "_aligned"
+        img_dir_name = f"{self.img_dir_ls[index]}_aligned"
         img_dir_path = os.path.join(self.data_root, self.img_dir_pt, img_dir_name)
         imgs = glob.glob(img_dir_path + "/*.bmp")
         separate = [idx for idx in range(0, 100, 16)]  # according to the paper separate the video into 6 sessions
@@ -83,7 +86,7 @@ class TemporalData(Dataset):
         return img_array_ls
 
     def _get_wav_sample(self, index):
-        img_dir_name = self.img_dir_ls[index] + ".wav_mt.csv"
+        img_dir_name = f"{self.img_dir_ls[index]}.wav_mt.csv"
         wav_path = os.path.join(self.data_root, self.audio_dir, img_dir_name)
         wav_ft = np.loadtxt(wav_path, delimiter=",")
         return wav_ft
@@ -120,20 +123,20 @@ def make_data_loader(cfg, mode):
 
 
 if __name__ == "__main__":
-    # trans = set_transform_op()
-    # data_set = TemporalData(
-    #     "../../../datasets",
-    #     "ImageData/trainingData_face",
-    #     "VoiceData/trainingData_mfcc",
-    #     "annotation_training.pkl",
-    #     trans
-    # )
-    # print(len(data_set))
-    # print(data_set[1])
+    trans = set_transform_op()
+    data_set = TemporalData(
+        "../../../datasets",
+        "ImageData/trainingData_face",
+        "VoiceData/trainingData_mfcc",
+        "annotation_training.pkl",
+        trans
+    )
+    print(len(data_set))
+    print(data_set[1])
     # print(data_set._statistic_img_sample(1))
     # print(data_set._get_wav_sample(1))
-    loader = make_data_loader("", "train")
-    for i, sample in enumerate(loader):
-        if i > 0:
-            break
-        print(sample["image"].shape, sample["audio"].shape, sample["label"].shape)
+    # loader = make_data_loader("", "train")
+    # for i, sample in enumerate(loader):
+    #     if i > 0:
+    #         break
+    #     print(sample["image"].shape, sample["audio"].shape, sample["label"].shape)

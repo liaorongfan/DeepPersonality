@@ -38,7 +38,7 @@ class DAN(nn.Module):
         x = self.leaky_relu(x)
         x = self.dropout(x)  # add dropout to enhance generalization ability
         x = self.linear_2(x)  # add another linear lay and activation function to enhance nonlinear mapping
-        x = F.sigmoid(x)
+        x = torch.sigmoid(x)
         return x
 
     def _initialize_weights(self):
@@ -96,7 +96,7 @@ def get_dan_model(pretrained=False, **kwargs):
 
 if __name__ == "__main__":
     model = get_dan_model(pretrained=True)
-    x = torch.randn(2, 3, 244, 244)
+    x = torch.randn(2, 3, 244, 244).cuda()
     y = model(x)
     print(y, y.shape)
 

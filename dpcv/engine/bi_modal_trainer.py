@@ -2,6 +2,7 @@ import torch
 
 
 class BiModalTrainer(object):
+    """base trainer for bi-modal input"""
     def __init__(self, cfg, collector, logger):
         self.cfg = cfg
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -41,25 +42,25 @@ class BiModalTrainer(object):
     def valid(self, data_loader, model, loss_f, epoch_idx):
         model.eval()
         with torch.no_grad():
-            loss_list = []
+            loss_batch_list = []
             acc_batch_list = []
-            ocean_list = []
+            ocean_acc_epoch = []
             for i, data in enumerate(data_loader):
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
                 loss = loss_f(outputs.cpu(), labels.cpu())
-                loss_list.append(loss.item())
-                acc_batch = (1 - torch.abs(outputs.cpu().detach() - labels.cpu().detach())).mean(dim=0)
-                ocean_list.append(acc_batch)
-                acc_batch_avg = acc_batch.mean()
+                loss_batch_list.append(loss.item())
+                ocean_acc_batch = (1 - torch.abs(outputs.cpu().detach() - labels.cpu().detach())).mean(dim=0)
+                ocean_acc_epoch.append(ocean_acc_batch)
+                acc_batch_avg = ocean_acc_batch.mean()
                 acc_batch_list.append(acc_batch_avg)
-            ocean_acc = torch.stack(ocean_list, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
+            ocean_acc = torch.stack(ocean_acc_epoch, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
             ocean_acc_avg = ocean_acc.mean()
 
-        self.clt.record_valid_loss(loss_list)
+        self.clt.record_valid_loss(loss_batch_list)
         self.clt.record_valid_acc(acc_batch_list)  # acc over batches
         self.clt.record_valid_ocean_acc(ocean_acc)
-        if ocean_acc_avg > self.clt.best_acc:
+        if ocean_acc_avg > self.clt.best_valid_acc:
             self.clt.update_best_acc(ocean_acc_avg)
             self.clt.update_model_save_flag(1)
         else:
@@ -69,8 +70,8 @@ class BiModalTrainer(object):
             "Valid: Epoch[{:0>3}/{:0>3}] Train Mean_Acc: {:.2%} Valid Mean_Acc:{:.2%} OCEAN_ACC:{}\n".
             format(
                 epoch_idx + 1, self.cfg.MAX_EPOCH,
-                float(self.clt.mean_train_acc),
-                float(self.clt.mean_valid_acc),
+                float(self.clt.epoch_train_acc),
+                float(self.clt.epoch_valid_acc),
                 self.clt.valid_ocean_acc)
         )
 
@@ -89,4 +90,4 @@ class BimodalLSTMTrain(BiModalTrainer):
         img_in, aud_in, labels = data["image"], data["audio"], data["label"]
         img_in = img_in.view(-1, 3, 112, 112)
         aud_in = aud_in.view(-1, 68)
-        return (img_in, aud_in), labels
+        return (aud_in, img_in), labels

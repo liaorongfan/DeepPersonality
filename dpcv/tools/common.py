@@ -3,7 +3,15 @@ import torch
 import random
 import numpy as np
 import argparse
-# import psutil
+
+
+def setup_config(args, cfg):
+    cfg.DATA_ROOT = args.data_root_dir if args.data_root_dir else cfg.DATA_ROOT
+    cfg.LR_INIT = args.lr if args.lr else cfg.LR_INIT
+    cfg.TRAIN_BATCH_SIZE = args.bs if args.bs else cfg.TRAIN_BATCH_SIZE
+    cfg.MAX_EPOCH = args.max_epoch if args.max_epoch else cfg.MAX_EPOCH
+    cfg.RESUME = args.resume if args.resume else cfg.RESUME
+    return cfg
 
 
 def setup_seed(seed=12345):

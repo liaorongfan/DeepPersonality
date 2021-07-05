@@ -21,16 +21,17 @@ __C.VALID_BATCH_SIZE = 8  # 8
 __C.NUM_WORKS = 0
 
 __C.START_EPOCH = 0
-__C.TRAIN_CLS_EPOCH = 2
-__C.MAX_EPOCH = 5
+__C.TRAIN_CLS_EPOCH = 10
+__C.MAX_EPOCH = 40
 
 __C.LR_INIT = 0.05
 __C.MOMENTUM = 0.9
 __C.WEIGHT_DECAY = 1e-4
 
 __C.FACTOR = 0.1
-__C.MILESTONE = [1, 2, ]
+__C.MILESTONE = [20, 30, 35]
 
+# __C.RESUME = "../results/07-04_20-13/checkpoint_14.pkl"
 __C.RESUME = None
 
 __C.LOG_INTERVAL = 10

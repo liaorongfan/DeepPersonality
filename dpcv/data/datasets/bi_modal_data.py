@@ -4,6 +4,7 @@ import os
 
 
 class BimodalData(Dataset):
+    """base class for bi-modal input data"""
     def __init__(self, data_root, img_dir, audio_dir, label_file):
         self.data_root = data_root
         self.img_dir = img_dir

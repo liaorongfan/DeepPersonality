@@ -7,18 +7,13 @@ import argparse
 import torch.optim as optim
 from datetime import datetime
 from dpcv.engine.portrait_model_trainer import ModelTrainer
-from dpcv.utiles.common import setup_seed
-from dpcv.utiles.draw import show_confMat, plot_line
-from dpcv.utiles.logger import make_logger
+from dpcv.tools.common import setup_seed
+from dpcv.tools.draw import show_confMat, plot_line
+from dpcv.tools.logger import make_logger
 from dpcv.modeling.networks.portrait_cnn import get_portrait_model
 from dpcv.config.portraint_config import cfg
 from dpcv.checkpoint.save import save_model
 from dpcv.data.datasets.portrait_data import make_data_loader
-from dpcv.modeling.loss.label_smooth import LabelSmoothLoss
-
-# import sys
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(os.path.join(BASE_DIR, '..'))
 
 
 def main(analysis_bad_case=False):

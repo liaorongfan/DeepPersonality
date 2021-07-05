@@ -138,7 +138,6 @@ if __name__ == "__main__":
     # # print(data_set._statistic_img_sample(1))
     # # print(data_set._get_wav_sample(1))
 
-
     loader = make_data_loader("", mode="train")
     for i, sample in enumerate(loader):
         # if i > 5:
