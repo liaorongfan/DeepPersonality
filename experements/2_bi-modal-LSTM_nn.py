@@ -19,7 +19,7 @@ def main(args, cfg):
     cfg = setup_config(args, cfg)
     res_dir = os.path.join("..", "results")
     logger, log_dir = make_logger(res_dir)
-    logger.info("file_name: \n{}\ncfg:\n{}\n".format(__file__, cfg))
+    logger.info("file_name: \n{}\n".format(__file__))
 
     train_loader = make_data_loader(cfg, mode="train")
     valid_loader = make_data_loader(cfg, mode="valid")

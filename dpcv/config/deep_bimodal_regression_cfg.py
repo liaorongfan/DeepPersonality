@@ -16,15 +16,15 @@ __C.VALID_BATCH_SIZE = 8  # 8
 
 __C.NUM_WORKS = 4
 
-__C.LR_INIT = 0.01
+__C.LR_INIT = 0.05
 __C.MOMENTUM = 0.9
 __C.WEIGHT_DECAY = 1e-4
 
 __C.FACTOR = 0.1
-__C.MILESTONE = [2, 3, 4]
+__C.MILESTONE = [5, 7, 9]
 
 __C.START_EPOCH = 0
-__C.MAX_EPOCH = 5
+__C.MAX_EPOCH = 10
 
 __C.LOG_INTERVAL = 50
 # __C.RESUME = "../results/07-01_22-28/checkpoint_23.pkl"

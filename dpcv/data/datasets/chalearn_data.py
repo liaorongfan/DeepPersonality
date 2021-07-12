@@ -16,7 +16,7 @@ import os
 class ChaLearnImage(Dataset):
 
     def __init__(self, data_base, mode="train", transform=None):
-        assert mode in ["train", "val"], "mode should be one 'train' or 'val'"
+        assert mode in ["train", "valid"], "mode should be one 'train' or 'valid'"
         self.data_base = data_base
         self.transform = transform
         self.mode = mode
@@ -38,7 +38,7 @@ class ChaLearnImage(Dataset):
 
     def parse_annotation(self):
         data_file_path = os.path.join(self.data_base, "annotation_training.pkl")
-        if self.mode == "val":
+        if self.mode == "valid":
             data_file_path = os.path.join(self.data_base, "annotation_validation.pkl")
 
         with open(data_file_path, 'rb') as fo:
@@ -54,7 +54,7 @@ class ChaLearnImage(Dataset):
         temp_img_list = []
         temp_ano_list = []
         data_dir = os.path.join(self.data_base, 'ImageData/trainingData/')
-        if self.mode == "val":
+        if self.mode == "valid":
             data_dir = os.path.join(self.data_base, 'ImageData/validationData/')
 
         for i in range(len(df)):
@@ -86,7 +86,7 @@ def set_transform_op():
 
 
 def make_data_loader(cfg, mode):
-    assert (mode in ["train", "val"]), " 'mode' only supports 'train' and 'val'"
+    assert (mode in ["train", "valid"]), " 'mode' only supports 'train' and 'valid'"
     transforms = set_transform_op()
     dataset = ChaLearnImage(cfg.DATA_ROOT, mode, transforms)
     data_loader = DataLoader(
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     trans = set_transform_op()
-    cha_data = ChaLearnImage("../../../datasets", mode="val", transform=trans)
+    cha_data = ChaLearnImage("../../../datasets", mode="valid", transform=trans)
     print(len(cha_data))
     print(cha_data[2])
     for i in range(4, 10):

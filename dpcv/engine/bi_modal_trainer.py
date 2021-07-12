@@ -91,3 +91,12 @@ class BimodalLSTMTrain(BiModalTrainer):
         img_in = img_in.view(-1, 3, 112, 112)
         aud_in = aud_in.view(-1, 68)
         return (aud_in, img_in), labels
+
+
+class DeepBimodalTrain(BimodalLSTMTrain):
+
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["image"], data["label"]
+        return (inputs,), labels

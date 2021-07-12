@@ -17,7 +17,7 @@ def main(args, cfg):
     setup_seed(12345)
     cfg = setup_config(args, cfg)
     logger, log_dir = make_logger(cfg.RESULT_DIR)
-    logger.info("file_name: \n{}\ncfg:\n{}\n".format(__file__, cfg))
+    logger.info("file_name: \n{}\n".format(__file__))
 
     train_loader = make_data_loader(cfg, mode="train")
     valid_loader = make_data_loader(cfg, mode="valid")
