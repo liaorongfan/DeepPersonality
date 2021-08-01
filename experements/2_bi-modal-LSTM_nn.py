@@ -3,7 +3,6 @@ import os
 import torch.optim as optim
 from datetime import datetime
 from dpcv.config.bi_modal_lstm_cfg import cfg
-# from dpcv.engine.bi_modal_lstm_train import BiModalTrainer_
 from dpcv.engine.bi_modal_trainer import BimodalLSTMTrain
 from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
@@ -25,7 +24,8 @@ def main(args, cfg):
     valid_loader = make_data_loader(cfg, mode="valid")
 
     model = get_bi_modal_lstm_model()
-    loss_f = nn.MSELoss()
+    # loss_f = nn.MSELoss()
+    loss_f = nn.L1Loss()
     optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 

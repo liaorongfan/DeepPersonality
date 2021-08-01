@@ -68,12 +68,15 @@ class TemporalData(Dataset):
     def _get_statistic_img_sample(self, index):
         img_dir_name = f"{self.img_dir_ls[index]}_aligned"
         img_dir_path = os.path.join(self.data_root, self.img_dir_pt, img_dir_name)
-        imgs = glob.glob(img_dir_path + "/*.bmp")
-        separate = [idx for idx in range(0, 100, 16)]  # according to the paper separate the video into 6 sessions
-        if len(imgs) < 100:
-            imgs_nums = len(imgs)
+        imgs = glob.glob(img_dir_path + "/*.jpg")
+        imgs_nums = len(imgs)
+        if imgs_nums < 6:
+            selected = [0, 0, 0, 0, 0, 0]
+        else:
             separate = [idx for idx in range(0, imgs_nums, int(imgs_nums / 6))]
-        selected = [random.randint(separate[idx], separate[idx + 1]) for idx in range(6)]
+            if len(separate) < 7:
+                separate.append(imgs_nums - 1)
+            selected = [random.randint(separate[idx], separate[idx + 1]) for idx in range(6)]
         img_array_ls = []
         for idx in selected:
             try:
@@ -82,7 +85,6 @@ class TemporalData(Dataset):
                 img_array_ls.append(img_array)
             except:
                 print("encounter bad image:", imgs[idx])
-        # video_imgs = np.stack(img_array_ls, axis=0)
         return img_array_ls
 
     def _get_wav_sample(self, index):
@@ -132,7 +134,8 @@ if __name__ == "__main__":
         trans
     )
     print(len(data_set))
-    print(data_set[1])
+    for key, val in data_set[777].items():
+        print(key, val.shape)
     # print(data_set._statistic_img_sample(1))
     # print(data_set._get_wav_sample(1))
     # loader = make_data_loader("", "train")

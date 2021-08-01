@@ -14,7 +14,7 @@ __C.RESUME = None
 __C.TRAIN_BATCH_SIZE = 32  # 24
 __C.VALID_BATCH_SIZE = 8  # 8
 
-__C.NUM_WORKS = 4
+__C.NUM_WORKS = 0
 
 __C.LR_INIT = 0.05
 __C.MOMENTUM = 0.9

@@ -102,7 +102,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     trans = set_transform_op()
-    cha_data = ChaLearnImage("../../../datasets", mode="valid", transform=trans)
+    cha_data = ChaLearnImage("../../../datasets", mode="train", transform=trans)
     print(len(cha_data))
     print(cha_data[2])
     for i in range(4, 10):

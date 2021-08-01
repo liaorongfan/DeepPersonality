@@ -21,7 +21,7 @@ def setup_seed(seed=12345):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = True       # 训练集变化不大时使训练加速，是固定cudnn最优配置，如卷积算法
+        torch.backends.cudnn.benchmark = True
 
 
 def parse_args():

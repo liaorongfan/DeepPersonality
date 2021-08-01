@@ -1,11 +1,24 @@
 # Dataset
 
 ## Example
-Expected dataset structure for [flower-102](https://www.robots.ox.ac.uk/~vgg/data/flowers/102/):
+Expected dataset structure for deep personality 
 ```
-102flowers/
-  train/
-  valid/
-  test/
-  imagelabels.mat
+datasets/
+  ImageData/
+    trainingData
+    face_train
+    validationData
+    face_train
+  VoiceData/
+    trainingData
+    trainingData_50176
+    trainingData_244832
+    trainingData_mfcc
+    validationData
+    validationata_50176
+    validationata_244832
+    validationata_mfcc   
+  annotation_training.pkl
+  annotation_validation.pkl
+  annotation_test.pkl
 ```
