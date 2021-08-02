@@ -1,6 +1,7 @@
 # output dir
 results/
 NNManager/
+checkpoints/
 # project dirs
 datasets/trainingData_face
 datasets/trainingData_face.zip
@@ -11,6 +12,7 @@ datasets/VoiceData
 datasets/chalearn
 datasets/102flowers
 datasets/missed_files.txt
+datasets/*.txt
 pretrained/
 /snippet
 

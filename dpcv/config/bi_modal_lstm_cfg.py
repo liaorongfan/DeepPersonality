@@ -8,7 +8,7 @@ sys.path.append(os.path.join(BASE_DIR, '..'))
 cfg = EasyDict()
 __C = cfg
 
-__C.DATA_ROOT = "/home/rongfan/11-personality_traits/DeepPersonality/datasets/"
+__C.DATA_ROOT = "datasets/"
 __C.TRAIN_IMG_DATA = "ImageData/face_train"
 __C.TRAIN_AUD_DATA = "VoiceData/trainingData_mfcc"
 __C.TRAIN_LABEL_DATA = "annotation_training.pkl"
@@ -22,7 +22,7 @@ __C.NUM_WORKS = 0
 __C.LR_INIT = 0.8
 __C.MOMENTUM = 0.9
 __C.WEIGHT_DECAY = 5e-4
-__C.FACTOR = 0.1
+__C.FACTOR = 1
 __C.MILESTONE = [120, 150, 180]
 __C.MAX_EPOCH = 200
 __C.START_EPOCH = 0

@@ -3,10 +3,14 @@ import os
 import torch.optim as optim
 from datetime import datetime
 from dpcv.config.bi_modal_lstm_cfg import cfg
-from dpcv.engine.bi_modal_trainer import BimodalLSTMTrain
+from dpcv.engine.bi_modal_trainer import BimodalLSTMTrain, ImgModalLSTMTrain, AudModalLSTMTrain
 from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
-from dpcv.modeling.networks.bi_modal_lstm import get_bi_modal_lstm_model
+from dpcv.modeling.networks.bi_modal_lstm import (
+    get_bi_modal_lstm_model,
+    get_img_modal_lstm_model,
+    get_aud_modal_lstm_model
+)
 from dpcv.checkpoint.save import save_model, resume_training
 from dpcv.data.datasets.temporal_data import make_data_loader
 from dpcv.tools.common import parse_args
@@ -24,6 +28,8 @@ def main(args, cfg):
     valid_loader = make_data_loader(cfg, mode="valid")
 
     model = get_bi_modal_lstm_model()
+    # model = get_img_modal_lstm_model()
+    # model = get_aud_modal_lstm_model()
     # loss_f = nn.MSELoss()
     loss_f = nn.L1Loss()
     optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
@@ -31,6 +37,8 @@ def main(args, cfg):
 
     collector = TrainSummary()
     trainer = BimodalLSTMTrain(cfg, collector, logger)
+    # trainer = ImgModalLSTMTrain(cfg, collector, logger)
+    # trainer = AudModalLSTMTrain(cfg, collector, logger)
 
     start_epoch = cfg.START_EPOCH
     if cfg.RESUME:
