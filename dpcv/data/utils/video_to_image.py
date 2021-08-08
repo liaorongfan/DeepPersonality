@@ -4,6 +4,44 @@ import os
 import zipfile
 
 
+def frame_sample(video, save_dir):
+    """
+    Creating folder to save all the 100 frames from the video
+    """
+    cap = cv2.VideoCapture(video)
+
+    file_name = (video.split('.mp4'))[0]
+    try:
+        if not os.path.exists(save_dir + file_name):
+            os.makedirs(save_dir + file_name)
+    except OSError:
+        print('Error: Creating directory of data')
+
+    # Setting the frame limit to 100
+    cap.set(cv2.CAP_PROP_FRAME_COUNT, 101)
+    length = 101
+    count = 0
+    # Running a loop to each frame and saving it in the created folder
+    while cap.isOpened():
+        count += 1
+        if length == count:
+            break
+        ret, frame = cap.read()
+        if frame is None:
+            continue
+
+        # Resizing it to 256*256 to save the disk space and fit into the model
+        frame = cv2.resize(frame, (256, 256), interpolation=cv2.INTER_CUBIC)
+        # Saves image of the current frame in jpg file
+        name = save_dir + str(file_name) + '/frame' + str(count) + '.jpg'
+        cv2.imwrite(name, frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    print(f"{video} precessed")
+
+
 def video2img_train(zipfile_train):
     # Running a loop through all the zipped training file to extract all video and then extract 100 frames from each.
     for i in range(1, 76):
@@ -160,7 +198,3 @@ def video2img_test(zipfile_test):
 
             # Print the file which is done
             print(zipfilename, ':', file_name)
-
-
-if __name__ == "__main__":
-    video2img_test("./unzippedData/test-1/")

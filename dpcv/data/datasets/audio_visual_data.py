@@ -7,6 +7,7 @@ import random
 import numpy as np
 from dpcv.data.datasets.bi_modal_data import BimodalData
 from dpcv.data.datasets.transforms import set_audio_visual_transform
+from dpcv.config.audiovisual_resnet_cfg import cfg
 
 
 class AudioVisualData(BimodalData):
@@ -47,35 +48,6 @@ class AudioVisualData(BimodalData):
         return wav_ft
 
 
-# def make_data_loader_(cfg, mode):
-#     assert (mode in ["train", "valid"]), " 'mode' only supports 'train' and 'valid'"
-#     transforms = set_audio_visual_transform()
-#     if mode == "train":
-#         dataset = AudioVisualData(
-#             cfg.DATA_ROOT,
-#             cfg.TRAIN_IMG_DATA,
-#             cfg.TRAIN_AUD_DATA,
-#             cfg.TRAIN_LABEL_DATA,
-#             transforms
-#         )
-#         batch_size = cfg.TRAIN_BATCH_SIZE
-#     else:
-#         dataset = AudioVisualData(
-#             cfg.DATA_ROOT,
-#             cfg.VALID_IMG_DATA,
-#             cfg.VALID_AUD_DATA,
-#             cfg.VALID_LABEL_DATA,
-#             transforms
-#         )
-#         batch_size = cfg.VALID_BATCH_SIZE
-#     data_loader = DataLoader(
-#         dataset=dataset,
-#         batch_size=batch_size,
-#         shuffle=True,
-#         num_workers=0  # cfg.NUM_WORKS
-#     )
-#     return data_loader
-
 def make_data_loader(cfg, mode):
     trans = set_audio_visual_transform()
     if mode == "train":
@@ -96,9 +68,9 @@ def make_data_loader(cfg, mode):
         )
     data_loader = DataLoader(
         dataset=data_set,
-        batch_size=32,
+        batch_size=cfg.TRAIN_BATCH_SIZE,
         shuffle=True,
-        num_workers=0
+        num_workers=cfg.NUM_WORKS
     )
     return data_loader
 

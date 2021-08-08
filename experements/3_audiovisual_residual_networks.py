@@ -23,8 +23,8 @@ def main(args, cfg):
     valid_loader = make_data_loader(cfg, mode="valid")
 
     model = get_audiovisual_resnet_model()
-    loss_f = nn.MSELoss()
-    optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
+    loss_f = nn.L1Loss()
+    optimizer = optim.Adam(model.parameters(), lr=0.0002, betas=(0.5, 0.999), eps=1e-8)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 
     collector = TrainSummary()
