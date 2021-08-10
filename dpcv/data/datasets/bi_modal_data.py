@@ -1,9 +1,14 @@
+import glob
+import torch
+import numpy as np
+from PIL import Image
 from torch.utils.data import Dataset
 import pickle
 import os
+from random import shuffle
 
 
-class BimodalData(Dataset):
+class VideoData(Dataset):
     """base class for bi-modal input data"""
     def __init__(self, data_root, img_dir, audio_dir, label_file):
         self.data_root = data_root

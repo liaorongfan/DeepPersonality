@@ -7,10 +7,11 @@ from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
 from dpcv.modeling.networks.audio_visual_residual import get_audiovisual_resnet_model
 from dpcv.config.audiovisual_resnet_cfg import cfg
-from dpcv.checkpoint.save import save_model, resume_training
+from dpcv.checkpoint.save import save_model, resume_training, load_model
 from dpcv.data.datasets.audio_visual_data import make_data_loader
 from dpcv.tools.common import parse_args
 from dpcv.evaluation.summary import TrainSummary
+from scipy.stats import pearsonr
 
 
 def main(args, cfg):
@@ -19,16 +20,24 @@ def main(args, cfg):
     logger, log_dir = make_logger(cfg.RESULT_DIR)
     logger.info("file_name: \n{}\n".format(__file__))
 
+    collector = TrainSummary()
+    trainer = BiModalTrainer(cfg, collector, logger)
+
     train_loader = make_data_loader(cfg, mode="train")
     valid_loader = make_data_loader(cfg, mode="valid")
+    # test_loader = make_data_loader(cfg, mode="test")
 
     model = get_audiovisual_resnet_model()
+    if cfg.TEST_ONLY:
+        model = load_model(model, cfg.WEIGHT)
+        ocean_acc_avg, ocean_acc, dataset_output, dataset_label = trainer.test(test_loader, model)
+        pcc = pearsonr(dataset_output, dataset_label)
+        logger.info(f"average acc of OCEAN:{ocean_acc},\taverage acc [{ocean_acc_avg}]\npcc and p_value:{pcc}")
+        return
+
     loss_f = nn.L1Loss()
     optimizer = optim.Adam(model.parameters(), lr=0.0002, betas=(0.5, 0.999), eps=1e-8)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
-
-    collector = TrainSummary()
-    trainer = BiModalTrainer(cfg, collector, logger)
 
     start_epoch = cfg.START_EPOCH
     if cfg.RESUME:

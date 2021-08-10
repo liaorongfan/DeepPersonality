@@ -46,3 +46,14 @@ def video2wave_val(zipfile_dir):
             command = "ffmpeg -i unzippedData/{}/{}.mp4 -ab 320k -ac 2 -ar 44100 -vn VoiceData/validationData/{}.wav"\
                 .format(zipfilename, file_name, file_name)
             subprocess.call(command, shell=True)
+
+
+def video2wave_tst(data_dir):
+    for video in os.listdir(data_dir):
+        file_name = video.split(".mp4")[0]
+        if not os.path.exists("VoiceData/testData"):
+            os.makedirs("VoiceData/testData")
+        command = f"ffmpeg -i {data_dir}/{video} -ab 320k -ac 2 -ar 44100 -vn VoiceData/testData/{file_name}.wav"
+        subprocess.call(command, shell=True)
+
+

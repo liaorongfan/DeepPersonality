@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import zipfile
+from tqdm import tqdm
 
 
 def frame_sample(video, save_dir):
@@ -18,8 +19,11 @@ def frame_sample(video, save_dir):
         print('Error: Creating directory of data')
 
     # Setting the frame limit to 100
-    cap.set(cv2.CAP_PROP_FRAME_COUNT, 101)
-    length = 101
+    # cap.set(cv2.CAP_PROP_FRAME_COUNT, 120)
+    # print(cap.get(cv2.CAP_PROP_FPS))
+    # print(int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 6 * 5))
+    cap.set(cv2.CAP_PROP_FPS, 25)
+    length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 6 * 5)
     count = 0
     # Running a loop to each frame and saving it in the created folder
     while cap.isOpened():
@@ -29,9 +33,8 @@ def frame_sample(video, save_dir):
         ret, frame = cap.read()
         if frame is None:
             continue
-
         # Resizing it to 256*256 to save the disk space and fit into the model
-        frame = cv2.resize(frame, (256, 256), interpolation=cv2.INTER_CUBIC)
+        frame = cv2.resize(frame, (456, 256), interpolation=cv2.INTER_CUBIC)
         # Saves image of the current frame in jpg file
         name = save_dir + str(file_name) + '/frame' + str(count) + '.jpg'
         cv2.imwrite(name, frame)
@@ -57,7 +60,7 @@ def video2img_train(zipfile_train):
         archive.extractall('unzippedData/' + zipfilename)
 
         # Running a loop over all the videos in the zipped file and extracting 100 frames from each
-        for file_name in archive.namelist():
+        for file_name in tqdm(archive.namelist()):
             cap = cv2.VideoCapture('unzippedData/' + zipfilename + '/' + file_name)
 
             file_name = (file_name.split('.mp4'))[0]
@@ -69,8 +72,11 @@ def video2img_train(zipfile_train):
                 print('Error: Creating directory of data')
 
             # Setting the frame limit to 100
-            cap.set(cv2.CAP_PROP_FRAME_COUNT, 101)
-            length = 101
+            # cap.set(cv2.CAP_PROP_FRAME_COUNT, 101)
+            # length = 101
+
+            cap.set(cv2.CAP_PROP_FPS, 25)
+            length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 6 * 5)
             count = 0
             # Running a loop to each frame and saving it in the created folder
             while cap.isOpened():
@@ -80,9 +86,8 @@ def video2img_train(zipfile_train):
                 ret, frame = cap.read()
                 if frame is None:
                     continue
-
                 # Resizing it to 256*256 to save the disk space and fit into the model
-                frame = cv2.resize(frame, (256, 256), interpolation=cv2.INTER_CUBIC)
+                frame = cv2.resize(frame, (456, 256), interpolation=cv2.INTER_CUBIC)
                 # Saves image of the current frame in jpg file
                 name = 'ImageData/trainingData/' + str(file_name) + '/frame' + str(count) + '.jpg'
                 cv2.imwrite(name, frame)
@@ -91,7 +96,7 @@ def video2img_train(zipfile_train):
                     break
 
             # Print the file which is done
-            print(zipfilename, ':', file_name)
+            # print(zipfilename, ':', file_name)
 
 
 def video2img_val(zipfile_val):
@@ -108,7 +113,7 @@ def video2img_val(zipfile_val):
         archive.extractall('unzippedData/' + zipfilename)
 
         # Running a loop over all the videos in the zipped file and extracting 100 frames from each
-        for file_name in archive.namelist():
+        for file_name in tqdm(archive.namelist()):
             cap = cv2.VideoCapture('unzippedData/' + zipfilename + '/' + file_name)
 
             file_name = (file_name.split('.mp4'))[0]
@@ -120,8 +125,10 @@ def video2img_val(zipfile_val):
                 print('Error: Creating directory of data')
 
             # Setting the frame limit to 100
-            cap.set(cv2.CAP_PROP_FRAME_COUNT, 101)
-            length = 101
+            # cap.set(cv2.CAP_PROP_FRAME_COUNT, 101)
+            # length = 101
+            cap.set(cv2.CAP_PROP_FPS, 25)
+            length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 6 * 5)
             count = 0
             # Running a loop to each frame and saving it in the created folder
             while cap.isOpened():
@@ -133,7 +140,7 @@ def video2img_val(zipfile_val):
                     continue
 
                 # Resizing it to 256*256 to save the disk space and fit into the model
-                frame = cv2.resize(frame, (256, 256), interpolation=cv2.INTER_CUBIC)
+                frame = cv2.resize(frame, (456, 256), interpolation=cv2.INTER_CUBIC)
                 # Saves image of the current frame in jpg file
                 name = 'ImageData/validationData/' + str(file_name) + '/frame' + str(count) + '.jpg'
                 cv2.imwrite(name, frame)
@@ -142,7 +149,7 @@ def video2img_val(zipfile_val):
                     break
 
             # Print the file which is done
-            print(zipfilename, ':', file_name)
+            # print(zipfilename, ':', file_name)
 
 
 def video2img_test(zipfile_test):
@@ -198,3 +205,8 @@ def video2img_test(zipfile_test):
 
             # Print the file which is done
             print(zipfilename, ':', file_name)
+
+
+if __name__ == "__main__":
+    # video2img_train("./chalearn/train/")
+    video2img_val("./chalearn/val/")

@@ -20,3 +20,9 @@ def resume_training(checkpoint_path, model, optimizer):
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     epoch = checkpoint["epoch"]
     return model, optimizer, epoch
+
+
+def load_model(model, checkpoint_path):
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    return model

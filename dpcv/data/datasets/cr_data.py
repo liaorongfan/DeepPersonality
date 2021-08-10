@@ -8,11 +8,11 @@ import librosa
 from PIL import Image
 import random
 import numpy as np
-from dpcv.data.datasets.bi_modal_data import BimodalData
+from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.datasets.transforms import set_crnet_transform
 
 
-class CRNetData(BimodalData):
+class CRNetData(VideoData):
     def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None):
         super().__init__(data_root, img_dir, audio_dir, label_file)
         self.transform = transform

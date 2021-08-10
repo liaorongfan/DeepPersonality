@@ -1,4 +1,4 @@
-from dpcv.data.utils.video_to_image import frame_sample
+from datasets.video_to_image import frame_sample
 import os
 
 
