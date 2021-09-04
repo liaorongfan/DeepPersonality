@@ -1,4 +1,4 @@
-from datasets.video_to_image import frame_sample
+from data.utils.video_to_image import frame_sample
 
 
 if __name__ == "__main__":

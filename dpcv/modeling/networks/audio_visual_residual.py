@@ -32,8 +32,9 @@ class AudioVisualResNet18(nn.Module):
 
         x = torch.cat([aud_x, vis_x], dim=-1)
         x = self.linear(x)
-        x = torch.tanh(x)
-        x = (x + 1) / 2  # scale tanh output to [0, 1]
+        x = torch.sigmoid(x)
+        # x = torch.tanh(x)
+        # x = (x + 1) / 2  # scale tanh output to [0, 1]
         return x
 
 

@@ -27,8 +27,9 @@ def main(args, cfg):
 
     loss_f = {"ce_loss": one_hot_CELoss, "bell_loss": BellLoss(), "mse_loss": nn.MSELoss(), "l1_loss": nn.L1Loss()}
 
-    optimizer_fir = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
-    optimizer_sec = optim.Adam(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
+    optimizer_fir = optim.SGD(model.parameters(), lr=cfg.LR_INIT, momentum=cfg.MOMENTUM, weight_decay=cfg.WEIGHT_DECAY)
+    optimizer_sec = optim.Adam(
+        model.parameters(), betas=(cfg.BETA_1, cfg.BETA_2), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
     optimizer = [optimizer_fir, optimizer_sec]
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer_sec, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 

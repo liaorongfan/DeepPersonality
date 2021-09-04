@@ -29,6 +29,9 @@ def set_crnet_transform():
 def set_audio_visual_transform():
     import torchvision.transforms as transforms
     transforms = transforms.Compose([
+        # transforms.RandomVerticalFlip(0.5),
+        # transforms.RandomRotation(15),
+        # transforms.ColorJitter(),
         transforms.RandomHorizontalFlip(0.5),
         transforms.RandomCrop((224, 224)),
         transforms.ToTensor(),

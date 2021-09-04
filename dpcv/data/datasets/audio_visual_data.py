@@ -33,8 +33,8 @@ class AudioVisualData(VideoData):
         return sample
 
     def get_image_data(self, idx):
-        img_dir = self.img_dir_ls[idx]
-        img_dir_path = os.path.join(self.data_root, self.img_dir, img_dir)
+        img_dir_path = self.img_dir_ls[idx]
+        # img_dir_path = os.path.join(self.data_root, self.img_dir, img_dir)
         img_paths = glob.glob(img_dir_path + "/*.jpg")
         img_path = random.choice(img_paths)
         try:
@@ -44,50 +44,20 @@ class AudioVisualData(VideoData):
             print(img_path)
 
     def get_wave_data(self, idx):
-        file_name = f"{self.img_dir_ls[idx]}.wav.npy"
-        wav_path = os.path.join(self.data_root, self.audio_dir, file_name)
+
+        img_dir_path = self.img_dir_ls[idx]
+        wav_path = img_dir_path.replace("image_data", "voice_data") + ".wav.npy"
         wav_ft = np.load(wav_path)
-        return wav_ft
-
-
-def make_data_loader(cfg, mode):
-    trans = set_audio_visual_transform()
-    if mode == "train":
-        data_set = AudioVisualData(
-            "../datasets",
-            "ImageData/trainingData",
-            "VoiceData/trainingData_50176",
-            "annotation_training.pkl",
-            trans
-        )
-    elif mode == "valid":
-        data_set = AudioVisualData(
-            "../datasets",
-            "ImageData/validationData",
-            "VoiceData/validationData_50176",
-            "annotation_validation.pkl",
-            trans
-        )
-    elif mode == "test":
-        data_set = AudioVisualData(
-            "../datasets",
-            "ImageData/testData",
-            "VoiceData/testData_50176",
-            "annotation_test.pkl",
-            trans
-        )
-    else:
-        raise ValueError("mode must in one of [train, valid, test]")
-
-    data_loader = DataLoader(
-        dataset=data_set,
-        batch_size=cfg.TRAIN_BATCH_SIZE,
-        shuffle=True,
-        num_workers=cfg.NUM_WORKS,
-        drop_last=True
-    )
-
-    return data_loader
+        try:
+            n = np.random.randint(0, len(wav_ft) - 50176)
+        except:
+            n = 0
+        wav_tmp = wav_ft[..., n: n + 50176]
+        if wav_tmp.shape[-1] < 50176:
+            wav_fill = np.zeros((1, 1, 50176))
+            wav_fill[..., :wav_tmp.shape[-1]] = wav_tmp
+            wav_tmp = wav_fill
+        return wav_tmp
 
 
 class VideoFrameData(Dataset):
@@ -161,6 +131,54 @@ class VideoFrameData(Dataset):
         return len(self.frame_data_triplet)
 
 
+def make_data_loader(cfg, mode):
+    trans = set_audio_visual_transform()
+    if mode == "train":
+        data_set = AudioVisualData(
+            "../datasets",
+            "image_data/training_data_01",
+            "voice_data/trainingData",
+            "annotation_training.pkl",
+            trans
+        )
+    elif mode == "valid":
+        data_set = AudioVisualData(
+            "../datasets",
+            "image_data/validation_data_01",
+            "voice_data/validationData",
+            "annotation_validation.pkl",
+            trans
+        )
+    elif mode == "trainval":
+        data_set = AudioVisualData(
+            "../datasets",
+            ["image_data/training_data_01", "image_data/validation_data_01"],
+            ["voice_data/trainingData", "voice_data/validationData"],
+            ["annotation/annotation_training.pkl", "annotation/annotation_validation.pkl"],
+            trans,
+        )
+    elif mode == "test":
+        data_set = AudioVisualData(
+            "../datasets",
+            "image_data/test_data_01",
+            "voice_data/testData",
+            "annotation/annotation_test.pkl",
+            trans
+        )
+    else:
+        raise ValueError("mode must in one of [train, valid, trianval, test]")
+
+    data_loader = DataLoader(
+        dataset=data_set,
+        batch_size=cfg.TRAIN_BATCH_SIZE,
+        shuffle=True,
+        num_workers=cfg.NUM_WORKS,
+        drop_last=True
+    )
+
+    return data_loader
+
+
 if __name__ == "__main__":
     # from tqdm import tqdm
     # args = ("../../../datasets", "ImageData/trainingData", "VoiceData/trainingData_50176", "annotation_training.pkl")
@@ -170,12 +188,13 @@ if __name__ == "__main__":
     # data = data_set[1]
     # print(data["image"].shape, data["audio"].shape, data["label"].shape)
 
-    dataset = VideoFrameData(
+    dataset = AudioVisualData(
         "../../../datasets",
-        "ImageData/validationData",
-        "VoiceData/validationData_50176",
-        "annotation_validation.pkl",
-        trans
+        ["image_data/training_data_01", "image_data/validation_data_01"],
+        ["voice_data/trainingData", "voice_data/validationData"],
+        ["annotation/annotation_training.pkl", "annotation/annotation_validation.pkl"],
+        trans,
     )
     print(len(dataset))
-    print(dataset[1])
+    a = dataset[1]
+    print(a)

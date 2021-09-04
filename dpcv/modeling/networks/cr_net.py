@@ -77,7 +77,7 @@ class CRNet(nn.Module):
         out = self.out_map(out_reg)
         out = out.view(out.size(0), -1)
 
-        return cls_guide, out
+        return cls_guide, out * 100
 
 
 def get_crnet_model(only_train_guider=True):

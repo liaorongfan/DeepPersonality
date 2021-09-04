@@ -77,7 +77,7 @@ shuffle(c)
 # print(len(train_addrs), "training audio files saved.. ")
 
 # ######################################### write TFRecords for validate data #######################################
-df = load_pickle('../../../datasets/annotation_validation.pkl')
+df = load_pickle('../../../datasets/annotation/annotation_validation.pkl')
 NUM_VID = len(df)
 addrs = []
 labels = []

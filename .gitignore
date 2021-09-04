@@ -5,14 +5,15 @@ checkpoints/
 # project dirs
 datasets/trainingData_face
 datasets/trainingData_face.zip
-datasets/ImageData
+datasets/image_data
 datasets/portrait
 datasets/unzippedData
-datasets/VoiceData
+datasets/voice_data
 datasets/chalearn
 datasets/102flowers
 datasets/missed_files.txt
 datasets/*.txt
+datasets/annotation
 pretrained/
 /snippet
 

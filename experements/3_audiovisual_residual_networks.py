@@ -23,20 +23,23 @@ def main(args, cfg):
     collector = TrainSummary()
     trainer = BiModalTrainer(cfg, collector, logger)
 
-    train_loader = make_data_loader(cfg, mode="train")
-    valid_loader = make_data_loader(cfg, mode="valid")
-    # test_loader = make_data_loader(cfg, mode="test")
+    train_loader = make_data_loader(cfg, mode="trainval")
+    valid_loader = make_data_loader(cfg, mode="test")
+    test_loader = make_data_loader(cfg, mode="test")
 
     model = get_audiovisual_resnet_model()
     if cfg.TEST_ONLY:
         model = load_model(model, cfg.WEIGHT)
-        ocean_acc_avg, ocean_acc, dataset_output, dataset_label = trainer.test(test_loader, model)
-        pcc = pearsonr(dataset_output, dataset_label)
+        # ocean_acc_avg, ocean_acc, dataset_output, dataset_label = trainer.test(test_loader, model)
+        ocean_acc_avg, ocean_acc = trainer.test(test_loader, model)
+        # pcc = pearsonr(dataset_output, dataset_label)
+        pcc = 0
         logger.info(f"average acc of OCEAN:{ocean_acc},\taverage acc [{ocean_acc_avg}]\npcc and p_value:{pcc}")
         return
 
     loss_f = nn.L1Loss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0002, betas=(0.5, 0.999), eps=1e-8)
+    optimizer = optim.SGD(model.parameters(), lr=0.005, weight_decay=1e-4)
+    # optimizer = optim.Adam(model.parameters(), lr=0.0002, betas=(0.5, 0.999), eps=1e-8)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 
     start_epoch = cfg.START_EPOCH

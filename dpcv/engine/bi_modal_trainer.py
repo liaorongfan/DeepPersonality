@@ -1,4 +1,5 @@
 import torch
+from tqdm import tqdm
 
 
 class BiModalTrainer(object):
@@ -81,7 +82,7 @@ class BiModalTrainer(object):
             ocean_acc = []
             label_list = []
             output_list = []
-            for i, data in enumerate(data_loader):
+            for i, data in tqdm(enumerate(data_loader)):
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
 
@@ -93,10 +94,10 @@ class BiModalTrainer(object):
                 ocean_acc.append(ocean_acc_batch)
             ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
             ocean_acc_avg = ocean_acc.mean()
-            dataset_output = torch.flatten(torch.stack(output_list, dim=0)).numpy()
-            dataset_label = torch.flatten(torch.stack(label_list, dim=0)).numpy()
+            # dataset_output = torch.flatten(torch.stack(output_list, dim=0)).numpy()
+            # dataset_label = torch.flatten(torch.stack(label_list, dim=0)).numpy()
 
-        return ocean_acc_avg, ocean_acc, dataset_output, dataset_label
+        return ocean_acc_avg, ocean_acc, #dataset_output, dataset_label
 
     def data_fmt(self, data):
         for k, v in data.items():
