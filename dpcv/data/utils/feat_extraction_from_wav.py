@@ -1,6 +1,5 @@
 from python_speech_features import logfbank
 import scipy.io.wavfile as wav
-# import tensorflow as tf
 import pickle
 import numpy as np
 from random import shuffle

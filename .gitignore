@@ -2,6 +2,7 @@
 results/
 NNManager/
 checkpoints/
+pre_trained_weights/
 # project dirs
 datasets/trainingData_face
 datasets/trainingData_face.zip

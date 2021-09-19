@@ -25,7 +25,7 @@ class CRNetData(VideoData):
     def __getitem__(self, idx):
         glo_img, loc_img, idx = self.get_imgs(idx)  # in case the idx changed
         wav_aud = self.get_wav_aud(idx)
-        anno_score = self._find_ocean_score(idx)
+        anno_score = self.get_ocean_label(idx)
         anno_cls_encode = self._cls_encode(anno_score)
 
         if self.transform:

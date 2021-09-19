@@ -6,7 +6,7 @@ import argparse
 
 
 def setup_config(args, cfg):
-    cfg.DATA_ROOT = args.data_root_dir if args.data_root_dir else cfg.DATA_ROOT
+    # cfg.DATA_ROOT = args.data_root_dir if args.data_root_dir else cfg.DATA_ROOT
     cfg.LR_INIT = args.lr if args.lr else cfg.LR_INIT
     cfg.TRAIN_BATCH_SIZE = args.bs if args.bs else cfg.TRAIN_BATCH_SIZE
     cfg.MAX_EPOCH = args.max_epoch if args.max_epoch else cfg.MAX_EPOCH
@@ -28,12 +28,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Training')
     parser.add_argument('--lr', default=None, help='learning rate')
     parser.add_argument('--bs', default=None, help='training batch size')
-    parser.add_argument("--resume", default=None,
-                        help="saved model path to last training epoch")
+    parser.add_argument("--resume", default=None, help="saved model path to last training epoch")
     parser.add_argument('--max_epoch', default=None)
-    parser.add_argument('--data_root_dir',
-                        default=r"/home/rongfan/11-personality_traits/DeepPersonality/datasets",
-                        help="path to your dataset")
+    # parser.add_argument('--data_root_dir', default=r"datasets", help="path to your dataset")
     args = parser.parse_args()
     return args
 

@@ -22,15 +22,14 @@ class WaveProcess(VideoData):
     def extract_save(self, wav_file):
         wav_path = os.path.join(self.data_root, self.audio_dir, wav_file)
         try:
-            wav_ft = librosa.load(wav_path, 16000)[0][None, None, :]  # output_shape = (1, 1, 50176)
+            wav_ft = librosa.load(wav_path, 16000)[0][None, None, :]  # output_shape = (1, 1, 244832)
             # wav_ft = librosa.load(wav_path, 3279)[0][None, None, :]  # output_shape = (1, 1, 50176)
-            # wav_ft = librosa.load(wav_path, 16000)[0][None, None, :]  # output_shape = (1, 1, 244832)
             wav_temp = wav_ft
-            # if wav_ft.shape[-1] < 50176:
-            #     wav_temp = np.zeros((1, 1, 50176))
-            #     wav_temp[..., :wav_ft.shape[-1]] = wav_ft
-            # elif wav_ft.shape[-1] > 50176:
-            #     wav_temp = wav_ft[..., :50176]
+            if wav_ft.shape[-1] < 244832:
+                wav_temp = np.zeros((1, 1, 244832))
+                wav_temp[..., :wav_ft.shape[-1]] = wav_ft
+            elif wav_ft.shape[-1] > 244832:
+                wav_temp = wav_ft[..., :244832]
             np.save(f"{self.saved_file}/{wav_file}.npy", wav_temp)
         except Exception:
             print("error:", wav_file, wav_path)

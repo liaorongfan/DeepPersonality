@@ -19,7 +19,7 @@ class AudioVisualData(VideoData):
         self.transform = transform
 
     def __getitem__(self, idx):
-        label = self._find_ocean_score(idx)
+        label = self.get_ocean_label(idx)
         img = self.get_image_data(idx)
         wav = self.get_wave_data(idx)
 

@@ -24,7 +24,6 @@ class BiModalTrainer(object):
             optimizer.step()
 
             loss_list.append(loss.item())
-
             acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean().clip(min=0)
             acc_avg = acc_avg.detach().numpy()
             acc_avg_list.append(acc_avg)
@@ -34,8 +33,9 @@ class BiModalTrainer(object):
                     "Train: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.2}".format(
                         epoch_idx + 1, self.cfg.MAX_EPOCH,
                         i + 1, len(data_loader),
-                        float(loss.item()), float(acc_avg))
-                )  # print current training info of that batch
+                        float(loss.item()), float(acc_avg)
+                    )
+                )
 
         self.clt.record_train_loss(loss_list)
         self.clt.record_train_acc(acc_avg_list)
@@ -139,6 +139,17 @@ class AudModalLSTMTrain(BiModalTrainer):
 
 class DeepBimodalTrain(BimodalLSTMTrain):
 
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["image"], data["label"]
+        return (inputs,), labels
+
+
+class InterpretDanTrain(BiModalTrainer):
+    """
+    for interpret cnn model, only image data used
+    """
     def data_fmt(self, data):
         for k, v in data.items():
             data[k] = v.to(self.device)

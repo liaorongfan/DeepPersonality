@@ -82,11 +82,11 @@ def get_dan_model(pretrained=False, **kwargs):
     dan = DAN(make_layers(backbone['VGG16'], batch_norm=True), **kwargs)
 
     if pretrained:
-        pretrained_dict = torch.load("/home/rongfan/11-personality_traits/DeepPersonality/vgg16_bn-6c64b313.pth")
+        pretrained_dict = torch.load("pre_trained_weights/vgg16_bn-6c64b313.pth")
         model_dict = dan.state_dict()
-        # 1. filter out unnecessary keys
+        # 1. filter out unnecessary keys -------------------------------------------------------------------------------
         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-        # 2. overwrite entries in the existing state dict
+        # 2. overwrite entries in the existing state dict --------------------------------------------------------------
         model_dict.update(pretrained_dict)
         dan.load_state_dict(model_dict)
         # model.load_state_dict(model_zoo.load_url(model_urls['vgg16']))
