@@ -1,5 +1,6 @@
 import random
-
+from abc import ABC
+import os
 import torch
 from torch.utils.data import DataLoader
 from PIL import Image
@@ -30,6 +31,7 @@ class InterpretData(VideoData):
         img_dir = self.img_dir_ls[index]
         img_path = self.image_sample(img_dir)
         img = Image.open(img_path).convert("RGB")
+        # img_name = f"{img_dir[-15:]}/{os.path.basename(img_path)}"
         return img
 
     @staticmethod
@@ -76,6 +78,7 @@ def make_data_loader(cfg, mode="train"):
     data_loader = DataLoader(
         dataset=data_set,
         batch_size=cfg.TRAIN_BATCH_SIZE,
+        shuffle=cfg.SHUFFLE,
         num_workers=cfg.NUM_WORKERS,
     )
     return data_loader

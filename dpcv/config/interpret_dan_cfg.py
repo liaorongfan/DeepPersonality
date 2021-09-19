@@ -21,17 +21,17 @@ _C.TRAINVAL_LABEL_DATA = ["annotation/annotation_training.pkl", "annotation/anno
 # data loader config ---------------------------------------------------------------------------------------------------
 _C.TRAIN_BATCH_SIZE = 32  # 24
 _C.VALID_BATCH_SIZE = 32  # 8
+_C.SHUFFLE = True
 _C.NUM_WORKERS = 4
 _C.START_EPOCH = 0
-_C.MAX_EPOCH = 30
+_C.MAX_EPOCH = 50
 # optimizer config -----------------------------------------------------------------------------------------------------
-_C.LR_INIT = 0.001
+_C.LR_INIT = 0.05
 _C.MOMENTUM = 0.9
 _C.WEIGHT_DECAY = 0.0005
 _C.FACTOR = 0.1
-_C.MILESTONE = [10, 20, 30, 40]
+_C.MILESTONE = [30, 40]
 
-# __C.RESUME = "results/07-04_20-13/checkpoint_14.pkl"
 _C.PRE_TRAINED_MODEL = "../pre_trained_weights/vgg16_bn-6c64b313.pth"
 _C.RESUME = None
 

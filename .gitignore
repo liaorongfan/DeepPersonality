@@ -23,7 +23,7 @@ pretrained/
 *.json
 *.diff
 *.jpg
-
+*.zip
 # compilation and distribution
 __pycache__
 _ext

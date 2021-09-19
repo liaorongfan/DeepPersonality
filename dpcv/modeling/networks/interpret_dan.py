@@ -10,7 +10,7 @@ class InterpretDAN(nn.Module):
         super(InterpretDAN, self).__init__()
         self.features = features
         self.glo_ave_pooling = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512, 5)
+        self.fc = nn.Linear(512, num_classes)
         if init_weights:
             self._initialize_weights()
 

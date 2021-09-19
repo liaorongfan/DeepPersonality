@@ -30,7 +30,7 @@ class BiModalTrainer(object):
             # print loss info for an interval
             if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1:
                 self.logger.info(
-                    "Train: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.2}".format(
+                    "Train: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.4f}".format(
                         epoch_idx + 1, self.cfg.MAX_EPOCH,
                         i + 1, len(data_loader),
                         float(loss.item()), float(acc_avg)
