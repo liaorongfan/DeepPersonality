@@ -5,7 +5,7 @@
 # code modified from https://github.com/frgfm/torch-cam/tree/master/torchcam/cams
 """
 from typing import Optional, List, Tuple
-from utils import locate_candidate_layer
+from dpcv.tools.utils import locate_candidate_layer
 import math
 import logging
 import torch
@@ -13,7 +13,7 @@ from torch import Tensor
 from torch import nn
 import torch.nn.functional as F
 from typing import Optional, Tuple, Any
-from utils import locate_linear_layer
+from dpcv.tools.utils import locate_linear_layer
 
 __all__ = ['CAM', 'ScoreCAM', 'SSCAM', 'ISCAM']
 
@@ -154,25 +154,6 @@ class CAM(_CAM):
     """Implements a class activation map extractor as described in `"Learning Deep Features for Discriminative
     Localization" <https://arxiv.org/pdf/1512.04150.pdf>`_.
 
-    The Class Activation Map (CAM) is defined for image classification models that have global pooling at the end
-    of the visual feature extraction block. The localization map is computed as follows:
-
-    .. math::
-        L^{(c)}_{CAM}(x, y) = ReLU\\Big(\\sum\\limits_k w_k^{(c)} A_k(x, y)\\Big)
-
-    where :math:`A_k(x, y)` is the activation of node :math:`k` in the target layer of the model at
-    position :math:`(x, y)`,
-    and :math:`w_k^{(c)}` is the weight corresponding to class :math:`c` for unit :math:`k` in the fully
-    connected layer..
-
-    Example::
-        >>> from torchvision.models import resnet18
-        >>> from torchcam.cams import CAM
-        >>> model = resnet18(pretrained=True).eval()
-        >>> cam = CAM(model, 'layer4', 'fc')
-        >>> with torch.no_grad(): out = model(input_tensor)
-        >>> cam(class_idx=100)
-
     Args:
         model: input model
         target_layer: name of the target layer
@@ -215,35 +196,6 @@ class CAM(_CAM):
 class ScoreCAM(_CAM):
     """Implements a class activation map extractor as described in `"Score-CAM:
     Score-Weighted Visual Explanations for Convolutional Neural Networks" <https://arxiv.org/pdf/1910.01279.pdf>`_.
-
-    The localization map is computed as follows:
-
-    .. math::
-        L^{(c)}_{Score-CAM}(x, y) = ReLU\\Big(\\sum\\limits_k w_k^{(c)} A_k(x, y)\\Big)
-
-    with the coefficient :math:`w_k^{(c)}` being defined as:
-
-    .. math::
-        w_k^{(c)} = softmax(Y^{(c)}(M_k) - Y^{(c)}(X_b))
-
-    where :math:`A_k(x, y)` is the activation of node :math:`k` in the target layer of the model at
-    position :math:`(x, y)`, :math:`Y^{(c)}(X)` is the model output score for class :math:`c` before softmax
-    for input :math:`X`, :math:`X_b` is a baseline image,
-    and :math:`M_k` is defined as follows:
-
-    .. math::
-        M_k = \\frac{U(A_k) - \\min\\limits_m U(A_m)}{\\max\\limits_m  U(A_m) - \\min\\limits_m  U(A_m)})
-        \\odot X
-
-    where :math:`\\odot` refers to the element-wise multiplication and :math:`U` is the upsampling operation.
-
-    Example::
-        >>> from torchvision.models import resnet18
-        >>> from torchcam.cams import ScoreCAM
-        >>> model = resnet18(pretrained=True).eval()
-        >>> cam = ScoreCAM(model, 'layer4')
-        >>> with torch.no_grad(): out = model(input_tensor)
-        >>> cam(class_idx=100)
 
     Args:
         model: input model
@@ -321,38 +273,6 @@ class ScoreCAM(_CAM):
 class SSCAM(ScoreCAM):
     """Implements a class activation map extractor as described in `"SS-CAM: Smoothed Score-CAM for
     Sharper Visual Feature Localization" <https://arxiv.org/pdf/2006.14255.pdf>`_.
-
-    The localization map is computed as follows:
-
-    .. math::
-        L^{(c)}_{SS-CAM}(x, y) = ReLU\\Big(\\sum\\limits_k w_k^{(c)} A_k(x, y)\\Big)
-
-    with the coefficient :math:`w_k^{(c)}` being defined as:
-
-    .. math::
-        w_k^{(c)} = \\frac{1}{N} \\sum\\limits_1^N softmax(Y^{(c)}(M_k) - Y^{(c)}(X_b))
-
-    where :math:`N` is the number of samples used to smooth the weights,
-    :math:`A_k(x, y)` is the activation of node :math:`k` in the target layer of the model at
-    position :math:`(x, y)`, :math:`Y^{(c)}(X)` is the model output score for class :math:`c` before softmax
-    for input :math:`X`, :math:`X_b` is a baseline image,
-    and :math:`M_k` is defined as follows:
-
-    .. math::
-        M_k = \\Bigg(\\frac{U(A_k) - \\min\\limits_m U(A_m)}{\\max\\limits_m  U(A_m) - \\min\\limits_m  U(A_m)} +
-        \\delta\\Bigg) \\odot X
-
-    where :math:`\\odot` refers to the element-wise multiplication, :math:`U` is the upsampling operation,
-    :math:`\\delta \\sim \\mathcal{N}(0, \\sigma^2)` is the random noise that follows a 0-mean gaussian distribution
-    with a standard deviation of :math:`\\sigma`.
-
-    Example::
-        >>> from torchvision.models import resnet18
-        >>> from torchcam.cams import SSCAM
-        >>> model = resnet18(pretrained=True).eval()
-        >>> cam = SSCAM(model, 'layer4')
-        >>> with torch.no_grad(): out = model(input_tensor)
-        >>> cam(class_idx=100)
 
     Args:
         model: input model
@@ -433,38 +353,6 @@ class SSCAM(ScoreCAM):
 class ISCAM(ScoreCAM):
     """Implements a class activation map extractor as described in `"IS-CAM: Integrated Score-CAM for axiomatic-based
     explanations" <https://arxiv.org/pdf/2010.03023.pdf>`_.
-
-    The localization map is computed as follows:
-
-    .. math::
-        L^{(c)}_{ISS-CAM}(x, y) = ReLU\\Big(\\sum\\limits_k w_k^{(c)} A_k(x, y)\\Big)
-
-    with the coefficient :math:`w_k^{(c)}` being defined as:
-
-    .. math::
-        w_k^{(c)} = \\sum\\limits_{i=1}^N \\frac{i}{N} softmax(Y^{(c)}(M_k) - Y^{(c)}(X_b))
-
-    where :math:`N` is the number of samples used to smooth the weights,
-    :math:`A_k(x, y)` is the activation of node :math:`k` in the target layer of the model at
-    position :math:`(x, y)`, :math:`Y^{(c)}(X)` is the model output score for class :math:`c` before softmax
-    for input :math:`X`, :math:`X_b` is a baseline image,
-    and :math:`M_k` is defined as follows:
-
-    .. math::
-        M_k = \\Bigg(\\frac{U(A_k) - \\min\\limits_m U(A_m)}{\\max\\limits_m  U(A_m) - \\min\\limits_m  U(A_m)} +
-        \\delta\\Bigg) \\odot X
-
-    where :math:`\\odot` refers to the element-wise multiplication, :math:`U` is the upsampling operation,
-    :math:`\\delta \\sim \\mathcal{N}(0, \\sigma^2)` is the random noise that follows a 0-mean gaussian distribution
-    with a standard deviation of :math:`\\sigma`.
-
-    Example::
-        >>> from torchvision.models import resnet18
-        >>> from torchcam.cams import ISCAM
-        >>> model = resnet18(pretrained=True).eval()
-        >>> cam = ISCAM(model, 'layer4')
-        >>> with torch.no_grad(): out = model(input_tensor)
-        >>> cam(class_idx=100)
 
     Args:
         model: input model
