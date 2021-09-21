@@ -53,9 +53,9 @@ def frame_sample(video, save_dir):
     # print(f"{video} precessed")
 
 
-def video2img_train(zipfile_train):
+def video2img_train(zipfile_train, save_to="image_data/train_data"):
     # Running a loop through all the zipped training file to extract all video and then extract 100 frames from each.
-    for i in range(1, 76):
+    for i in tqdm(range(1, 76)):
         if i < 10:
             zipfilename = 'training80_0' + str(i) + '.zip'
         else:
@@ -72,19 +72,15 @@ def video2img_train(zipfile_train):
             cap = cv2.VideoCapture('unzippedData/' + zipfilename + '/' + file_name)
 
             file_name = (file_name.split('.mp4'))[0]
+            save_path = os.path.join(save_to, file_name)
             # Creating folder to save all the 100 frames from the video
             try:
-                if not os.path.exists('ImageData/trainingData/' + file_name):
-                    os.makedirs('ImageData/trainingData/' + file_name)
+                if not os.path.exists(save_path):
+                    os.makedirs(save_path)
             except OSError:
                 print('Error: Creating directory of data')
 
-            # Setting the frame limit to 100
-            # cap.set(cv2.CAP_PROP_FRAME_COUNT, 101)
-            # length = 101
-
-            cap.set(cv2.CAP_PROP_FPS, 25)
-            length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 6 * 5)
+            length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
             count = 0
             # Running a loop to each frame and saving it in the created folder
             while cap.isOpened():
@@ -94,21 +90,18 @@ def video2img_train(zipfile_train):
                 ret, frame = cap.read()
                 if frame is None:
                     continue
-                # Resizing it to 256*256 to save the disk space and fit into the model
+                # Resizing it to 456*256 to save the disk space and fit into the model
                 frame = cv2.resize(frame, (456, 256), interpolation=cv2.INTER_CUBIC)
                 # Saves image of the current frame in jpg file
-                name = 'ImageData/trainingData/' + str(file_name) + '/frame' + str(count) + '.jpg'
+                name = f"{save_path}/frame_{str(count)}.jpg"
                 cv2.imwrite(name, frame)
 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
-            # Print the file which is done
-            # print(zipfilename, ':', file_name)
-
 
 def video2img_val(zipfile_val, saved_to="image_data/valid_data"):
-    for i in range(1, 26):
+    for i in tqdm(range(1, 26)):
         if i < 10:
             zipfilename = 'validation80_0' + str(i) + '.zip'
         else:
@@ -132,12 +125,6 @@ def video2img_val(zipfile_val, saved_to="image_data/valid_data"):
                     os.makedirs(save_path)
             except OSError:
                 print('Error: Creating directory of data')
-
-            # Setting the frame limit to 100
-            # cap.set(cv2.CAP_PROP_FRAME_COUNT, 101)
-            # length = 101
-            # cap.set(cv2.CAP_PROP_FPS, 25)
-            # length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 6 * 5)
 
             length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
             count = 0
@@ -217,4 +204,6 @@ if __name__ == "__main__":
     # video2img_train("./chalearn/train/")
     # print("current work directory:", os.getcwd())
     # video2img_val("/home/rongfan/11-personality_traits/DeepPersonality/datasets/raw_data_tmp/validate/")
-    video2img_test("/home/rongfan/11-personality_traits/DeepPersonality/datasets/raw_data_tmp/test/")
+    # video2img_test("/home/rongfan/11-personality_traits/DeepPersonality/datasets/raw_data_tmp/test/")
+    video2img_train(
+        "/home/ssd500/personality_data/raw_data_tmp/train/", "/home/ssd500/personality_data/image_data/train_data")
