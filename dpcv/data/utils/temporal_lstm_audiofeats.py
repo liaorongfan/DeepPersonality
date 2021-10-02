@@ -74,10 +74,10 @@ def audio_preprocess_mfcc(root_path, exe_dir, save_to):
 if __name__ == "__main__":
     from pyAudioAnalysis import audioBasicIO
 
-    data_root = "../datasets/VoiceData/trainingData/"
+    data_root = "/home/ssd500/personality_data/raw_voice/validationData/"
     wav_file = "../datasets/VoiceData/validationData/i3s5XtbhSrE.004.wav"
-    save_to = "../datasets/VoiceData/trainingData_mfcc/"
-    exe_dir = "../datasets"
+    save_to = "/home/ssd500/personality_data/tem_voice/valid_data_mfcc"
+    exe_dir = "../../../pyAudioAnalysis"
 
     # extract_mfcc_features(wav_file, exe_dir, save_to)
     audio_preprocess_mfcc(data_root, exe_dir, save_to)

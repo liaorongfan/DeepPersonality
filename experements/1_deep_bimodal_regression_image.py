@@ -2,15 +2,15 @@ import torch.nn as nn
 import os
 import torch.optim as optim
 from datetime import datetime
-from dpcv.config.deep_bimodal_regression_cfg import cfg
-from dpcv.engine.bi_modal_trainer import DeepBimodalTrain
+from dpcv.config.interpret_dan_cfg import cfg
+from dpcv.engine.bi_modal_trainer import InterpretDanTrain
 from dpcv.modeling.networks.dan import get_dan_model
 from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
 from dpcv.checkpoint.save import save_model, resume_training
 from dpcv.tools.common import parse_args
 from dpcv.evaluation.summary import TrainSummary
-from dpcv.data.datasets.chalearn_data import make_data_loader
+from dpcv.data.datasets.interpret_dan_data import make_data_loader
 
 
 def main(args, cfg):
@@ -29,7 +29,7 @@ def main(args, cfg):
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 
     collector = TrainSummary()
-    trainer = DeepBimodalTrain(cfg, collector, logger)
+    trainer = InterpretDanTrain(cfg, collector, logger)
 
     start_epoch = cfg.START_EPOCH
     if cfg.RESUME:

@@ -23,9 +23,9 @@ def main(args, cfg):
     collector = TrainSummary()
     trainer = BiModalTrainer(cfg, collector, logger)
 
-    train_loader = make_data_loader(cfg, mode="trainval")
-    valid_loader = make_data_loader(cfg, mode="test")
-    test_loader = make_data_loader(cfg, mode="test")
+    train_loader = make_data_loader(cfg, mode="train")
+    valid_loader = make_data_loader(cfg, mode="valid")
+    # test_loader = make_data_loader(cfg, mode="test")
 
     model = get_audiovisual_resnet_model()
     if cfg.TEST_ONLY:

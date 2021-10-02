@@ -20,8 +20,8 @@ def main(args, cfg):
     logger, log_dir = make_logger(out_dir=os.path.join("..", "results"))
     logger.info("file_name: \n{}\n".format(__file__))
 
-    train_loader = make_data_loader(cfg, mode="valid")
-    valid_loader = make_data_loader(cfg, mode="test")
+    train_loader = make_data_loader(cfg, mode="train")
+    valid_loader = make_data_loader(cfg, mode="valid")
 
     model = get_interpret_dan_model(cfg, pretrained=True)
     loss_f = nn.MSELoss()
@@ -106,8 +106,8 @@ def visualize_cam(model_weights, image, trait_id=None):
 
 if __name__ == "__main__":
     args = parse_args()
-    # main(args, cfg)
-    visualize_cam(
-        "../results/09-20_00-05/checkpoint_89.pkl",
-        "../datasets/image_data/test_data/--Ymqszjv54.000/frame_1.jpg",
-    )
+    main(args, cfg)
+    # visualize_cam(
+    #     "../results/09-20_00-05/checkpoint_89.pkl",
+    #     "../datasets/image_data/test_data/--Ymqszjv54.000/frame_1.jpg",
+    # )

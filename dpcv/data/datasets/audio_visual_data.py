@@ -135,18 +135,18 @@ def make_data_loader(cfg, mode):
     trans = set_audio_visual_transform()
     if mode == "train":
         data_set = AudioVisualData(
-            "../datasets",
-            "image_data/training_data_01",
-            "voice_data/trainingData",
-            "annotation_training.pkl",
+            "/home/ssd500/personality_data",
+            "image_data/train_data",
+            "annotation/annotation_training.pkl",
+            "voice_data/train_data",
             trans
         )
     elif mode == "valid":
         data_set = AudioVisualData(
-            "../datasets",
-            "image_data/validation_data_01",
-            "voice_data/validationData",
-            "annotation_validation.pkl",
+            "/home/ssd500/personality_data",
+            "image_data/valid_data",
+            "annotation/annotation_validation.pkl",
+            "voice_data/valid_data",
             trans
         )
     elif mode == "trainval":
@@ -159,8 +159,8 @@ def make_data_loader(cfg, mode):
         )
     elif mode == "test":
         data_set = AudioVisualData(
-            "../datasets",
-            "image_data/test_data_01",
+            "/home/ssd500/personality_data",
+            "image_data/test_data",
             "voice_data/testData",
             "annotation/annotation_test.pkl",
             trans

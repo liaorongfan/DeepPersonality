@@ -8,13 +8,14 @@ import librosa
 from PIL import Image
 import random
 import numpy as np
+from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.datasets.transforms import set_crnet_transform
 
 
 class CRNetData(VideoData):
     def __init__(self, data_root, img_dir, face_img_dir, audio_dir, label_file, transform=None):
-        super().__init__(data_root, img_dir, audio_dir, label_file)
+        super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
         self.face_img_dir_ls = self.get_face_img_dir(face_img_dir)
 
@@ -59,12 +60,14 @@ class CRNetData(VideoData):
     def get_imgs(self, idx):
 
         glo_img_dir = self.img_dir_ls[idx]
-        loc_img_dir = (glo_img_dir + "_aligned").replace("data_01", "data_01_face")
+        loc_img_dir = glo_img_dir.replace("train_data", "train_data_face")
+        # in case some video doesn't get aligned face images
         if os.path.basename(loc_img_dir) not in self.face_img_dir_ls:
             return self.get_imgs(idx + 1)
         loc_imgs = glob.glob(loc_img_dir + "/*.jpg")
+        loc_imgs = sorted(loc_imgs, key=lambda x: int(Path(x).stem[5:]))
         # according to the paper sample 32 frames per video
-        separate = np.linspace(0, len(loc_imgs), 32, endpoint=False, dtype=np.int8)
+        separate = np.linspace(0, len(loc_imgs), 32, endpoint=False, dtype=np.int16)
         img_index = random.choice(separate)
         try:
             loc_img_pt = loc_imgs[img_index]
@@ -79,10 +82,10 @@ class CRNetData(VideoData):
 
     @staticmethod
     def _match_img(loc_img_pt):
-        img_dir = os.path.dirname(loc_img_pt).replace("_face", "").replace("_aligned", "")
+        img_dir = os.path.dirname(loc_img_pt).replace("_face", "")
         img_name, _ = os.path.basename(loc_img_pt).split(".")
-        img_id = int(img_name[-3:])
-        glo_img_name = "frame" + str(img_id) + ".jpg"
+        img_id = int(img_name.split("_")[-1])
+        glo_img_name = "frame_" + str(img_id) + ".jpg"
         return os.path.join(img_dir, glo_img_name)
 
     def get_wav_aud(self, index):
@@ -90,6 +93,10 @@ class CRNetData(VideoData):
         audio_name = f"{img_dir_name}.wav.npy"
         wav_path = os.path.join(self.data_root, self.audio_dir, audio_name)
         wav_ft = np.load(wav_path, allow_pickle=True)
+        if wav_ft.shape[-1] < 244832:
+            wav_ft_pad = np.zeros((1, 1, 244832))
+            wav_ft_pad[..., :wav_ft.shape[-1]] = wav_ft
+            return wav_ft_pad
         return wav_ft
 
 
@@ -99,18 +106,18 @@ def make_data_loader(cfg, mode=None):
     if mode == "train":
         dataset = CRNetData(
             "../datasets",
-            "image_data/training_data_01",
-            "image_data/training_data_01_face",
-            "voice_data/training_data_244832",
+            "image_data/train_data",
+            "image_data/train_data_face",
+            "voice_data/train_data",  # default train_data_244832 form librosa
             "annotation/annotation_training.pkl",
             transforms
         )
     else:
         dataset = CRNetData(
             "../datasets",
-            "image_data/validation_data_01",
-            "image_data/validation_data_01_face",
-            "voice_data/validation_data_244832",
+            "image_data/valid_data",
+            "image_data/valid_data_face",
+            "voice_data/valid_data",
             "annotation/annotation_validation.pkl",
             transforms
         )
@@ -124,24 +131,25 @@ def make_data_loader(cfg, mode=None):
 
 
 if __name__ == "__main__":
-    # trans = set_crnet_transform()
-    # data_set = CRNetData(
-    #     "../../../datasets",
-    #     "ImageData/trainingData",
-    #     "VoiceData/trainingData_244832",
-    #     "annotation_training.pkl",
-    #     trans
-    # )
-    # # print(len(data_set))
-    # # print(data_set[2])
+    trans = set_crnet_transform()
+    data_set = CRNetData(
+        "../../../datasets",
+        "image_data/train_data",
+        "image_data/train_data_face",
+        "voice_data/train_data",
+        "annotation/annotation_training.pkl",
+        trans
+    )
+    print(len(data_set))
+    print(data_set[2])
     # for item in data_set[2].values():
     #     print(item.shape)
     # # print(data_set._statistic_img_sample(1))
     # # print(data_set._get_wav_sample(1))
 
-    loader = make_data_loader("", mode="train")
-    for i, sample in enumerate(loader):
-        # if i > 5:
-        #     break
-        for item in sample.values():
-            print(item.shape)
+    # loader = make_data_loader("", mode="train")
+    # for i, sample in enumerate(loader):
+    #     # if i > 5:
+    #     #     break
+    #     for item in sample.values():
+    #         print(item.shape)
