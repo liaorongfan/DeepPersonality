@@ -15,6 +15,7 @@ datasets/102flowers
 datasets/missed_files.txt
 datasets/*.txt
 datasets/annotation
+datasets/va_data
 pretrained/
 /snippet
 

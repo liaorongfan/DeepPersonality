@@ -62,7 +62,7 @@ class SphereFEM(nn.Module):
         self.conv4_3 = nn.Conv2d(512, 512, 3, 1, 1)
         self.relu4_3 = nn.PReLU(512)
 
-        self.fc5 = nn.Linear(512 * 7 * 6, 512)
+        self.fc5 = nn.Linear(512 * 7 * 7, 512)
 
         if pre_trained:
             self.load_pre_trained_model()
@@ -107,23 +107,24 @@ class PersEmoN(nn.Module):
 
     def forward(self, x_p, x_e):
         x_p = self.efm(x_p)
-        p_coherence = self.data_classifier(x_p)
+        p_coherence = F.softmax(self.data_classifier(x_p), 1)
         p_score = self.pam(x_p)
+        p_score = torch.sigmoid(p_score)
 
         x_e = self.efm(x_e)
-        e_coherence = self.data_classifier(x_e)
+        e_coherence = F.softmax(self.data_classifier(x_e), 1)
         e_score = self.eam(x_e)
-
         x_ep = self.ram(e_score)
+        e_score = torch.tanh(e_score)
 
         return p_score, p_coherence, e_score, e_coherence, x_ep
 
 
-
 if __name__ == "__main__":
     fem = PersEmoN(SphereFEM())
-    inputs_p = torch.randn((100, 3, 112, 96))
-    inputs_e = torch.randn((100, 3, 112, 96))
+    inputs_p = torch.randn((100, 3, 112, 112))
+    inputs_e = torch.randn((100, 3, 112, 112))
     out = fem(inputs_p, inputs_e)
     for item in out:
         print(item.shape)
+    print(out[1])

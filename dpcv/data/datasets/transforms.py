@@ -28,7 +28,6 @@ def set_lstm_transform():
     return transforms
 
 
-
 def set_crnet_transform():
     import torchvision.transforms as transforms
     # norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
@@ -52,3 +51,13 @@ def set_audio_visual_transform():
         transforms.ToTensor(),
     ])
     return transforms
+
+
+def set_per_transform():
+    import torchvision.transforms as transforms
+    transforms = transforms.Compose([
+        transforms.CenterCrop((112, 112)),
+        transforms.ToTensor(),
+    ])
+    return transforms
+

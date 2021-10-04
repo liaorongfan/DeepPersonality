@@ -15,7 +15,7 @@ from random import shuffle
 class AudioVisualData(VideoData):
 
     def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None):
-        super().__init__(data_root, img_dir, audio_dir, label_file)
+        super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
 
     def __getitem__(self, idx):
@@ -137,16 +137,16 @@ def make_data_loader(cfg, mode):
         data_set = AudioVisualData(
             "/home/ssd500/personality_data",
             "image_data/train_data",
-            "annotation/annotation_training.pkl",
             "voice_data/train_data",
+            "annotation/annotation_training.pkl",
             trans
         )
     elif mode == "valid":
         data_set = AudioVisualData(
             "/home/ssd500/personality_data",
             "image_data/valid_data",
-            "annotation/annotation_validation.pkl",
             "voice_data/valid_data",
+            "annotation/annotation_validation.pkl",
             trans
         )
     elif mode == "trainval":

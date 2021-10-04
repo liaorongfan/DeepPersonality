@@ -38,7 +38,7 @@ class CRNetData(VideoData):
 
         sample = {
             "glo_img": glo_img, "loc_img": loc_img, "wav_aud": wav_aud,
-            "reg_label": anno_score * 100, "cls_label": anno_cls_encode
+            "reg_label": anno_score, "cls_label": anno_cls_encode
         }
         return sample
 
@@ -60,7 +60,10 @@ class CRNetData(VideoData):
     def get_imgs(self, idx):
 
         glo_img_dir = self.img_dir_ls[idx]
-        loc_img_dir = glo_img_dir.replace("train_data", "train_data_face")
+        if "train" in glo_img_dir:
+            loc_img_dir = glo_img_dir.replace("train_data", "train_data_face")
+        else:
+            loc_img_dir = glo_img_dir.replace("valid_data", "valid_data_face")
         # in case some video doesn't get aligned face images
         if os.path.basename(loc_img_dir) not in self.face_img_dir_ls:
             return self.get_imgs(idx + 1)
