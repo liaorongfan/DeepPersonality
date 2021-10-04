@@ -16,8 +16,8 @@ __C.VALID_IMG_DATA = "image_data/validation_data_01"
 __C.VALID_AUD_DATA = "voiceData/validation_data_244832"
 __C.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
 
-__C.TRAIN_BATCH_SIZE = 32  # 24
-__C.VALID_BATCH_SIZE = 32  # 8
+__C.TRAIN_BATCH_SIZE = 32
+__C.VALID_BATCH_SIZE = 32
 __C.NUM_WORKS = 4
 __C.BETA_1 = 0.5
 __C.BETA_2 = 0.999

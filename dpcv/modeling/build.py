@@ -9,7 +9,6 @@ from dpcv.modeling.module.se_resnet import se_resnet50
 
 def get_model(cfg, cls_num, logger):
     """
-    创建模型
     :param cfg:
     :param cls_num:
     :return:
@@ -20,7 +19,6 @@ def get_model(cfg, cls_num, logger):
             pretrained_state_dict = torch.load(cfg.path_resnet18, map_location="cpu")
             model.load_state_dict(pretrained_state_dict)    # load pretrain model
             logger.info("load pretrained model!")
-        # 修改最后一层
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, cls_num)  # 102
     elif cfg.model_name == "vgg16_bn":
@@ -29,7 +27,6 @@ def get_model(cfg, cls_num, logger):
             pretrained_state_dict = torch.load(cfg.path_vgg16bn, map_location="cpu")
             model.load_state_dict(pretrained_state_dict)    # load pretrain model
             logger.info("load pretrained model!")
-        # 替换网络层
         in_feat_num = model.classifier[6].in_features
         model.classifier[6] = nn.Linear(in_feat_num, cls_num)
     elif cfg.model_name == "se_resnet50":
