@@ -34,6 +34,7 @@ class _CAM:
             target_layer: Optional[str] = None,
             input_shape: Tuple[int, ...] = (3, 224, 224),
             enable_hooks: bool = True,
+            conv1d: bool = False,
     ) -> None:
 
         # Obtain a mapping from module name to module instance for each layer in the model
@@ -63,6 +64,7 @@ class _CAM:
         self._relu = False
         # Model output is used by the extractor
         self._score_used = False
+        self.conv1d = conv1d
 
     def _hook_a(self, module: nn.Module, input: Tensor, output: Tensor) -> None:
         """Activation hook"""
@@ -132,7 +134,10 @@ class _CAM:
         weights = weights[(...,) + (None,) * missing_dims]
 
         # Perform the weighted combination to get the CAM
-        batch_cams = torch.nansum(weights * self.hook_a.squeeze(0), dim=0)  # type: ignore[union-attr]
+        if self.conv1d:
+            batch_cams = torch.nansum(weights * self.hook_a.squeeze(0), dim=1)  # type: ignore[union-attr]
+        else:
+            batch_cams = torch.nansum(weights * self.hook_a.squeeze(0), dim=0)  # type: ignore[union-attr]
 
         if self._relu:
             batch_cams = F.relu(batch_cams, inplace=True)

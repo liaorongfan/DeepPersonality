@@ -255,3 +255,11 @@ class PersEmoTrainer(BiModalTrainer):
             # dataset_output = torch.flatten(torch.stack(output_list, dim=0)).numpy()
             # dataset_label = torch.flatten(torch.stack(label_list, dim=0)).numpy()
         return ocean_acc_avg, ocean_acc, #dataset_output, dataset_label
+
+
+class InterpretAudioTrainer(BiModalTrainer):
+
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        return (data["aud_data"],), data["aud_label"]

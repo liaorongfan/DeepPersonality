@@ -24,13 +24,27 @@ class AudioInterpretNet(nn.Module):
             nn.MaxPool1d(8),
             nn.Dropout(0.5),
         )
-
-        self.fc = nn.Linear(2000, 5)
+        self.gap = nn.AdaptiveAvgPool1d(1)
+        self.fc = nn.Linear(256, 5)
 
     def forward(self, x):
         x = self.conv_block_1(x)
         x = self.conv_block_2(x)
         x = self.conv_block_3(x)
+        x = self.gap(x)
+        x = x.flatten(1)
         x = self.fc(x)
         return x
 
+
+def get_model(cfg, pretrained=False, **kwargs):
+    model = AudioInterpretNet()
+    model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return model
+
+
+if __name__ == "__main__":
+    dumy = torch.randn((2, 1, 30604))
+    model = AudioInterpretNet()
+    out = model(dumy)
+    print(out.shape)

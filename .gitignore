@@ -10,6 +10,7 @@ datasets/image_data
 datasets/portrait
 datasets/unzippedData
 datasets/voice_data
+datasets/raw_voice
 datasets/chalearn
 datasets/102flowers
 datasets/missed_files.txt

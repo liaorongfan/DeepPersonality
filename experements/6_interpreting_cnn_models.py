@@ -105,9 +105,9 @@ def visualize_cam(model_weights, image, trait_id=None):
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    main(args, cfg)
-    # visualize_cam(
-    #     "../results/09-20_00-05/checkpoint_89.pkl",
-    #     "../datasets/image_data/test_data/--Ymqszjv54.000/frame_1.jpg",
-    # )
+    # args = parse_args()
+    # main(args, cfg)
+    visualize_cam(
+        "../results/09-20_00-05/checkpoint_89.pkl",
+        "../datasets/image_data/test_data/--Ymqszjv54.000/frame_200.jpg",
+    )

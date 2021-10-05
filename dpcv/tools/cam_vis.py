@@ -121,3 +121,13 @@ def overlay_mask(img: Image.Image, mask: Image.Image, colormap: str = 'jet', alp
     overlayed_img = Image.fromarray((alpha * np.asarray(img) + (1 - alpha) * overlay).astype(np.uint8))
 
     return overlayed_img
+
+
+def overlay_audio_mask(audio, mask):
+    mask = mask.view(1, -1).numpy()
+    mask = Image.fromarray(mask, mode="F")
+    mask = mask.resize((1, audio.shape[-1]))
+    mask = np.array(mask).T
+    aud_mask = audio.numpy() * mask
+    return aud_mask
+
