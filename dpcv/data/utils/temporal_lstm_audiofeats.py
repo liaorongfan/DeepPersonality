@@ -72,6 +72,8 @@ def audio_preprocess_mfcc(root_path, exe_dir, save_to):
 
 
 if __name__ == "__main__":
+    # pyAudioAnalysis should be installed first https://github.com/tyiannak/pyAudioAnalysis
+    # or you can use the processed data provided by this program
     from pyAudioAnalysis import audioBasicIO
 
     data_root = "/home/ssd500/personality_data/raw_voice/validationData/"

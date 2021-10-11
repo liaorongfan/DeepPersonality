@@ -16,21 +16,22 @@ class WaveProcess(VideoData):
             os.makedirs(save_to)
 
     def __getitem__(self, idx):
-        wav_file = self.img_dir_ls[idx] + ".wav"
+        wav_file = os.path.basename(self.img_dir_ls[idx]) + ".wav"
         self.extract_save(wav_file)
 
     def extract_save(self, wav_file):
+
         wav_path = os.path.join(self.data_root, self.audio_dir, wav_file)
         try:
             wav_ft = librosa.load(wav_path, 16000)[0][None, None, :]  # output_shape = (1, 1, 244832)
             # wav_ft = librosa.load(wav_path, 3279)[0][None, None, :]  # output_shape = (1, 1, 50176)
-            wav_temp = wav_ft
-            if wav_ft.shape[-1] < 244832:
-                wav_temp = np.zeros((1, 1, 244832))
-                wav_temp[..., :wav_ft.shape[-1]] = wav_ft
-            elif wav_ft.shape[-1] > 244832:
-                wav_temp = wav_ft[..., :244832]
-            np.save(f"{self.saved_file}/{wav_file}.npy", wav_temp)
+            # wav_temp = wav_ft
+            # if wav_ft.shape[-1] < 244832:
+            #     wav_temp = np.zeros((1, 1, 244832))
+            #     wav_temp[..., :wav_ft.shape[-1]] = wav_ft
+            # elif wav_ft.shape[-1] > 244832:
+            #     wav_temp = wav_ft[..., :244832]
+            np.save(f"{self.saved_file}/{wav_file}.npy", wav_ft)
         except Exception:
             print("error:", wav_file, wav_path)
 
@@ -43,13 +44,13 @@ class WaveProcess(VideoData):
 
 if __name__ == "__main__":
     from tqdm import tqdm
-    saved_dir = "../../../datasets/VoiceData/validationData_244832"
-    args_train = ("../../../datasets", "ImageData/trainingData", "VoiceData/trainingData", "annotation_training.pkl")
-    args_valid = (
-        "../../../datasets", "ImageData/validationData", "VoiceData/validationData", "annotation_validation.pkl")
+    saved_dir = "../../../datasets/VoiceData/test_data_244832"
+    # args_train = ("../../../datasets", "ImageData/trainingData", "VoiceData/trainingData", "annotation_training.pkl")
+    # args_valid = (
+    #     "../../../datasets", "ImageData/validationData", "VoiceData/validationData", "annotation_validation.pkl")
     args_test = (
-        "../../../datasets", "ImageData/testData", "VoiceData/testData", "annotation_test.pkl")
-    processor = WaveProcess(saved_dir, *args_valid)
+        "../../../datasets", "image_data/test_data", "annotation/annotation_test.pkl", "raw_voice/testData")
+    processor = WaveProcess(saved_dir, *args_test)
     for idx in tqdm(range(len(processor))):
         a = processor[idx]
     # test = processor[1]

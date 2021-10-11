@@ -161,7 +161,7 @@ def make_data_loader(cfg, mode):
         data_set = AudioVisualData(
             "/home/ssd500/personality_data",
             "image_data/test_data",
-            "voice_data/testData",
+            "voice_data/test_data",
             "annotation/annotation_test.pkl",
             trans
         )

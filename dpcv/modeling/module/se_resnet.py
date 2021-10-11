@@ -18,7 +18,7 @@ class SELayer(nn.Module):
         b, c, _, _ = x.size()
         y = self.avg_pool(x).view(b, c)
         y = self.fc(y).view(b, c, 1, 1)
-        return x * y.expand_as(x)  # expand_as把一个tensor变成和函数括号内一样形状的tensor
+        return x * y.expand_as(x)
 
 
 def conv3x3(in_planes, out_planes, stride=1):
@@ -103,29 +103,30 @@ class SEBottleneck(nn.Module):
         return out
 
 
-def se_resnet18(num_classes=1_000):
+def se_resnet18(num_classes=1000):
     """Constructs a ResNet-18 model.
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        num_classes (int): number of classification
     """
     model = ResNet(SEBasicBlock, [2, 2, 2, 2], num_classes=num_classes)
     model.avgpool = nn.AdaptiveAvgPool2d(1)
     return model
 
 
-def se_resnet34(num_classes=1_000):
+def se_resnet34(num_classes=1000):
     """Constructs a ResNet-34 model.
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        num_classes (int): number of classification
     """
     model = ResNet(SEBasicBlock, [3, 4, 6, 3], num_classes=num_classes)
     model.avgpool = nn.AdaptiveAvgPool2d(1)
     return model
 
 
-def se_resnet50(num_classes=1_000, pretrained=False):
+def se_resnet50(num_classes=1000, pretrained=False):
     """Constructs a ResNet-50 model.
     Args:
+        num_classes (int): number of classification
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
     model = ResNet(SEBottleneck, [3, 4, 6, 3], num_classes=num_classes)
@@ -139,17 +140,17 @@ def se_resnet50(num_classes=1_000, pretrained=False):
 def se_resnet101(num_classes=1_000):
     """Constructs a ResNet-101 model.
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        num_classes (int): number of classification
     """
     model = ResNet(SEBottleneck, [3, 4, 23, 3], num_classes=num_classes)
     model.avgpool = nn.AdaptiveAvgPool2d(1)
     return model
 
 
-def se_resnet152(num_classes=1_000):
+def se_resnet152(num_classes=1000):
     """Constructs a ResNet-152 model.
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        num_classes (int): number of classification
     """
     model = ResNet(SEBottleneck, [3, 8, 36, 3], num_classes=num_classes)
     model.avgpool = nn.AdaptiveAvgPool2d(1)
@@ -159,17 +160,18 @@ def se_resnet152(num_classes=1_000):
 if __name__ == "__main__":
 
     import torch
-    model = se_resnet50()
+    se_model = se_resnet50()
 
-    # 替换网络层
-    for name, module in model.named_modules():
-        print("layer name:{}, layer instance:{}".format(name, module))
-    in_feat_num = model.fc.in_features
-    model.fc = nn.Linear(in_feat_num, 102)
+    # for name, module in se_model.named_modules():
+    #     print("layer name:{}, layer instance:{}".format(name, module))
+
+    # modify network change classification layer
+    in_feat_num = se_model.fc.in_features
+    se_model.fc = nn.Linear(in_feat_num, 5)
 
     # forward
-    fake_img = torch.randn((1, 3, 224, 224))  # batchsize * channel * height * width
-    output = model(fake_img)
+    fake_img = torch.randn((1, 3, 224, 224))  # batch_size * channel * height * width
+    output = se_model(fake_img)
     print(output.shape)
 
 

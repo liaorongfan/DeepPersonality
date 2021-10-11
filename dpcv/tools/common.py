@@ -34,3 +34,10 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
+def get_device(gpu=0):
+    device = torch.device(
+        f'cuda:{gpu}'
+        if torch.cuda.is_available() and gpu is not None
+        else 'cpu')
+    return device
