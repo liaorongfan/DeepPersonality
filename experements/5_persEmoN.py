@@ -1,5 +1,3 @@
-import torch
-import torch.nn as nn
 import os
 import torch.optim as optim
 from datetime import datetime
