@@ -1,11 +1,11 @@
 import pprint
+from datetime import datetime
 from abc import ABCMeta, abstractmethod
 from typing import Dict
 from tabulate import tabulate
-
+from dpcv.checkpoint.save import save_model, resume_training
 import torch
 from torch.nn import Module
-
 
 
 class BaseExp(metaclass=ABCMeta):
@@ -77,3 +77,28 @@ class BaseExp(metaclass=ABCMeta):
     #                 except Exception:
     #                     v = ast.literal_eval(v)
     #             setattr(self, k, v)
+
+
+def run(cfg, train_loader, valid_loader, model, loss_f, optimizer, scheduler, trainer, collector, logger, log_dir):
+
+    if cfg.RESUME:
+        model, optimizer, epoch = resume_training(cfg.RESUME, model, optimizer)
+        cfg.START_EPOCH = epoch
+        logger.info(f"resume training from {cfg.RESUME}")
+
+    for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
+        trainer.train(train_loader, model, loss_f, optimizer, epoch)
+        trainer.valid(valid_loader, model, loss_f, epoch)
+        scheduler.step()
+
+        if collector.model_save:
+            save_model(epoch, collector.best_valid_acc, model, optimizer, log_dir, cfg)
+            collector.update_best_epoch(epoch)
+
+    collector.draw_epo_info(cfg.MAX_EPOCH - cfg.START_EPOCH, log_dir)
+    logger.info(
+        "{} done, best acc: {} in :{}".format(
+            datetime.strftime(datetime.now(), '%m-%d_%H-%M'), collector.best_valid_acc, collector.best_epoch
+        )
+    )
+

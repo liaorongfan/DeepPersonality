@@ -1,6 +1,6 @@
 # output dir
 results/
-NNManager/
+ExpManager/
 checkpoints/
 pre_trained_weights/
 # project dirs
@@ -26,6 +26,7 @@ pretrained/
 *.diff
 *.jpg
 *.zip
+*.log
 # compilation and distribution
 __pycache__
 _ext

@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
+import torch
 
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
@@ -97,7 +98,9 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-
+    """
+    Note: that class is not a formal resnet but with a sigmoid function for the last fc layer
+    """
     def __init__(self, block, layers, num_classes=1000, zero_init_residual=False):
         super(ResNet, self).__init__()
         self.inplanes = 64
@@ -160,7 +163,7 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
-
+        x = torch.sigmoid(x)
         return x
 
 

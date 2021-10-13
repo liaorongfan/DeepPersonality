@@ -1,6 +1,7 @@
+import torch
 import torch.nn as nn
 from torch.hub import load_state_dict_from_url
-from torchvision.models import ResNet
+from dpcv.modeling.module.resnet_tv import ResNet
 
 
 class SELayer(nn.Module):
@@ -128,12 +129,23 @@ def se_resnet50(num_classes=1000, pretrained=False):
     Args:
         num_classes (int): number of classification
         pretrained (bool): If True, returns a model pre-trained on ImageNet
+    Note:
+        the resnet use sigmoid function for the out fc layer's output since the
+        personality label in range (0, 1)
     """
     model = ResNet(SEBottleneck, [3, 4, 6, 3], num_classes=num_classes)
     model.avgpool = nn.AdaptiveAvgPool2d(1)
     if pretrained:
-        model.load_state_dict(load_state_dict_from_url(
-            "https://github.com/moskomule/senet.pytorch/releases/download/archive/seresnet50-60a8950a85b2b.pkl"))
+        # model.load_state_dict(load_state_dict_from_url(
+        #     "https://github.com/moskomule/senet.pytorch/releases/download/archive/seresnet50-60a8950a85b2b.pkl"))
+
+        pretrained_dict = load_state_dict_from_url(
+            "https://github.com/moskomule/senet.pytorch/releases/download/archive/seresnet50-60a8950a85b2b.pkl")
+        model_dict = model.state_dict()
+        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+        model_dict.update(pretrained_dict)
+        model.load_state_dict(model_dict)
+    model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 
 
@@ -160,17 +172,17 @@ def se_resnet152(num_classes=1000):
 if __name__ == "__main__":
 
     import torch
-    se_model = se_resnet50()
+    se_model = se_resnet50(5)
 
     # for name, module in se_model.named_modules():
     #     print("layer name:{}, layer instance:{}".format(name, module))
 
     # modify network change classification layer
-    in_feat_num = se_model.fc.in_features
-    se_model.fc = nn.Linear(in_feat_num, 5)
+    # in_feat_num = se_model.fc.in_features
+    # se_model.fc = nn.Linear(in_feat_num, 5)
 
     # forward
-    fake_img = torch.randn((1, 3, 224, 224))  # batch_size * channel * height * width
+    fake_img = torch.randn((1, 3, 224, 224)).cuda()  # batch_size * channel * height * width
     output = se_model(fake_img)
     print(output.shape)
 

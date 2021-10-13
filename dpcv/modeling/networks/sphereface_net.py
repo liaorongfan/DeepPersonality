@@ -120,6 +120,12 @@ class PersEmoN(nn.Module):
         return p_score, p_coherence, e_score, e_coherence, x_ep
 
 
+def get_pers_emo_model():
+    multi_modal_model = PersEmoN(SphereFEM())
+    multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return multi_modal_model
+
+
 if __name__ == "__main__":
     fem = PersEmoN(SphereFEM())
     inputs_p = torch.randn((100, 3, 112, 112))
