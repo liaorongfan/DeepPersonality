@@ -25,13 +25,13 @@ _C.VALID_BATCH_SIZE = 32  # 8
 _C.SHUFFLE = True
 _C.NUM_WORKERS = 0
 _C.START_EPOCH = 0
-_C.MAX_EPOCH = 100
+_C.MAX_EPOCH = 300
 # optimizer config -----------------------------------------------------------------------------------------------------
-_C.LR_INIT = 0.05
+_C.LR_INIT = 0.01
 _C.MOMENTUM = 0.9
 _C.WEIGHT_DECAY = 0.0005
 _C.FACTOR = 0.1
-_C.MILESTONE = [50, 70, 90]
+_C.MILESTONE = [200, 250]
 
 _C.PRE_TRAINED_MODEL = None
 _C.RESUME = None

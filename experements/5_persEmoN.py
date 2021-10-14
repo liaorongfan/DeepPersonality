@@ -17,7 +17,7 @@ from dpcv.tools.exp import run
 def main(args, cfg):
     setup_seed(12345)
     cfg = setup_config(args, cfg)
-    logger, log_dir = make_logger(out_dir=os.path.join("..", cfg.OUTPUT_DIR))
+    logger, log_dir = make_logger(cfg.OUTPUT_DIR)
 
     train_loader = make_data_loader(cfg, mode="train")
     valid_loader = make_data_loader(cfg, mode="valid")
