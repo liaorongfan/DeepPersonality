@@ -10,7 +10,7 @@ _C = cfg
 
 # data set split config ------------------------------------------------------------------------------------------------
 _C.DATA_ROOT = "../datasets"
-_C.OUTPUT_DIR = "../results/hrnet"
+_C.OUTPUT_DIR = "../results/swin_transformer"
 _C.TRAIN_IMG_DATA = "image_data/train_data"
 _C.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 _C.VALID_IMG_DATA = "image_data/valid_data"
@@ -20,7 +20,7 @@ _C.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 _C.TRAINVAL_IMG_DATA = ["image_data/train_data", "image_data/valid_data"]
 _C.TRAINVAL_LABEL_DATA = ["annotation/annotation_training.pkl", "annotation/annotation_validation.pkl"]
 # data loader config ---------------------------------------------------------------------------------------------------
-_C.TRAIN_BATCH_SIZE = 16  # 24
+_C.TRAIN_BATCH_SIZE = 24  # 24
 _C.VALID_BATCH_SIZE = 8  # 8
 _C.SHUFFLE = True
 _C.NUM_WORKERS = 4

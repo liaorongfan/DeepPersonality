@@ -1,7 +1,7 @@
 import torch.optim as optim
 import torch.nn as nn
-from dpcv.config.hrnet_cls_cfg import cfg
-from dpcv.modeling.networks.hr_net_cls import get_hr_net_model
+from dpcv.config.swin_transformer_cfg import cfg
+from dpcv.modeling.networks.swin_transformer import get_swin_transformer_model
 from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
 from dpcv.tools.common import parse_args
@@ -19,7 +19,7 @@ def main(args, cfg):
     train_loader = make_data_loader(cfg, mode="train")
     valid_loader = make_data_loader(cfg, mode="valid")
 
-    model = get_hr_net_model()
+    model = get_swin_transformer_model()
     loss_f = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)

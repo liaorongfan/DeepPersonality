@@ -146,7 +146,7 @@ class DeepBimodalTrain(BimodalLSTMTrain):
         return (inputs,), labels
 
 
-class InterpretDanTrain(BiModalTrainer):
+class ImageModalTrainer(BiModalTrainer):
     """
     for interpret cnn model, only image data used
     """

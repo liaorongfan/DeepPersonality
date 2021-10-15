@@ -3,7 +3,7 @@ import os
 import torch.optim as optim
 from datetime import datetime
 from dpcv.config.interpret_dan_cfg import cfg
-from dpcv.engine.bi_modal_trainer import InterpretDanTrain
+from dpcv.engine.bi_modal_trainer import ImageModalTrainer
 from dpcv.modeling.networks.dan import get_dan_model
 from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
@@ -29,7 +29,7 @@ def main(args, cfg):
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 
     collector = TrainSummary()
-    trainer = InterpretDanTrain(cfg, collector, logger)
+    trainer = ImageModalTrainer(cfg, collector, logger)
 
     start_epoch = cfg.START_EPOCH
     if cfg.RESUME:
