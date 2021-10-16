@@ -21,6 +21,7 @@ def main(args, cfg):
 
     model = get_swin_transformer_model()
     loss_f = nn.MSELoss()
+
     optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 

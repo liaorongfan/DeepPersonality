@@ -24,7 +24,6 @@ def main(args, cfg):
     valid_loader = make_data_loader(cfg, mode="valid")
 
     model = get_crnet_model(only_train_guider=True)
-
     loss_f = {"ce_loss": one_hot_CELoss, "bell_loss": BellLoss(), "mse_loss": nn.MSELoss(), "l1_loss": nn.L1Loss()}
 
     optimizer_fir = optim.SGD(model.parameters(), lr=cfg.LR_INIT, momentum=cfg.MOMENTUM, weight_decay=cfg.WEIGHT_DECAY)

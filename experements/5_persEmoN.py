@@ -24,6 +24,7 @@ def main(args, cfg):
 
     model = get_pers_emo_model()
     loss_f = per_emo_loss
+
     optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 

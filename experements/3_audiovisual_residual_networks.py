@@ -28,6 +28,8 @@ def main(args, cfg):
     test_loader = make_data_loader(cfg, mode="test")
 
     model = get_audiovisual_resnet_model()
+    loss_f = nn.L1Loss()
+
     if cfg.TEST_ONLY:
         model = load_model(model, cfg.WEIGHT)
         # ocean_acc_avg, ocean_acc, dataset_output, dataset_label = trainer.test(test_loader, model)
@@ -37,7 +39,6 @@ def main(args, cfg):
         logger.info(f"average acc of OCEAN:{ocean_acc},\taverage acc [{ocean_acc_avg}]\npcc and p_value:{pcc}")
         return
 
-    loss_f = nn.L1Loss()
     optimizer = optim.SGD(model.parameters(), lr=0.005, weight_decay=1e-4)
     # optimizer = optim.Adam(model.parameters(), lr=0.0002, betas=(0.5, 0.999), eps=1e-8)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
