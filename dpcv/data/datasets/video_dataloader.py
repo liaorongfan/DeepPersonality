@@ -50,7 +50,7 @@ def get_training_data(
     return training_data
 
 
-def get_normalize_method(mean, std, no_mean_norm, no_std_norm):
+def get_normalize_method(mean, std, no_mean_norm=False, no_std_norm=False):
     if no_mean_norm:
         if no_std_norm:
             return Normalize([0, 0, 0], [1, 1, 1])
@@ -63,44 +63,21 @@ def get_normalize_method(mean, std, no_mean_norm, no_std_norm):
             return Normalize(mean, std)
 
 
-def get_train_loader(opt, model_parameters):
-    assert opt.train_crop in ['random', 'corner', 'center']
-    spatial_transform = []
-    if opt.train_crop == 'random':
-        spatial_transform.append(
-            RandomResizedCrop(
-                opt.sample_size, (opt.train_crop_min_scale, 1.0),
-                (opt.train_crop_min_ratio, 1.0 / opt.train_crop_min_ratio)))
-    elif opt.train_crop == 'corner':
-        scales = [1.0]
-        scale_step = 1 / (2**(1 / 4))
-        for _ in range(1, 5):
-            scales.append(scales[-1] * scale_step)
-        spatial_transform.append(MultiScaleCornerCrop(opt.sample_size, scales))
-    elif opt.train_crop == 'center':
-        spatial_transform.append(Resize(opt.sample_size))
-        spatial_transform.append(CenterCrop(opt.sample_size))
-    normalize = get_normalize_method(opt.mean, opt.std, opt.no_mean_norm,
-                                     opt.no_std_norm)
-    if not opt.no_hflip:
-        spatial_transform.append(RandomHorizontalFlip())
-    if opt.colorjitter:
-        spatial_transform.append(ColorJitter())
-    spatial_transform.append(ToTensor())
-    if opt.input_type == 'flow':
-        spatial_transform.append(PickFirstChannels(n=2))
-    spatial_transform.append(ScaleValue(opt.value_scale))
-    spatial_transform.append(normalize)
+def get_train_loader(video_path, annotation_path, batch_size, num_workers):
+    normalize = get_normalize_method(
+        [0.4345, 0.4051, 0.3775],
+        [0.2768, 0.2713, 0.2737],
+    )
+    spatial_transform = [
+        Resize(112),
+        CenterCrop(112),
+        RandomHorizontalFlip(),
+        ToTensor(),
+        normalize,
+    ]
     spatial_transform = Compose(spatial_transform)
 
-    assert opt.train_t_crop in ['random', 'center']
-    temporal_transform = []
-    if opt.sample_t_stride > 1:
-        temporal_transform.append(TemporalSubsampling(opt.sample_t_stride))
-    if opt.train_t_crop == 'random':
-        temporal_transform.append(TemporalRandomCrop(opt.sample_duration))
-    elif opt.train_t_crop == 'center':
-        temporal_transform.append(TemporalCenterCrop(opt.sample_duration))
+    temporal_transform = [TemporalCenterCrop(16)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     loader = VideoLoader(image_name_formatter)
@@ -108,25 +85,28 @@ def get_train_loader(opt, model_parameters):
     video_path_formatter = (
         lambda root_path, label, video_id: root_path / label / video_id)
     train_data = VideoDataset(
-        opt.video_path,
-        opt.annotation_path,
+        video_path,
+        annotation_path,
         'training',
         spatial_transform=spatial_transform,
         temporal_transform=temporal_transform,
         video_loader=loader,
         video_path_formatter=video_path_formatter
     )
-    # train_data = get_training_data(
-    #     opt.video_path,
-    #     opt.annotation_path,
-    #     spatial_transform,
-    #     temporal_transform,
-    # )
 
     train_loader = torch.utils.data.DataLoader(
         train_data,
-        batch_size=opt.batch_size,
+        batch_size=batch_size,
         shuffle=True,
-        num_workers=opt.n_threads,
+        num_workers=num_workers,
     )
     return train_loader
+
+
+if __name__ == "__main__":
+    opt = ""
+    data_loader = get_train_loader()
+    for i, (inputs, targets) in enumerate(data_loader):
+        if i > 2:
+            break
+        print(inputs.shape)

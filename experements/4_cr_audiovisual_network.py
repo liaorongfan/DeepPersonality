@@ -16,9 +16,7 @@ from dpcv.modeling.loss.cr_loss import one_hot_CELoss, BellLoss
 def main(args, cfg):
     setup_seed(12345)
     cfg = setup_config(args, cfg)
-    res_dir = os.path.join("..", "results")
-    logger, log_dir = make_logger(res_dir)
-    logger.info("file_name: \n{}\n".format(__file__))
+    logger, log_dir = make_logger(cfg.OUTPUT_DIR)
 
     train_loader = make_data_loader(cfg, mode="train")
     valid_loader = make_data_loader(cfg, mode="valid")
