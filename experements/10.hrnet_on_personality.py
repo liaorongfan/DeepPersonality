@@ -6,7 +6,7 @@ from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
 from dpcv.tools.common import parse_args
 from dpcv.evaluation.summary import TrainSummary
-from dpcv.data.datasets.interpret_dan_data import make_data_loader
+from dpcv.data.datasets.video_frame_data import make_data_loader
 from dpcv.engine.bi_modal_trainer import ImageModalTrainer
 from dpcv.tools.exp import run
 

@@ -6,7 +6,7 @@ from pathlib import Path
 import torch
 from torch.utils.data import DataLoader
 from dpcv.data.datasets.bi_modal_data import VideoData
-from dpcv.data.datasets.transforms import set_per_transform
+from data.transforms.transform import set_per_transform
 
 
 class PersEmoNData(VideoData):

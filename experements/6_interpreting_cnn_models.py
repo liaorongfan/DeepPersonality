@@ -11,7 +11,7 @@ from dpcv.tools.logger import make_logger
 from dpcv.checkpoint.save import save_model, resume_training
 from dpcv.tools.common import parse_args
 from dpcv.evaluation.summary import TrainSummary
-from dpcv.data.datasets.interpret_dan_data import make_data_loader
+from dpcv.data.datasets.video_frame_data import make_data_loader
 
 
 def main(args, cfg):

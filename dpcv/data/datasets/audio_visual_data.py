@@ -8,7 +8,7 @@ import random
 import pickle
 import numpy as np
 from dpcv.data.datasets.bi_modal_data import VideoData
-from dpcv.data.datasets.transforms import set_audio_visual_transform
+from data.transforms.transform import set_audio_visual_transform
 from random import shuffle
 
 

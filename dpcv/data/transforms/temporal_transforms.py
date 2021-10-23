@@ -1,3 +1,6 @@
+"""
+code modified form https://github.com/kenshohara/3D-ResNets-PyTorch.git
+"""
 import random
 import math
 

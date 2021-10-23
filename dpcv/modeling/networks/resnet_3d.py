@@ -229,11 +229,11 @@ def get_3d_resnet_model(model_depth, **kwargs):
     elif model_depth == 152:
         model = ResNet(Bottleneck, [3, 8, 36, 3], get_inplanes(), **kwargs)
 
-    return model
+    return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
 if __name__ == "__main__":
     model = get_3d_resnet_model(50)
-    xin = torch.randn(2, 3, 16, 112, 112)
+    xin = torch.randn(4, 3, 16, 224, 224)
     y = model(xin)
     print(y.shape)

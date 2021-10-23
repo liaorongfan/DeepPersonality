@@ -1,12 +1,12 @@
-import torch.optim as optim
 import torch.nn as nn
-from dpcv.config.senet_cfg import cfg
-from dpcv.modeling.module.se_resnet import se_resnet50
+import torch.optim as optim
+from dpcv.config.resnet_3d_cfg import cfg
+from dpcv.modeling.networks.resnet_3d import get_3d_resnet_model
 from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
 from dpcv.tools.common import parse_args
 from dpcv.evaluation.summary import TrainSummary
-from dpcv.data.datasets.video_frame_data import make_data_loader
+from dpcv.data.datasets.resnet3d_data import make_data_loader
 from dpcv.engine.bi_modal_trainer import ImageModalTrainer
 from dpcv.tools.exp import run
 
@@ -19,7 +19,7 @@ def main(args, cfg):
     train_loader = make_data_loader(cfg, mode="train")
     valid_loader = make_data_loader(cfg, mode="valid")
 
-    model = se_resnet50(5)
+    model = get_3d_resnet_model(50)
     loss_f = nn.MSELoss()
 
     optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)
