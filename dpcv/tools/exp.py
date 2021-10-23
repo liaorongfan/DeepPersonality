@@ -3,8 +3,8 @@ from datetime import datetime
 from abc import ABCMeta, abstractmethod
 from typing import Dict
 from tabulate import tabulate
-from dpcv.checkpoint.save import save_model, resume_training
 import torch
+from dpcv.checkpoint.save import save_model, resume_training, load_model
 from torch.nn import Module
 
 
@@ -79,7 +79,16 @@ class BaseExp(metaclass=ABCMeta):
     #             setattr(self, k, v)
 
 
-def run(cfg, train_loader, valid_loader, model, loss_f, optimizer, scheduler, trainer, collector, logger, log_dir):
+def run(cfg, data_loader, model, loss_f, optimizer, scheduler, trainer, collector, logger, log_dir):
+
+    if cfg.TEST_ONLY:
+        from scipy.stats import pearsonr
+        model = load_model(model, cfg.WEIGHT)
+        ocean_acc_avg, ocean_acc, dataset_output, dataset_label = trainer.test(data_loader["test"], model)
+        # ocean_acc_avg, ocean_acc = trainer.test(test_loader, model)
+        pcc = pearsonr(dataset_output, dataset_label)
+        logger.info(f"average acc of OCEAN:{ocean_acc},\taverage acc [{ocean_acc_avg}]\npcc and p_value:{pcc}")
+        return
 
     if cfg.RESUME:
         model, optimizer, epoch = resume_training(cfg.RESUME, model, optimizer)
@@ -87,8 +96,8 @@ def run(cfg, train_loader, valid_loader, model, loss_f, optimizer, scheduler, tr
         logger.info(f"resume training from {cfg.RESUME}")
 
     for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
-        trainer.train(train_loader, model, loss_f, optimizer, epoch)
-        trainer.valid(valid_loader, model, loss_f, epoch)
+        trainer.train(data_loader["train"], model, loss_f, optimizer, epoch)
+        trainer.valid(data_loader["valid"], model, loss_f, epoch)
         scheduler.step()
 
         if collector.model_save:

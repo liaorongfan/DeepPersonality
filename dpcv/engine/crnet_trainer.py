@@ -1,4 +1,5 @@
 import torch
+from tqdm import tqdm
 from dpcv.engine.bi_modal_trainer import BiModalTrainer
 
 
@@ -105,6 +106,29 @@ class CRNetTrainer(BiModalTrainer):
                 float(self.clt.epoch_valid_acc),
                 self.clt.valid_ocean_acc)
         )
+
+    def test(self, data_loader, model):
+        model.eval()
+        with torch.no_grad():
+            ocean_acc = []
+            label_list = []
+            output_list = []
+            for i, data in tqdm(enumerate(data_loader)):
+                inputs, cls_label, labels = self.data_fmt(data)
+                _, outputs = model(*inputs)
+
+                outputs = outputs.cpu().detach()
+                labels = labels.cpu().detach()
+                output_list.append(outputs)
+                label_list.append(labels)
+                ocean_acc_batch = (1 - torch.abs(outputs - labels)).mean(dim=0)
+                ocean_acc.append(ocean_acc_batch)
+            ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
+            ocean_acc_avg = ocean_acc.mean()
+            dataset_output = torch.flatten(torch.stack(output_list, dim=0)).numpy()
+            dataset_label = torch.flatten(torch.stack(label_list, dim=0)).numpy()
+
+        return ocean_acc_avg, ocean_acc, dataset_output, dataset_label
 
     def data_fmt(self, data):
         for k, v in data.items():

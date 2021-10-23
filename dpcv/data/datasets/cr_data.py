@@ -59,8 +59,10 @@ class CRNetData(VideoData):
         glo_img_dir = self.img_dir_ls[idx]
         if "train" in glo_img_dir:
             loc_img_dir = glo_img_dir.replace("train_data", "train_data_face")
-        else:
+        elif "valid" in glo_img_dir:
             loc_img_dir = glo_img_dir.replace("valid_data", "valid_data_face")
+        else:
+            loc_img_dir = glo_img_dir.replace("test_data", "test_data_face")
         # in case some video doesn't get aligned face images
         if os.path.basename(loc_img_dir) not in self.face_img_dir_ls:
             return self.get_imgs(idx + 1)
@@ -101,7 +103,7 @@ class CRNetData(VideoData):
 
 
 def make_data_loader(cfg, mode=None):
-    assert (mode in ["train", "valid"]), " 'mode' only supports 'train' and 'valid'"
+    assert (mode in ["train", "valid", "test"]), " 'mode' only supports 'train' and 'valid'"
     transforms = set_crnet_transform()
     if mode == "train":
         dataset = CRNetData(
@@ -112,7 +114,7 @@ def make_data_loader(cfg, mode=None):
             "annotation/annotation_training.pkl",
             transforms
         )
-    else:
+    elif mode == "valid":
         dataset = CRNetData(
             "../datasets",
             "image_data/valid_data",
@@ -121,11 +123,21 @@ def make_data_loader(cfg, mode=None):
             "annotation/annotation_validation.pkl",
             transforms
         )
+    else:
+        dataset = CRNetData(
+            "../datasets",
+            "image_data/test_data",
+            "image_data/test_data_face",
+            "voice_data/test_data",
+            "annotation/annotation_test.pkl",
+            transforms
+        )
     data_loader = DataLoader(
         dataset=dataset,
         batch_size=24,
         shuffle=True,
-        num_workers=4  # cfg.NUM_WORKS
+        num_workers=4,  # cfg.NUM_WORKS
+        drop_last=True,
     )
     return data_loader
 
