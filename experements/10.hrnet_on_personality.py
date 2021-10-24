@@ -18,7 +18,8 @@ def main(args, cfg):
 
     data_loader = {
         "train": make_data_loader(cfg, mode="train"),
-        "valid": make_data_loader(cfg, mode="valid")
+        "valid": make_data_loader(cfg, mode="valid"),
+        "test": make_data_loader(cfg, mode="test"),
     }
 
     model = get_hr_net_model()

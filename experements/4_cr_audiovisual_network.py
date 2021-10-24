@@ -39,12 +39,10 @@ def main(args, cfg):
         model.train_regressor()
         model = load_model(model, cfg.WEIGHT)
         ocean_acc_avg, ocean_acc, dataset_output, dataset_label = trainer.test(test_loader, model)
-        # ocean_acc_avg, ocean_acc = trainer.test(test_loader, model)
         pcc = pearsonr(dataset_output, dataset_label)
         logger.info(f"average acc of OCEAN:{ocean_acc},\taverage acc [{ocean_acc_avg}]\npcc and p_value:{pcc}")
         return
 
-    # start_epoch = cfg.START_EPOCH
     if cfg.RESUME:
         model, optimizer[1], epoch = resume_training(cfg.RESUME, model, optimizer[1])
         cfg.START_EPOCH = epoch

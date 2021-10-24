@@ -9,7 +9,8 @@ cfg = EasyDict()
 _C = cfg
 # if only test or resume training or train from scratch ----------------------------------------------------------------
 _C.TEST_ONLY = True
-_C.WEIGHT = "../results/cr_net/10-22_01-38/checkpoint_85.pkl"
+_C.WEIGHT = "../results/cr_net/exp4_02-02/checkpoint_48.pkl"
+# _C.WEIGHT = "../results/cr_net/10-22_01-38/checkpoint_85.pkl"
 # __C.RESUME = "../results/07-04_20-13/checkpoint_14.pkl"
 _C.RESUME = None
 # data related config --------------------------------------------------------------------------------------------------

@@ -7,7 +7,8 @@ sys.path.append(os.path.join(BASE_DIR, '..'))
 
 cfg = EasyDict()
 _C = cfg
-_C.TEST_ONLY = False
+_C.TEST_ONLY = True
+_C.WEIGHT = "../results/hrnet/10-23_19-13/checkpoint_295.pkl"
 # data set split config ------------------------------------------------------------------------------------------------
 _C.DATA_ROOT = "../datasets"
 _C.OUTPUT_DIR = "../results/hrnet"

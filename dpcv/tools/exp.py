@@ -85,7 +85,6 @@ def run(cfg, data_loader, model, loss_f, optimizer, scheduler, trainer, collecto
         from scipy.stats import pearsonr
         model = load_model(model, cfg.WEIGHT)
         ocean_acc_avg, ocean_acc, dataset_output, dataset_label = trainer.test(data_loader["test"], model)
-        # ocean_acc_avg, ocean_acc = trainer.test(test_loader, model)
         pcc = pearsonr(dataset_output, dataset_label)
         logger.info(f"average acc of OCEAN:{ocean_acc},\taverage acc [{ocean_acc_avg}]\npcc and p_value:{pcc}")
         return
