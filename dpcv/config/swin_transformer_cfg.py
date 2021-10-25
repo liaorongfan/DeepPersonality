@@ -7,7 +7,7 @@ sys.path.append(os.path.join(BASE_DIR, '..'))
 
 cfg = EasyDict()
 _C = cfg
-
+_C.TEST_ONLY = False
 # data set split config ------------------------------------------------------------------------------------------------
 _C.DATA_ROOT = "../datasets"
 _C.OUTPUT_DIR = "../results/swin_transformer"

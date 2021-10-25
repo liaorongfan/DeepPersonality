@@ -148,13 +148,25 @@ class DeepBimodalTrain(BimodalLSTMTrain):
 
 class ImageModalTrainer(BiModalTrainer):
     """
-    for interpret cnn model, only image data used
+    for model only image data used
     """
     def data_fmt(self, data):
         for k, v in data.items():
             data[k] = v.to(self.device)
         inputs, labels = data["image"], data["label"]
         return (inputs,), labels
+
+
+class ImageListTrainer(BiModalTrainer):
+    """
+    for interpret cnn model, only image data used
+    """
+    def data_fmt(self, data):
+        inputs, labels = data["image"], data["label"]
+        inputs = [item.to(self.device) for item in inputs]
+        labels = labels.to(self.device)
+        return (inputs,), labels
+
 
 
 class PersEmoTrainer(BiModalTrainer):

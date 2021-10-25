@@ -640,11 +640,16 @@ class SlowFast(nn.Module):
         return x
 
 
-if __name__ == "__main__":
+def get_slow_fast_model():
     slow_fast_model = SlowFast(slow_fast_cfg)
+    return slow_fast_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+if __name__ == "__main__":
+    model = SlowFast(slow_fast_cfg)
     # print(slow_fast_model)
     xin_1 = torch.randn(2, 3, 16, 224, 224)
     xin_2 = torch.randn(2, 3, 64, 224, 224)
     x = [xin_1, xin_2]
-    y = slow_fast_model(x)
+    y = model(x)
     print(y.shape)
