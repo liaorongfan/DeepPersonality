@@ -174,15 +174,18 @@ class TSN2D(BaseRecognizer):
         # cls_score = self.cls_head(x)
         # cls_score.detach().cpu().numpy()
         losses = dict()
-        if self.with_cls_head:
-            cls_score = self.cls_head(x)
-            # gt_label = gt_label.squeeze()
-            loss_cls = self.cls_head.loss(cls_score, gt_label)
-            losses.update(loss_cls)
+        # if self.with_cls_head:
+        cls_score = self.cls_head(x)
+        # gt_label = gt_label.squeeze()
+        loss_cls = self.cls_head.loss(cls_score, gt_label)
+        losses.update(loss_cls)
         if self.necks is not None:
             if aux_losses is not None:
                 losses.update(aux_losses)
-        return losses
+        loss_value = 0
+        for value in losses.values():
+            loss_value += value
+        return loss_value, cls_score
         # return cls_score
 
     def forward_test(
@@ -254,6 +257,12 @@ class TSN2D(BaseRecognizer):
             return prob
 
 
+def get_tpn_model():
+
+    model = TSN2D(**args)
+    return model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
 if __name__ == "__main__":
 
     model = TSN2D(**args)
@@ -262,4 +271,6 @@ if __name__ == "__main__":
     input = {"num_modalities": [1], "img_group_0": xin, "img_meta": None, "gt_label": label}
     y = model(**input)
     print(y)
+
+
 

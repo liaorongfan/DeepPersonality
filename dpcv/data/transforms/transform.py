@@ -16,6 +16,32 @@ def set_transform_op():
     return transforms
 
 
+def set_tpn_transform_op():
+    import torchvision.transforms as transforms
+    norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
+    norm_std = [0.229, 0.224, 0.225]
+    transforms = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop((256, 256)),
+        transforms.ToTensor(),
+        transforms.Normalize(norm_mean, norm_std)
+    ])
+    return transforms
+
+
+def set_vat_transform_op():
+    import torchvision.transforms as transforms
+    norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
+    norm_std = [0.229, 0.224, 0.225]
+    transforms = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop((224, 112)),
+        transforms.ToTensor(),
+        transforms.Normalize(norm_mean, norm_std)
+    ])
+    return transforms
+
+
 def set_lstm_transform():
     import torchvision.transforms as transforms
     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images

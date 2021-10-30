@@ -1,31 +1,23 @@
 import torch
 from torch.utils.data import DataLoader
-from data.transforms.transform import set_transform_op
+from data.transforms.transform import set_tpn_transform_op
 from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
 
 
-class SlowFastData(VideoFrameSegmentData):
+class TPNData(VideoFrameSegmentData):
 
     def __getitem__(self, index):
 
         img = self.get_image_data(index)
-        frame_list = self.pack_pathway_output(img)
         label = self.get_ocean_label(index)
-        return {"image": frame_list, "label": torch.as_tensor(label)}
+        return {"image": img, "label": torch.as_tensor(label)}
 
-    @staticmethod
-    def pack_pathway_output(frames):
-        fast_pathway = frames
-        slow_pathway = torch.index_select(
-            frames,
-            1,
-            torch.linspace(
-                0, frames.shape[1] - 1, frames.shape[1] // 4
-            ).long(),
-        )
-        frame_list = [slow_pathway, fast_pathway]
-
-        return frame_list
+    def _loading(self, path, frame_indices):
+        clip = self.loader(path, frame_indices)
+        if self.spa_trans is not None:
+            clip = [self.spa_trans(img) for img in clip]
+        clip = torch.stack(clip, 0)
+        return clip
 
 
 def make_data_loader(cfg, mode="train"):
@@ -34,13 +26,13 @@ def make_data_loader(cfg, mode="train"):
     from dpcv.data.datasets.common import VideoLoader
 
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
-    spatial_transform = set_transform_op()
-    temporal_transform = [TemporalRandomCrop(64)]
+    spatial_transform = set_tpn_transform_op()
+    temporal_transform = [TemporalRandomCrop(8)]
     temporal_transform = TemporalCompose(temporal_transform)
     video_loader = VideoLoader()
 
     if mode == "train":
-        data_set = SlowFastData(
+        data_set = TPNData(
             cfg.DATA_ROOT,
             cfg.TRAIN_IMG_DATA,
             cfg.TRAIN_LABEL_DATA,
@@ -49,7 +41,7 @@ def make_data_loader(cfg, mode="train"):
             temporal_transform,
         )
     elif mode == "valid":
-        data_set = SlowFastData(
+        data_set = TPNData(
             cfg.DATA_ROOT,
             cfg.VALID_IMG_DATA,
             cfg.VALID_LABEL_DATA,
@@ -58,7 +50,7 @@ def make_data_loader(cfg, mode="train"):
             temporal_transform,
         )
     elif mode == "trainval":
-        data_set = SlowFastData(
+        data_set = TPNData(
             cfg.DATA_ROOT,
             cfg.TRAINVAL_IMG_DATA,
             cfg.TRAINVAL_LABEL_DATA,
@@ -67,7 +59,7 @@ def make_data_loader(cfg, mode="train"):
             temporal_transform,
         )
     else:
-        data_set = SlowFastData(
+        data_set = TPNData(
             cfg.DATA_ROOT,
             cfg.TEST_IMG_DATA,
             cfg.TEST_LABEL_DATA,
@@ -86,7 +78,7 @@ def make_data_loader(cfg, mode="train"):
 
 if __name__ == "__main__":
     import os
-    from dpcv.config.interpret_dan_cfg import cfg
+    from dpcv.config.tpn_cfg import cfg
 
     os.chdir("../../")
 
@@ -100,4 +92,6 @@ if __name__ == "__main__":
 
     data_loader = make_data_loader(cfg, mode="valid")
     for i, item in enumerate(data_loader):
-        print(item["image"][0].shape, item["image"][1].shape, item["label"].shape)
+        print(item["image"].shape, item["label"].shape)
+        if i > 5:
+            break
