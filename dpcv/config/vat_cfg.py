@@ -8,7 +8,12 @@ sys.path.append(os.path.join(BASE_DIR, '..'))
 cfg = EasyDict()
 _C = cfg
 
-_C.TEST_ONLY = False
+
+# test related setting  ------------------------------------------------------------------------------------------------
+_C.TEST_ONLY = True
+_C.WEIGHT = "../results/vat_net/10-30_14-41/checkpoint_71.pkl"
+_C.COMPUTE_PCC = True
+_C.COMPUTE_CCC = True
 # data set split config ------------------------------------------------------------------------------------------------
 _C.DATA_ROOT = "../datasets/"
 _C.OUTPUT_DIR = "../results/vat_net"
