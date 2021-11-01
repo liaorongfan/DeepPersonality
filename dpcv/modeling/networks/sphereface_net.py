@@ -133,4 +133,4 @@ if __name__ == "__main__":
     out = fem(inputs_p, inputs_e)
     for item in out:
         print(item.shape)
-    print(out[1])
+    # print(out[1])

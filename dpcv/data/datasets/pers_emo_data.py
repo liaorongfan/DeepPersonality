@@ -4,6 +4,7 @@ import os
 from PIL import Image
 from pathlib import Path
 import torch
+import numpy as np
 from torch.utils.data import DataLoader
 from dpcv.data.datasets.bi_modal_data import VideoData
 from data.transforms.transform import set_per_transform
@@ -50,8 +51,11 @@ class PersEmoNData(VideoData):
 
     def per_img_sample(self, img_dir):
         imgs = glob.glob(f"{img_dir}/*.jpg")
-        random.shuffle(imgs)
-        imgs = imgs[:10]
+
+        imgs = sorted(imgs, key=lambda x: int(Path(x).stem[5:]))
+        separate = np.linspace(0, len(imgs), 11, endpoint=False, dtype=np.int16)
+        imgs_idx = [random.randint(separate[idx], separate[idx + 1]) for idx in range(10)]
+        imgs = [imgs[idx] for idx in imgs_idx]
         imgs = [Image.open(img) for img in imgs]
         labs = [self.get_per_label(img_dir)] * 10
         return imgs, labs
@@ -148,18 +152,19 @@ if __name__ == "__main__":
         per_trans=per_trans,
         emo_trans=emo_trans,
     )
-    # print(dataset[2])
+    for k, v in dataset[2].items():
+        print(v.shape)
 
-    data_loader = DataLoader(
-        dataset=dataset,
-        batch_size=1,
-        shuffle=True,
-        num_workers=0  # cfg.NUM_WORKS
-    )
-
-    for i, item in enumerate(data_loader):
-        # if i >= 1:
-        #     break
-        print("::--------------> ", i)
-        for k, v in item.items():
-            print(k, v.squeeze().shape)
+    # data_loader = DataLoader(
+    #     dataset=dataset,
+    #     batch_size=1,
+    #     shuffle=True,
+    #     num_workers=0  # cfg.NUM_WORKS
+    # )
+    #
+    # for i, item in enumerate(data_loader):
+    #     # if i >= 1:
+    #     #     break
+    #     print("::--------------> ", i)
+    #     for k, v in item.items():
+    #         print(k, v.squeeze().shape)
