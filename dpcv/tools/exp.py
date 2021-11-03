@@ -9,13 +9,13 @@ def run(cfg, data_loader, model, loss_f, optimizer, scheduler, trainer, collecto
         logger.info("Test only mode")
         model = load_model(model, cfg.WEIGHT)
         ocean_acc_avg, ocean_acc, dataset_output, dataset_label = trainer.test(data_loader["test"], model)
-        logger.info(f"average acc of OCEAN:{ocean_acc},\taverage acc [{ocean_acc_avg}]")
+        logger.info("acc: {} mean: {}".format(ocean_acc, ocean_acc_avg))
         if cfg.COMPUTE_PCC:
-            pcc_dict = compute_pcc(dataset_output, dataset_label)
-            logger.info(f"pcc and p_value:\n{pcc_dict}")
+            pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label)
+            logger.info(f"pcc: {pcc_dict} mean: {pcc_mean}")
         if cfg.COMPUTE_CCC:
-            ccc_dict = compute_ccc(dataset_output, dataset_label)
-            logger.info(f"ccc:\n{ccc_dict}")
+            ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label)
+            logger.info(f"ccc: {ccc_dict} mean: {ccc_mean}")
         return
 
     if cfg.RESUME:

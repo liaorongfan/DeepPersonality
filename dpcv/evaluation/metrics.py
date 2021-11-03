@@ -49,19 +49,26 @@ def compute_pcc(outputs, labels):
     from scipy.stats import pearsonr
     keys = ['O', 'C', 'E', 'A', 'N']
     pcc_dic = {}
+    pcc_sum = 0
     for i, key in enumerate(keys):
         res = pearsonr(outputs[:, i], labels[:, i])
-        pcc_dic[key] = {"pcc": np.round(res[0], 4), "p-value": np.round(res[1], 4)}
-    return pcc_dic
+        # res[1] records p-value
+        pcc_dic[key] = np.round(res[0], 4)
+        pcc_sum += res[0]
+    mean = np.round((pcc_sum / 5), 4)
+    return pcc_dic, mean
 
 
 def compute_ccc(outputs, labels):
     keys = ['O', 'C', 'E', 'A', 'N']
     ccc_dic = {}
+    ccc_sum = 0
     for i, key in enumerate(keys):
         res = concordance_correlation_coefficient(labels[:, i], outputs[:, i])
         ccc_dic[key] = np.round(res, 4)
-    return ccc_dic
+        ccc_sum += res
+    mean = np.round((ccc_sum / 5), 4)
+    return ccc_dic, mean
 
 
 if __name__ == "__main__":

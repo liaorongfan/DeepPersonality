@@ -30,9 +30,9 @@ _C.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 _C.TRAIN_BATCH_SIZE = 1  # 24
 _C.VALID_BATCH_SIZE = 1  # 8
 _C.SHUFFLE = True
-_C.NUM_WORKS = 0
+_C.NUM_WORKS = 4
 _C.START_EPOCH = 0
-_C.MAX_EPOCH = 500
+_C.MAX_EPOCH = 1000
 # optimizer config -----------------------------------------------------------------------------------------------------
 _C.LR_INIT = 0.01
 _C.MOMENTUM = 0.9
@@ -42,5 +42,5 @@ _C.MILESTONE = [200, 250]
 
 _C.PRE_TRAINED_MODEL = None
 # _C.RESUME = None
-_C.RESUME = "../results/per_emo/10-31_16-47/checkpoint_283.pkl"
+_C.RESUME = "../results/per_emo/11-03_01-42/checkpoint_782.pkl"
 _C.LOG_INTERVAL = 20

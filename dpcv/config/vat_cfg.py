@@ -38,7 +38,7 @@ _C.MOMENTUM = 0.9
 _C.WEIGHT_DECAY = 0.0005
 _C.FACTOR = 0.1
 _C.MILESTONE = [80, 90]
-
+# resume training ------------------------------------------------------------------------------------------------------
 _C.RESUME = None
 
 _C.LOG_INTERVAL = 20

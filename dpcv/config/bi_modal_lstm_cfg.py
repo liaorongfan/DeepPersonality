@@ -6,24 +6,44 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(BASE_DIR, '..'))
 
 cfg = EasyDict()
-__C = cfg
+_C = cfg
 
-__C.DATA_ROOT = "../datasets/"
-__C.TRAIN_IMG_DATA = "image_data/train_data_face"
-__C.TRAIN_AUD_DATA = "voice_data/voice_mfcc/train_data_mfcc"
-__C.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
-__C.VALID_IMG_DATA = "image_data/valid_data_face"
-__C.VALID_AUD_DATA = "voice_data/voice_mfcc/valid_data_mfcc"
-__C.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
-__C.RESUME = None
-__C.TRAIN_BATCH_SIZE = 64
-__C.VALID_BATCH_SIZE = 32
-__C.NUM_WORKS = 4
-__C.LR_INIT = 0.05
-__C.MOMENTUM = 0.9
-__C.WEIGHT_DECAY = 5e-4
-__C.FACTOR = 1
-__C.MILESTONE = [120, 150, 180]
-__C.MAX_EPOCH = 200
-__C.START_EPOCH = 0
-__C.LOG_INTERVAL = 20
+# test related setting  ------------------------------------------------------------------------------------------------
+_C.TEST_ONLY = False
+_C.WEIGHT = "../results/audio_visual_resnet/10-01_20-10/checkpoint_76.pkl"
+_C.COMPUTE_PCC = True
+_C.COMPUTE_CCC = True
+
+# data set split config ------------------------------------------------------------------------------------------------
+_C.OUTPUT_DIR = "../results/bi_modal_lstm"
+_C.DATA_ROOT = "../datasets/"
+
+_C.TRAIN_IMG_DATA = "image_data/train_data_face"
+_C.VALID_IMG_DATA = "image_data/valid_data_face"
+_C.TEST_IMG_DATA = "image_data/test_data_face"
+
+_C.TRAIN_AUD_DATA = "voice_data/voice_mfcc/train_data_mfcc"
+_C.VALID_AUD_DATA = "voice_data/voice_mfcc/valid_data_mfcc"
+_C.TEST_AUD_DATA = "voice_data/voice_mfcc/test_data_mfcc"
+
+_C.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
+_C.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
+_C.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
+
+# data loader config ---------------------------------------------------------------------------------------------------
+_C.TRAIN_BATCH_SIZE = 64
+_C.VALID_BATCH_SIZE = 32
+_C.NUM_WORKS = 4
+_C.START_EPOCH = 0
+_C.MAX_EPOCH = 200
+
+# optimizer config -----------------------------------------------------------------------------------------------------
+_C.LR_INIT = 0.05
+_C.MOMENTUM = 0.9
+_C.WEIGHT_DECAY = 5e-4
+_C.FACTOR = 1
+_C.MILESTONE = [120, 150, 180]
+
+# resume training ------------------------------------------------------------------------------------------------------
+_C.RESUME = None
+_C.LOG_INTERVAL = 20

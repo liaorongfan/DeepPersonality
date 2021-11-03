@@ -92,7 +92,7 @@ class TemporalData(VideoData):
 
 
 def make_data_loader(cfg, mode):
-    assert (mode in ["train", "valid"]), " 'mode' only supports 'train' and 'valid'"
+    assert (mode in ["train", "valid", "test"]), " 'mode' only supports 'train' 'valid' 'test' "
     transforms = set_lstm_transform()
     if mode == "train":
         dataset = TemporalData(
@@ -103,12 +103,21 @@ def make_data_loader(cfg, mode):
             transforms
         )
         batch_size = cfg.TRAIN_BATCH_SIZE
-    else:
+    elif mode == "valid":
         dataset = TemporalData(
             cfg.DATA_ROOT,
             cfg.VALID_IMG_DATA,
             cfg.VALID_AUD_DATA,
             cfg.VALID_LABEL_DATA,
+            transforms
+        )
+        batch_size = cfg.VALID_BATCH_SIZE
+    else:
+        dataset = TemporalData(
+            cfg.DATA_ROOT,
+            cfg.TEST_IMG_DATA,
+            cfg.TEST_AUD_DATA,
+            cfg.TEST_LABEL_DATA,
             transforms
         )
         batch_size = cfg.VALID_BATCH_SIZE
@@ -123,7 +132,7 @@ def make_data_loader(cfg, mode):
 
 
 if __name__ == "__main__":
-    trans = set_transform_op()
+    trans = set_lstm_transform()
     data_set = TemporalData(
         "../../../datasets",
         "image_data/train_data_face",

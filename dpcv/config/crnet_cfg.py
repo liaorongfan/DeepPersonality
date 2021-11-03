@@ -17,10 +17,12 @@ _C.RESUME = None
 _C.DATA_ROOT = "DeepPersonality/datasets/"
 _C.OUTPUT_DIR = "../results/cr_net"
 _C.TRAIN_IMG_DATA = "image_data/training_data"
-_C.TRAIN_AUD_DATA = "voice_data/training_data"
-_C.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 _C.VALID_IMG_DATA = "image_data/validation_data"
+
+_C.TRAIN_AUD_DATA = "voice_data/training_data"
 _C.VALID_AUD_DATA = "voiceData/validation_data"
+
+_C.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 _C.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
 # data loader related config -------------------------------------------------------------------------------------------
 _C.TRAIN_BATCH_SIZE = 32

@@ -1,5 +1,6 @@
 import torch
 from tqdm import tqdm
+import numpy as np
 
 
 class BiModalTrainer(object):
@@ -97,7 +98,12 @@ class BiModalTrainer(object):
             dataset_output = torch.cat(output_list, dim=0).numpy()
             dataset_label = torch.cat(label_list, dim=0).numpy()
 
-        return ocean_acc_avg, ocean_acc, dataset_output, dataset_label
+        ocean_acc_avg_rand = np.round(ocean_acc_avg.astype("float64"), 4)
+        keys = ["O", "C", "E", "A", "N"]
+        ocean_acc_dict = {}
+        for i, k in enumerate(keys):
+            ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
+        return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label
 
     def data_fmt(self, data):
         for k, v in data.items():

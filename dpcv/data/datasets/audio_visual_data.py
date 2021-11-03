@@ -135,34 +135,34 @@ def make_data_loader(cfg, mode):
     trans = set_audio_visual_transform()
     if mode == "train":
         data_set = AudioVisualData(
-            "/home/ssd500/personality_data",
-            "image_data/train_data",
-            "voice_data/train_data",
-            "annotation/annotation_training.pkl",
+            cfg.DATA_ROOT,  # "/home/ssd500/personality_data",
+            cfg.TRAIN_IMG_DATA,  # "image_data/train_data",
+            cfg.TRAIN_AUD_DATA,  # "voice_data/train_data",
+            cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
             trans
         )
     elif mode == "valid":
         data_set = AudioVisualData(
-            "/home/ssd500/personality_data",
-            "image_data/valid_data",
-            "voice_data/valid_data",
-            "annotation/annotation_validation.pkl",
+            cfg.DATA_ROOT,  # "/home/ssd500/personality_data",
+            cfg.VALID_IMG_DATA,  # "image_data/valid_data",
+            cfg.VALID_AUD_DATA,  # "voice_data/valid_data",
+            cfg.VALID_LABEL_DATA,  # annotation/annotation_validation.pkl",
             trans
         )
     elif mode == "trainval":
         data_set = AudioVisualData(
-            "../datasets",
-            ["image_data/training_data_01", "image_data/validation_data_01"],
-            ["voice_data/trainingData", "voice_data/validationData"],
-            ["annotation/annotation_training.pkl", "annotation/annotation_validation.pkl"],
+            cfg.DATA_ROOT,  # "../datasets",
+            cfg.TRAINVAL_IMG_DATA,  # ["image_data/training_data_01", "image_data/validation_data_01"],
+            cfg.TRANIVAL_AUD_DATA,  # ["voice_data/trainingData", "voice_data/validationData"],
+            cfg.TRAINVAL_LABEL_DATA,  # ["annotation/annotation_training.pkl", "annotation/annotation_validation.pkl"],
             trans,
         )
     elif mode == "test":
         data_set = AudioVisualData(
-            "/home/ssd500/personality_data",
-            "image_data/test_data",
-            "voice_data/test_data",
-            "annotation/annotation_test.pkl",
+            cfg.DATA_ROOT,  # "/home/ssd500/personality_data",
+            cfg.TEST_IMG_DATA,  # "image_data/test_data",
+            cfg.TEST_AUD_DATA,  # "voice_data/test_data",
+            cfg.TEST_LABEL_DATA,  # "annotation/annotation_test.pkl",
             trans
         )
     else:
