@@ -10,7 +10,7 @@ from dpcv.data.datasets.cr_data import make_data_loader
 from dpcv.tools.common import parse_args, setup_config, setup_seed
 from dpcv.evaluation.summary import TrainSummary
 from dpcv.modeling.loss.cr_loss import one_hot_CELoss, BellLoss
-from scipy.stats import pearsonr
+from dpcv.evaluation.metrics import compute_ccc, compute_pcc
 
 
 def main(args, cfg):
@@ -39,8 +39,11 @@ def main(args, cfg):
         model.train_regressor()
         model = load_model(model, cfg.WEIGHT)
         ocean_acc_avg, ocean_acc, dataset_output, dataset_label = trainer.test(test_loader, model)
-        pcc = pearsonr(dataset_output, dataset_label)
-        logger.info(f"average acc of OCEAN:{ocean_acc},\taverage acc [{ocean_acc_avg}]\npcc and p_value:{pcc}")
+        pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label)
+        ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label)
+        logger.info(f"acc: {ocean_acc} mean: {ocean_acc_avg}")
+        logger.info(f"pcc: {pcc_dict} mean: {pcc_mean}")
+        logger.info(f"acc: {ccc_dict} mean: {ccc_mean}")
         return
 
     if cfg.RESUME:

@@ -10,7 +10,7 @@ _C = cfg
 
 # test related setting  ------------------------------------------------------------------------------------------------
 _C.TEST_ONLY = False
-_C.WEIGHT = "../results/audio_visual_resnet/10-01_20-10/checkpoint_76.pkl"
+_C.WEIGHT = "../results/bi_modal_lstm/11-04_22-46/checkpoint_21.pkl"
 _C.COMPUTE_PCC = True
 _C.COMPUTE_CCC = True
 

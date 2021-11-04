@@ -111,11 +111,21 @@ def make_data_loader(cfg, mode=None):
             per_trans=per_trans,
             emo_trans=emo_trans,
         )
-    if mode == "valid":
+    elif mode == "valid":
         dataset = PersEmoNData(
             cfg.DATA_ROOT,  # "../datasets/",
             cfg.VALID_IMG_DATA,  # "image_data/valid_data_face",
             cfg.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            cfg.VA_DATA,  # "va_data/cropped_aligned",
+            cfg.VA_VALID_LABEL,  # "va_data/va_label/VA_Set/Validation_Set",
+            per_trans=per_trans,
+            emo_trans=emo_trans,
+        )
+    else:
+        dataset = PersEmoNData(
+            cfg.DATA_ROOT,  # "../datasets/",
+            cfg.TEST_IMG_DATA,  # "image_data/valid_data_face",
+            cfg.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
             cfg.VA_DATA,  # "va_data/cropped_aligned",
             cfg.VA_VALID_LABEL,  # "va_data/va_label/VA_Set/Validation_Set",
             per_trans=per_trans,

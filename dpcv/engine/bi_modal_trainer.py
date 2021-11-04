@@ -83,7 +83,7 @@ class BiModalTrainer(object):
             ocean_acc = []
             label_list = []
             output_list = []
-            for i, data in tqdm(enumerate(data_loader)):
+            for data in tqdm(data_loader):
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
 
@@ -334,9 +334,7 @@ class PersEmoTrainer(BiModalTrainer):
             ocean_acc = []
             label_list = []
             output_list = []
-            for i, data in tqdm(enumerate(data_loader)):
-                # inputs, labels = self.data_fmt(data)
-                # outputs = model(*inputs)
+            for data in tqdm(data_loader):
 
                 inputs, p_labels, e_labels = self.data_fmt(data)
                 p_score, p_co, e_score, e_co, x_ep = model(*inputs)
@@ -348,9 +346,9 @@ class PersEmoTrainer(BiModalTrainer):
                 ocean_acc.append(ocean_acc_batch)
             ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
             ocean_acc_avg = ocean_acc.mean()
-            # dataset_output = torch.flatten(torch.stack(output_list, dim=0)).numpy()
-            # dataset_label = torch.flatten(torch.stack(label_list, dim=0)).numpy()
-        return ocean_acc_avg, ocean_acc, #dataset_output, dataset_label
+            dataset_output = torch.stack(output_list, dim=0).view(-1, 5).numpy()
+            dataset_label = torch.stack(label_list, dim=0).view(-1, 5).numpy()
+        return ocean_acc_avg, ocean_acc, dataset_output, dataset_label
 
 
 class InterpretAudioTrainer(BiModalTrainer):
