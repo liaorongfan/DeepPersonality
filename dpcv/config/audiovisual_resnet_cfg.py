@@ -13,6 +13,7 @@ _C.TEST_ONLY = True
 _C.WEIGHT = "../results/audio_visual_resnet/10-01_20-10/checkpoint_76.pkl"
 _C.COMPUTE_PCC = True
 _C.COMPUTE_CCC = True
+
 # data set split config ------------------------------------------------------------------------------------------------
 _C.OUTPUT_DIR = "../results/audio_visual_resnet"
 _C.DATA_ROOT = "../datasets/"

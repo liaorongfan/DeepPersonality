@@ -64,20 +64,26 @@ class InterpretAudio(VideoData):
 def make_data_loader(cfg, mode="train"):
     if mode == "train":
         dataset = InterpretAudio(
-            "../datasets",
-            "raw_voice/trainingData",
-            "annotation/annotation_training.pkl",
+            cfg.DATA_ROOT,  # "../datasets",
+            cfg.TRAIN_AUD_DATA,  # "raw_voice/trainingData",
+            cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
         )
     elif mode == "valid":
         dataset = InterpretAudio(
-            "../datasets",
-            "raw_voice/validationData",
-            "annotation/annotation_validation.pkl",
+            cfg.DATA_ROOT,  # "../datasets",
+            cfg.VALID_AUD_DATA,  # "raw_voice/validationData",
+            cfg.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+        )
+    elif mode == "test":
+        dataset = InterpretAudio(
+            cfg.DATA_ROOT,  # "../datasets",
+            cfg.TEST_AUD_DATA,  # "raw_voice/testData",
+            cfg.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
         )
     else:
-        raise ValueError("mode must be one of 'train' or 'valid' ")
+        raise ValueError("mode must be one of 'train' or 'valid' or test' ")
 
-    data_loader = DataLoader(dataset, batch_size=128, num_workers=4)
+    data_loader = DataLoader(dataset, batch_size=128, num_workers=cfg.NUM_WORKERS)
 
     return data_loader
 

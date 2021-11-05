@@ -1,28 +1,28 @@
 import torch
 import torch.nn as nn
-import os
 import torch.optim as optim
-from datetime import datetime
 import torchaudio
-from dpcv.config.interpret_dan_cfg import cfg
+from dpcv.config.interpret_aud_cfg import cfg
 from dpcv.engine.bi_modal_trainer import InterpretAudioTrainer
 from dpcv.modeling.networks.audio_interpretability_net import get_model
 from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
-from dpcv.checkpoint.save import save_model, resume_training
 from dpcv.tools.common import parse_args
 from dpcv.evaluation.summary import TrainSummary
 from dpcv.data.datasets.interpretability_audio_data import make_data_loader, norm
+from dpcv.tools.exp import run
 
 
 def main(args, cfg):
     setup_seed(12345)
     cfg = setup_config(args, cfg)
-    logger, log_dir = make_logger(out_dir=os.path.join("..", "results"))
-    logger.info("file_name: \n{}\n".format(__file__))
+    logger, log_dir = make_logger(cfg.OUTPUT_DIR)
 
-    train_loader = make_data_loader(cfg, mode="train")
-    valid_loader = make_data_loader(cfg, mode="valid")
+    data_loader = {
+        "train": make_data_loader(cfg, mode="train"),
+        "valid": make_data_loader(cfg, mode="valid"),
+        "test": make_data_loader(cfg, mode="test")
+    }
 
     model = get_model(cfg)
     loss_f = nn.MSELoss()
@@ -33,26 +33,7 @@ def main(args, cfg):
     collector = TrainSummary()
     trainer = InterpretAudioTrainer(cfg, collector, logger)
 
-    if cfg.RESUME:
-        model, optimizer, epoch = resume_training(cfg.RESUME, model, optimizer)
-        cfg.START_EPOCH = epoch
-        logger.info(f"resume training from {cfg.RESUME}")
-
-    for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
-        trainer.train(train_loader, model, loss_f, optimizer, epoch)
-        trainer.valid(valid_loader, model, loss_f, epoch)
-        scheduler.step()
-        if collector.model_save:
-            save_model(epoch, collector.best_valid_acc, model, optimizer, log_dir, cfg)
-            collector.update_best_epoch(epoch)
-
-    collector.draw_epo_info(cfg.MAX_EPOCH - cfg.START_EPOCH, log_dir)
-    logger.info(
-        "{} done, best acc: {} in :{}".format(
-            datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
-            collector.best_valid_acc,
-            collector.best_epoch,
-        ))
+    run(cfg, data_loader, model, loss_f, optimizer, scheduler, trainer, collector, logger, log_dir)
 
 
 def audio_process(aud_file):
@@ -100,15 +81,15 @@ def visualize_cam(model_weights, image, trait_id=None):
 
 
 if __name__ == "__main__":
-    # args = parse_args()
-    # main(args, cfg)
-    wav_ls = ["../datasets/raw_voice/validationData/0mym1CooiTE.005.wav",
-              "../datasets/raw_voice/validationData/0uCqd5hZcyI.004.wav",
-              "../datasets/raw_voice/validationData/1pm5uoU85FI.004.wav",
-              "../datasets/raw_voice/validationData/2rV3Ibtdnvs.001.wav",
-              "../datasets/raw_voice/validationData/5KHOpRCxnwQ.001.wav"]
-    for wav in wav_ls:
-        visualize_cam(
-            "../results/10-05_21-03/checkpoint_21.pkl",
-            wav,
-        )
+    args = parse_args()
+    main(args, cfg)
+    # wav_ls = ["../datasets/raw_voice/validationData/0mym1CooiTE.005.wav",
+    #           "../datasets/raw_voice/validationData/0uCqd5hZcyI.004.wav",
+    #           "../datasets/raw_voice/validationData/1pm5uoU85FI.004.wav",
+    #           "../datasets/raw_voice/validationData/2rV3Ibtdnvs.001.wav",
+    #           "../datasets/raw_voice/validationData/5KHOpRCxnwQ.001.wav"]
+    # for wav in wav_ls:
+    #     visualize_cam(
+    #         "../results/interpret_aud/checkpoint_4.pkl",
+    #         wav,
+    #     )
