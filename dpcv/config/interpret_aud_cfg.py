@@ -9,8 +9,8 @@ cfg = EasyDict()
 _C = cfg
 
 # test related setting  ------------------------------------------------------------------------------------------------
-_C.TEST_ONLY = False
-_C.WEIGHT = "../results/interpret_aud/11-06_00-09/checkpoint_1.pkl"
+_C.TEST_ONLY = True
+_C.WEIGHT = "../results/interpret_aud/11-06_00-35/checkpoint_21.pkl"
 _C.COMPUTE_PCC = True
 _C.COMPUTE_CCC = True
 

@@ -81,15 +81,15 @@ def visualize_cam(model_weights, image, trait_id=None):
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    main(args, cfg)
-    # wav_ls = ["../datasets/raw_voice/validationData/0mym1CooiTE.005.wav",
-    #           "../datasets/raw_voice/validationData/0uCqd5hZcyI.004.wav",
-    #           "../datasets/raw_voice/validationData/1pm5uoU85FI.004.wav",
-    #           "../datasets/raw_voice/validationData/2rV3Ibtdnvs.001.wav",
-    #           "../datasets/raw_voice/validationData/5KHOpRCxnwQ.001.wav"]
-    # for wav in wav_ls:
-    #     visualize_cam(
-    #         "../results/interpret_aud/checkpoint_4.pkl",
-    #         wav,
-    #     )
+    # args = parse_args()
+    # main(args, cfg)
+    wav_ls = ["../datasets/raw_voice/validationData/0mym1CooiTE.005.wav",
+              "../datasets/raw_voice/validationData/0uCqd5hZcyI.004.wav",
+              "../datasets/raw_voice/validationData/1pm5uoU85FI.004.wav",
+              "../datasets/raw_voice/validationData/2rV3Ibtdnvs.001.wav",
+              "../datasets/raw_voice/validationData/5KHOpRCxnwQ.001.wav"]
+    for wav in wav_ls:
+        visualize_cam(
+            "../results/interpret_aud/11-06_00-35/checkpoint_21.pkl",
+            wav,
+        )

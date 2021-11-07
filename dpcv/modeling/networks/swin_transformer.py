@@ -13,51 +13,51 @@ import torch
 import torch.nn as nn
 import torch.utils.checkpoint as checkpoint
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
-from yacs.config import CfgNode as CN
+# from yacs.config import CfgNode as CN
+from easydict import EasyDict as CN
 
 
-_C = CN()
+def swin_config():
+    _C = CN()
 
-_C.DATA = CN()
-# Input image size
-_C.DATA.IMG_SIZE = 224
+    _C.DATA = CN()
+    # Input image size
+    _C.DATA.IMG_SIZE = 224
 
-_C.MODEL = CN()
-# Model type
-_C.MODEL.TYPE = 'swin'
-# Model name
-_C.MODEL.NAME = 'swin_tiny_patch4_window7_224'
-# Checkpoint to resume, could be overwritten by command line argument
-_C.MODEL.RESUME = ''
-# Number of classes, overwritten in data preparation
-_C.MODEL.NUM_CLASSES = 5
-# Dropout rate
-_C.MODEL.DROP_RATE = 0.0
-# Drop path rate
-_C.MODEL.DROP_PATH_RATE = 0.1
-# Label Smoothing
-_C.MODEL.LABEL_SMOOTHING = 0.1
+    _C.MODEL = CN()
+    # Model type
+    _C.MODEL.TYPE = 'swin'
+    # Model name
+    _C.MODEL.NAME = 'swin_small_patch4_window7_224'
+    # Checkpoint to resume, could be overwritten by command line argument
+    _C.MODEL.RESUME = ''
+    # Number of classes, overwritten in data preparation
+    _C.MODEL.NUM_CLASSES = 5
+    # Dropout rate
+    _C.MODEL.DROP_RATE = 0.0
+    # Drop path rate
+    _C.MODEL.DROP_PATH_RATE = 0.3
+    # Label Smoothing
+    _C.MODEL.LABEL_SMOOTHING = 0.1
 
-# Swin Transformer parameters
-_C.MODEL.SWIN = CN()
-_C.MODEL.SWIN.PATCH_SIZE = 4
-_C.MODEL.SWIN.IN_CHANS = 3
-_C.MODEL.SWIN.EMBED_DIM = 96
-_C.MODEL.SWIN.DEPTHS = [2, 2, 6, 2]
-_C.MODEL.SWIN.NUM_HEADS = [3, 6, 12, 24]
-_C.MODEL.SWIN.WINDOW_SIZE = 7
-_C.MODEL.SWIN.MLP_RATIO = 4.
-_C.MODEL.SWIN.QKV_BIAS = True
-_C.MODEL.SWIN.QK_SCALE = None
-_C.MODEL.SWIN.APE = False
-_C.MODEL.SWIN.PATCH_NORM = True
+    # Swin Transformer parameters
+    _C.MODEL.SWIN = CN()
+    _C.MODEL.SWIN.PATCH_SIZE = 4
+    _C.MODEL.SWIN.IN_CHANS = 3
+    _C.MODEL.SWIN.EMBED_DIM = 96
+    _C.MODEL.SWIN.DEPTHS = [2, 2, 18, 2]
+    _C.MODEL.SWIN.NUM_HEADS = [3, 6, 12, 24]
+    _C.MODEL.SWIN.WINDOW_SIZE = 7
+    _C.MODEL.SWIN.MLP_RATIO = 4.
+    _C.MODEL.SWIN.QKV_BIAS = True
+    _C.MODEL.SWIN.QK_SCALE = None
+    _C.MODEL.SWIN.APE = False
+    _C.MODEL.SWIN.PATCH_NORM = True
 
-_C.TRAIN = CN()
-_C.TRAIN.USE_CHECKPOINT = False
+    _C.TRAIN = CN()
+    _C.TRAIN.USE_CHECKPOINT = False
 
-config = _C.clone()
-
-
+    return _C
 
 
 class Mlp(nn.Module):
@@ -636,6 +636,7 @@ class SwinTransformer(nn.Module):
 
 
 def get_swin_transformer_model():
+    config = swin_config()
     model = SwinTransformer(
         img_size=config.DATA.IMG_SIZE,
         patch_size=config.MODEL.SWIN.PATCH_SIZE,
@@ -659,6 +660,6 @@ def get_swin_transformer_model():
 
 if __name__ == "__main__":
     model = get_swin_transformer_model()
-    xin = torch.randn(8, 3, 224, 224)
+    xin = torch.randn(8, 3, 224, 224).cuda()
     y = model(xin)
     print(y)

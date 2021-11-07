@@ -16,8 +16,11 @@ def main(args, cfg):
     cfg = setup_config(args, cfg)
     logger, log_dir = make_logger(cfg.OUTPUT_DIR)
 
-    train_loader = make_data_loader(cfg, mode="train")
-    valid_loader = make_data_loader(cfg, mode="valid")
+    data_loader = {
+        "train": make_data_loader(cfg, mode="train"),
+        "valid": make_data_loader(cfg, mode="valid"),
+        "test": make_data_loader(cfg, mode="test"),
+    }
 
     model = se_resnet50(5)
     loss_f = nn.MSELoss()
@@ -28,7 +31,7 @@ def main(args, cfg):
     collector = TrainSummary()
     trainer = ImageModalTrainer(cfg, collector, logger)
 
-    run(cfg, train_loader, valid_loader, model, loss_f, optimizer, scheduler, trainer, collector, logger, log_dir)
+    run(cfg, data_loader, model, loss_f, optimizer, scheduler, trainer, collector, logger, log_dir)
 
 
 if __name__ == "__main__":

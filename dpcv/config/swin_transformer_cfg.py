@@ -7,7 +7,11 @@ sys.path.append(os.path.join(BASE_DIR, '..'))
 
 cfg = EasyDict()
 _C = cfg
-_C.TEST_ONLY = False
+# test related setting  ------------------------------------------------------------------------------------------------
+_C.TEST_ONLY = True
+_C.WEIGHT = "../results/swin_transformer/11-06_22-35/checkpoint_392.pkl"
+_C.COMPUTE_PCC = True
+_C.COMPUTE_CCC = True
 # data set split config ------------------------------------------------------------------------------------------------
 _C.DATA_ROOT = "../datasets"
 _C.OUTPUT_DIR = "../results/swin_transformer"
@@ -25,15 +29,15 @@ _C.VALID_BATCH_SIZE = 8  # 8
 _C.SHUFFLE = True
 _C.NUM_WORKERS = 4
 _C.START_EPOCH = 0
-_C.MAX_EPOCH = 300
+_C.MAX_EPOCH = 400
 # optimizer config -----------------------------------------------------------------------------------------------------
 _C.LR_INIT = 0.05
 _C.MOMENTUM = 0.9
 _C.WEIGHT_DECAY = 0.0005
 _C.FACTOR = 0.1
-_C.MILESTONE = [200, 250]
+_C.MILESTONE = [180, ]
 
 _C.PRE_TRAINED_MODEL = None
-_C.RESUME = None
-
+_C.RESUME = "../results/swin_transformer/11-06_12-53/checkpoint_196.pkl"
+# _C.RESUME = None
 _C.LOG_INTERVAL = 20
