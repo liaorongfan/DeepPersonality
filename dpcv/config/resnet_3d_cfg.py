@@ -8,8 +8,11 @@ sys.path.append(os.path.join(BASE_DIR, '..'))
 cfg = EasyDict()
 _C = cfg
 
-
-_C.TEST_ONLY = False
+# test related setting  ------------------------------------------------------------------------------------------------
+_C.TEST_ONLY = True
+_C.WEIGHT = "../results/resnet3d/11-08_21-00/checkpoint_94.pkl"
+_C.COMPUTE_PCC = True
+_C.COMPUTE_CCC = True
 
 # data set split config ------------------------------------------------------------------------------------------------
 _C.DATA_ROOT = "../datasets/"
@@ -30,7 +33,7 @@ _C.NUM_WORKERS = 4  # for debug in pycharm set to 0
 _C.START_EPOCH = 0
 _C.MAX_EPOCH = 100
 # optimizer config -----------------------------------------------------------------------------------------------------
-_C.LR_INIT = 0.001
+_C.LR_INIT = 0.01
 _C.MOMENTUM = 0.9
 _C.WEIGHT_DECAY = 0.0005
 _C.FACTOR = 0.1

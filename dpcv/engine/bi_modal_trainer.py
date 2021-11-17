@@ -252,6 +252,34 @@ class TPNTrainer(BiModalTrainer):
                 self.clt.valid_ocean_acc)
         )
 
+    def test(self, data_loader, model):
+        model.eval()
+        with torch.no_grad():
+            ocean_acc = []
+            label_list = []
+            output_list = []
+            for data in tqdm(data_loader):
+                inputs, labels = self.data_fmt(data)
+                loss, outputs = model(**inputs)
+
+                outputs = outputs.cpu().detach()
+                labels = labels.cpu().detach()
+                output_list.append(outputs)
+                label_list.append(labels)
+                ocean_acc_batch = (1 - torch.abs(outputs - labels)).mean(dim=0)
+                ocean_acc.append(ocean_acc_batch)
+            ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
+            ocean_acc_avg = ocean_acc.mean()
+            dataset_output = torch.cat(output_list, dim=0).numpy()
+            dataset_label = torch.cat(label_list, dim=0).numpy()
+
+        ocean_acc_avg_rand = np.round(ocean_acc_avg.astype("float64"), 4)
+        keys = ["O", "C", "E", "A", "N"]
+        ocean_acc_dict = {}
+        for i, k in enumerate(keys):
+            ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
+        return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label
+
 
 class PersEmoTrainer(BiModalTrainer):
 

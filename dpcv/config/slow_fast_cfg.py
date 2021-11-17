@@ -8,7 +8,11 @@ sys.path.append(os.path.join(BASE_DIR, '..'))
 cfg = EasyDict()
 _C = cfg
 
-_C.TEST_ONLY = False
+# test related setting  ------------------------------------------------------------------------------------------------
+_C.TEST_ONLY = True
+_C.WEIGHT = "../results/slow_fast/11-10_00-10/checkpoint_3.pkl"
+_C.COMPUTE_PCC = True
+_C.COMPUTE_CCC = True
 # data set split config ------------------------------------------------------------------------------------------------
 _C.DATA_ROOT = "../datasets/"
 _C.OUTPUT_DIR = "../results/slow_fast"
@@ -26,14 +30,14 @@ _C.VALID_BATCH_SIZE = 2  # 8
 _C.SHUFFLE = True
 _C.NUM_WORKERS = 4
 _C.START_EPOCH = 0
-_C.MAX_EPOCH = 100
+_C.MAX_EPOCH = 300
 # optimizer config -----------------------------------------------------------------------------------------------------
 _C.LR_INIT = 0.01
 _C.MOMENTUM = 0.9
 _C.WEIGHT_DECAY = 0.0005
 _C.FACTOR = 0.1
-_C.MILESTONE = [80, 90]
+_C.MILESTONE = [250, 280]
 
 _C.RESUME = None
 
-_C.LOG_INTERVAL = 10
+_C.LOG_INTERVAL = 20
