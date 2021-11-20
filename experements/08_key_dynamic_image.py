@@ -33,7 +33,7 @@ def get_example_data(shape=224):
 
     # Download an example image from wikimedia.
 
-    img = Image.open("../datasets/both.png")
+    img = Image.open("../datasets/demo/both.png")
 
     # Pre-process the image and convert into a tensor
     transform = torchvision.transforms.Compose([

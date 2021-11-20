@@ -170,12 +170,6 @@ def video2img_test(zipfile_test, saved_to="image_data/test_data"):
             except OSError:
                 print('Error: Creating directory of data')
 
-            # Setting the frame limit to 100
-            # cap.set(cv2.CAP_PROP_FRAME_COUNT, 101)
-            # length = 101
-            # cap.set(cv2.CAP_PROP_FPS, 25)
-            # length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) / 6 * 5)
-
             length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
             if length == 0:
                 print("escape:", file_name)

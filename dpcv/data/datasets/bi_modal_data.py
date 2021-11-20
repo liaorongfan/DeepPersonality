@@ -30,33 +30,14 @@ class VideoData(Dataset):
             img_dir_path:(List[Str, ]) a list contains the path of image files
         """
         if isinstance(data_dir, list):
-            img_dir_path = []
+            data_dir_path = []
             for dir_i in data_dir:
-                img_dir_ls = os.listdir(os.path.join(self.data_root, dir_i))
-                img_dir_path.extend([os.path.join(self.data_root, dir_i, item) for item in img_dir_ls])
+                data_dir_ls = os.listdir(os.path.join(self.data_root, dir_i))
+                data_dir_path.extend([os.path.join(self.data_root, dir_i, item) for item in data_dir_ls])
         else:
-            img_dir_ls = os.listdir(os.path.join(self.data_root, data_dir))
-            img_dir_path = [os.path.join(self.data_root, data_dir, item) for item in img_dir_ls]
-        return img_dir_path
-
-    # def parse_aud_dir(self, aud_dir):
-    #     """
-    #
-    #     Args:
-    #         aud_dir:(Str or List[Str, ]) training audio data directory or train and valid data directory
-    #
-    #     Returns:
-    #         aud_file_path:(List[Str, ]) a list contains the path of audio files
-    #     """
-    #     if isinstance(aud_dir, list):
-    #         aud_file_path = []
-    #         for dir_i in aud_dir:
-    #             img_dir_ls = os.listdir(os.path.join(self.data_root, dir_i))
-    #             aud_file_path.extend([os.path.join(self.data_root, dir_i, item) for item in img_dir_ls])
-    #     else:
-    #         img_dir_ls = os.listdir(os.path.join(self.data_root, aud_dir))
-    #         aud_file_path = [os.path.join(self.data_root, aud_dir, item) for item in img_dir_ls]
-    #     return aud_file_path
+            data_dir_ls = os.listdir(os.path.join(self.data_root, data_dir))
+            data_dir_path = [os.path.join(self.data_root, data_dir, item) for item in data_dir_ls]
+        return data_dir_path
 
     def parse_annotation(self, label_file):
         """
