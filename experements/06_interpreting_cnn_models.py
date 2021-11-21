@@ -35,8 +35,6 @@ def main(args, cfg):
     run(cfg, data_loader, model, loss_f, optimizer, scheduler, trainer, collector, logger, log_dir)
 
 
-
-
 def image_process(img):
     import torchvision.transforms as transforms
     from PIL import Image
