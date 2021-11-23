@@ -2,17 +2,52 @@ import os
 import os.path as osp
 import numpy as np
 # `pip install easydict` if you don't have it
-from easydict import EasyDict as edict
+from easydict import EasyDict as CfgNode
 
-__C = edict()
-# # Consumers can get config by:
-# cfg = __C
-#
-# #
-# # Training options
-# #
-# __C.TRAIN = edict()
-#
+__C = CfgNode()
+# Consumers can get config by:
+cfg = __C
+
+# --------------------------------------------------- dataset config node ----------------------------------------------
+__C.DATA = CfgNode()
+
+__C.DATA.ROOT = "datasets"
+
+__C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
+__C.DATA.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
+
+__C.DATA.VALID_AUD_DATA = "raw_voice/validationData"
+__C.DATA.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
+
+__C.DATA.TEST_AUD_DATA = "raw_voice/testData"
+__C.DATA.TEST_LABEL_DATA = "annotation/annotation_validation.pkl"
+
+# -------------------------------------------------- dataloader config node --------------------------------------------
+__C.DATA_LOADER = CfgNode()
+# name of dataloader build function
+__C.DATA_LOADER.NAME = "build_audio_loader"
+__C.DATA_LOADER.BATCH_SIZE = 128
+__C.DATA_LOADER.NUM_WORKERS = 0
+
+# ----------------------------------------------------- model config node ----------------------------------------------
+__C.MODEL = CfgNode()
+__C.MODEL.NAME = "se_resnet50"
+__C.MODEL.PRETRAIN = False
+__C.MODEL.NUM_CLASS = 5
+
+# ----------------------------------------------------- loss config node ----------------------------------------------
+__C.LOSS = CfgNode()
+__C.LOSS.NAME = "mean_square_error"
+
+# ---------------------------------------------------- solver config node ----------------------------------------------
+__C.SOLVER = CfgNode()
+__C.SOLVER.NAME = "sgd"
+__C.SOLVER.LR_INIT = 0.01
+__C.SOLVER.WEIGHT_DECAY = 0.0005
+
+__C.SOLVER.SCHEDULER = "multi_step_scale"
+__C.SOLVER.FACTOR = 0.1
+__C.SOLVER.MILESTONE = [100, 120]
 # # Initial learning rate
 # __C.TRAIN.LEARNING_RATE = 0.001
 #
@@ -314,7 +349,7 @@ def _merge_a_into_b(a, b):
     """Merge config dictionary a into config dictionary b, clobbering the
     options in b whenever they are also specified in a.
     """
-    if type(a) is not edict:
+    if type(a) is not CfgNode:
         return
 
     for k, v in a.items():
@@ -333,7 +368,7 @@ def _merge_a_into_b(a, b):
                                                                type(v), k))
 
         # recursively merge dicts
-        if type(v) is edict:
+        if type(v) is CfgNode:
             try:
                 _merge_a_into_b(a[k], b[k])
             except:
@@ -347,7 +382,7 @@ def cfg_from_file(filename):
     """Load a config file and merge it into the default options."""
     import yaml
     with open(filename, 'r') as f:
-        yaml_cfg = edict(yaml.load(f))
+        yaml_cfg = CfgNode(yaml.load(f))
 
     _merge_a_into_b(yaml_cfg, __C)
 

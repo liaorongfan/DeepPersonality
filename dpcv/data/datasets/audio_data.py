@@ -1,7 +1,7 @@
 import os
 from dpcv.data.datasets.bi_modal_data import VideoData
 from torch.utils.data import DataLoader
-from build import DATALOADER_REGISTRY
+from .build import DATA_LOADER_REGISTRY
 import torch
 
 
@@ -42,30 +42,34 @@ class AudioData(VideoData):
         return len(self.aud_file_ls)
 
 
-@DATALOADER_REGISTRY.register()
+@DATA_LOADER_REGISTRY.register()
 def build_audio_loader(cfg, mode="train"):
     if mode == "train":
         dataset = AudioData(
-            cfg.DATA_ROOT,  # "../datasets",
-            cfg.TRAIN_AUD_DATA,  # "raw_voice/trainingData",
-            cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
+            cfg.DATA.ROOT,  # "../datasets",
+            cfg.DATA.TRAIN_AUD_DATA,  # "raw_voice/trainingData",
+            cfg.DATA.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
         )
     elif mode == "valid":
         dataset = AudioData(
-            cfg.DATA_ROOT,  # "../datasets",
-            cfg.VALID_AUD_DATA,  # "raw_voice/validationData",
-            cfg.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            cfg.DATA.ROOT,  # "../datasets",
+            cfg.DATA.VALID_AUD_DATA,  # "raw_voice/validationData",
+            cfg.DATA.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
         )
     elif mode == "test":
         dataset = AudioData(
-            cfg.DATA_ROOT,  # "../datasets",
-            cfg.TEST_AUD_DATA,  # "raw_voice/testData",
-            cfg.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            cfg.DATA.ROOT,  # "../datasets",
+            cfg.DATA.TEST_AUD_DATA,  # "raw_voice/testData",
+            cfg.DATA.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
         )
     else:
         raise ValueError("mode must be one of 'train' or 'valid' or test' ")
 
-    data_loader = DataLoader(dataset, batch_size=128, num_workers=cfg.NUM_WORKERS)
+    data_loader = DataLoader(
+        dataset,
+        batch_size=cfg.DATA_LOADER.BATCH_SIZE,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
 
     return data_loader
 

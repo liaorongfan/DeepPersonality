@@ -1,9 +1,9 @@
 from dpcv.tools.registry import Registry
 
-DATALOADER_REGISTRY = Registry("DATALOADER")
+DATA_LOADER_REGISTRY = Registry("DATA_LOADER")
 
 
 def build_dataloader(cfg):
-    name = cfg.DATALOADER.NAME
-    dataloader = DATALOADER_REGISTRY.get(name)
+    name = cfg.DATA_LOADER.NAME
+    dataloader = DATA_LOADER_REGISTRY.get(name)
     return dataloader
