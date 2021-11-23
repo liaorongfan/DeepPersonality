@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchaudio
 from dpcv.config.interpret_aud_cfg import cfg
-from dpcv.engine.bi_modal_trainer import InterpretAudioTrainer
+from dpcv.engine.bi_modal_trainer import AudioTrainer
 from dpcv.modeling.networks.audio_interpretability_net import get_model
 from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
@@ -31,7 +31,7 @@ def main(args, cfg):
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=cfg.FACTOR, milestones=cfg.MILESTONE)
 
     collector = TrainSummary()
-    trainer = InterpretAudioTrainer(cfg, collector, logger)
+    trainer = AudioTrainer(cfg, collector, logger)
 
     run(cfg, data_loader, model, loss_f, optimizer, scheduler, trainer, collector, logger, log_dir)
 

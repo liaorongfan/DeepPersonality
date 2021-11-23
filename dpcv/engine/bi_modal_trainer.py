@@ -1,8 +1,10 @@
 import torch
 from tqdm import tqdm
 import numpy as np
+from .build import TRAINER_REGISTRY
 
 
+@TRAINER_REGISTRY.register()
 class BiModalTrainer(object):
     """base trainer for bi-modal input"""
     def __init__(self, cfg, collector, logger):
@@ -112,6 +114,7 @@ class BiModalTrainer(object):
         return (aud_in, img_in), labels
 
 
+@TRAINER_REGISTRY.register()
 class BimodalLSTMTrain(BiModalTrainer):
 
     def data_fmt(self, data):
@@ -123,6 +126,7 @@ class BimodalLSTMTrain(BiModalTrainer):
         return (aud_in, img_in), labels
 
 
+@TRAINER_REGISTRY.register()
 class ImgModalLSTMTrain(BiModalTrainer):
 
     def data_fmt(self, data):
@@ -133,6 +137,7 @@ class ImgModalLSTMTrain(BiModalTrainer):
         return (img_in,), labels
 
 
+@TRAINER_REGISTRY.register()
 class AudModalLSTMTrain(BiModalTrainer):
 
     def data_fmt(self, data):
@@ -143,6 +148,7 @@ class AudModalLSTMTrain(BiModalTrainer):
         return (aud_in,), labels
 
 
+@TRAINER_REGISTRY.register()
 class DeepBimodalTrain(BimodalLSTMTrain):
 
     def data_fmt(self, data):
@@ -152,6 +158,7 @@ class DeepBimodalTrain(BimodalLSTMTrain):
         return (inputs,), labels
 
 
+@TRAINER_REGISTRY.register()
 class ImageModalTrainer(BiModalTrainer):
     """
     for model only image data used
@@ -163,6 +170,7 @@ class ImageModalTrainer(BiModalTrainer):
         return (inputs,), labels
 
 
+@TRAINER_REGISTRY.register()
 class ImageListTrainer(BiModalTrainer):
     """
     for interpret cnn model, only image data used
@@ -174,6 +182,7 @@ class ImageListTrainer(BiModalTrainer):
         return (inputs,), labels
 
 
+@TRAINER_REGISTRY.register()
 class TPNTrainer(BiModalTrainer):
     """
     for interpret cnn model, only image data used
@@ -281,6 +290,7 @@ class TPNTrainer(BiModalTrainer):
         return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label
 
 
+@TRAINER_REGISTRY.register()
 class PersEmoTrainer(BiModalTrainer):
 
     def data_fmt(self, data):
@@ -379,7 +389,8 @@ class PersEmoTrainer(BiModalTrainer):
         return ocean_acc_avg, ocean_acc, dataset_output, dataset_label
 
 
-class InterpretAudioTrainer(BiModalTrainer):
+@TRAINER_REGISTRY.register()
+class AudioTrainer(BiModalTrainer):
 
     def data_fmt(self, data):
         for k, v in data.items():

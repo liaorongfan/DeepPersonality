@@ -1,19 +1,11 @@
-import torch.optim as optim
-import torch.nn as nn
 from datetime import datetime
 from dpcv.data.datasets.build import build_dataloader
 from dpcv.modeling.networks.build import build_model
 from dpcv.modeling.loss.build import build_loss_func
 from dpcv.modeling.solver.build import build_solver, build_scheduler
-from dpcv.config.default_config_opt import cfg
-from dpcv.modeling.module.se_resnet import se_resnet50
-from dpcv.tools.common import setup_seed, setup_config
-from dpcv.tools.logger import make_logger
-from dpcv.tools.common import parse_args
+from dpcv.engine.build import build_trainer
+from dpcv.config.default_config_opt import cfg as test_cfg
 from dpcv.evaluation.summary import TrainSummary
-from dpcv.data.datasets.video_frame_data import make_data_loader
-from dpcv.engine.bi_modal_trainer import ImageModalTrainer
-from dpcv.tools.exp import run
 from dpcv.checkpoint.save import save_model, resume_training, load_model
 from dpcv.evaluation.metrics import compute_pcc, compute_ccc
 from dpcv.tools.logger import make_logger
@@ -42,7 +34,6 @@ class ExpRunner:
         self.collector = TrainSummary()
         self.trainer = self.build_trainer(cfg, self.collector, self.logger)
 
-
     @classmethod
     def build_dataloader(cls, cfg):
         dataloader = build_dataloader(cfg)
@@ -70,8 +61,8 @@ class ExpRunner:
         return build_scheduler(cfg, optimizer)
 
     @classmethod
-    def build_trainer(cls, collector, logger):
-        return
+    def build_trainer(cls, cfg, collector, logger):
+        return build_trainer(cfg, collector, logger)
 
     def train(self, cfg):
         if cfg.RESUME:
@@ -85,10 +76,10 @@ class ExpRunner:
             self.scheduler.step()
 
             if self.collector.model_save:
-                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, log_dir, cfg)
+                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
                 self.collector.update_best_epoch(epoch)
 
-        self.collector.draw_epo_info(cfg.MAX_EPOCH - cfg.START_EPOCH, log_dir)
+        self.collector.draw_epo_info(cfg.MAX_EPOCH - cfg.START_EPOCH, self.log_dir)
         self.logger.info(
             "{} done, best acc: {} in :{}".format(
                 datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
@@ -121,7 +112,7 @@ if __name__ == "__main__":
     import torch
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
 
-    exp_runner = ExpRunner(cfg)
+    exp_runner = ExpRunner(test_cfg)
     xin = torch.randn((1, 3, 224, 224)).cuda()
     y = exp_runner.model(xin)
     print(y.shape)
