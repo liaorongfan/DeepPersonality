@@ -6,6 +6,7 @@ import numpy as np
 import glob
 from dpcv.data.datasets.bi_modal_data import VideoData
 from data.transforms.transform import set_transform_op
+from .build import DATA_LOADER_REGISTRY
 
 
 class SingleFrameData(VideoData):
@@ -74,6 +75,47 @@ def make_data_loader(cfg, mode="train"):
         batch_size=cfg.TRAIN_BATCH_SIZE,
         shuffle=cfg.SHUFFLE,
         num_workers=cfg.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def single_frame_data_loader(cfg, mode="train"):
+    assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
+    transform = set_transform_op()
+    if mode == "train":
+        data_set = SingleFrameData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TRAIN_IMG_DATA,
+            cfg.DATA.TRAIN_LABEL_DATA,
+            transform,
+        )
+    elif mode == "valid":
+        data_set = SingleFrameData(
+            cfg.DATA.ROOT,
+            cfg.DATA.VALID_IMG_DATA,
+            cfg.DATA.VALID_LABEL_DATA,
+            transform,
+        )
+    elif mode == "trainval":
+        data_set = SingleFrameData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TRAINVAL_IMG_DATA,
+            cfg.DATA.TRAINVAL_LABEL_DATA,
+            transform,
+        )
+    else:
+        data_set = SingleFrameData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TEST_IMG_DATA,
+            cfg.DATA.TEST_LABEL_DATA,
+            transform,
+        )
+    data_loader = DataLoader(
+        dataset=data_set,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=cfg.DATA_LOADER.SHUFFLE,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )
     return data_loader
 

@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from dpcv.data.datasets.build import build_dataloader
 from dpcv.modeling.networks.build import build_model
@@ -14,57 +15,59 @@ from dpcv.tools.logger import make_logger
 class ExpRunner:
 
     def __init__(self, cfg):
-        """ construct certain experiment by the following template
+        """ run exp from config file
 
+        arg:
+            cfg_file: config file of an experiment
+        """
+
+        """
+        construct certain experiment by the following template
         step 1: prepare dataloader
         step 2: prepare model and loss function
         step 3: select optimizer for gradient descent algorithm
         step 4: prepare trainer for typical training in pytorch manner
         """
-        self.logger, self.log_dir = make_logger(cfg.OUTPUT_DIR)
+        self.cfg = cfg
+        self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR)
 
-        self.data_loader = self.build_dataloader(cfg)
+        self.data_loader = self.build_dataloader()
 
-        self.model = self.build_model(cfg)
-        self.loss_f = self.build_loss_function(cfg)
+        self.model = self.build_model()
+        self.loss_f = self.build_loss_function()
 
-        self.optimizer = self.build_solver(cfg, self.model)
-        self.scheduler = self.build_scheduler(cfg, self.optimizer)
+        self.optimizer = self.build_solver()
+        self.scheduler = self.build_scheduler()
 
         self.collector = TrainSummary()
-        self.trainer = self.build_trainer(cfg, self.collector, self.logger)
+        self.trainer = self.build_trainer()
 
-    @classmethod
-    def build_dataloader(cls, cfg):
-        dataloader = build_dataloader(cfg)
+    def build_dataloader(self):
+        dataloader = build_dataloader(self.cfg)
         data_loader_dicts = {
-            "train": dataloader(cfg, mode="train"),
-            "valid": dataloader(cfg, mode="valid"),
-            "test": dataloader(cfg, mode="test"),
+            "train": dataloader(self.cfg, mode="train"),
+            "valid": dataloader(self.cfg, mode="valid"),
+            "test": dataloader(self.cfg, mode="test"),
         }
         return data_loader_dicts
 
-    @classmethod
-    def build_model(cls, cfg):
-        return build_model(cfg)
+    def build_model(self):
+        return build_model(self.cfg)
 
-    @classmethod
-    def build_loss_function(cls, cfg):
-        return build_loss_func(cfg)
+    def build_loss_function(self):
+        return build_loss_func(self.cfg)
 
-    @classmethod
-    def build_solver(cls, cfg, model):
-        return build_solver(cfg, model)
+    def build_solver(self):
+        return build_solver(self.cfg, self.model)
 
-    @classmethod
-    def build_scheduler(cls, cfg, optimizer):
-        return build_scheduler(cfg, optimizer)
+    def build_scheduler(self):
+        return build_scheduler(self.cfg, self.optimizer)
 
-    @classmethod
-    def build_trainer(cls, cfg, collector, logger):
-        return build_trainer(cfg, collector, logger)
+    def build_trainer(self):
+        return build_trainer(self.cfg, self.collector, self.logger)
 
-    def train(self, cfg):
+    def train(self):
+        cfg = self.cfg.TRAIN
         if cfg.RESUME:
             self.model, self.optimizer, epoch = resume_training(cfg.RESUME, self.model, self.optimizer)
             cfg.START_EPOCH = epoch
@@ -88,9 +91,20 @@ class ExpRunner:
             )
         )
 
-    def test(self, cfg):
+    def test(self, weight=None):
         self.logger.info("Test only mode")
-        self.model = load_model(self.model, cfg.WEIGHT)
+        cfg = self.cfg.TEST
+        cfg.WEIGHT =  weight if weight else cfg.WEIGHT
+
+        if cfg.WEIGHT:
+            self.model = load_model(self.model, cfg.WEIGHT)
+        else:
+            weights = sorted(
+                [file for file in os.listdir(self.log_dir) if file.endswith(".pkl") and ("last" not in file)]
+            )
+            weight_file = os.path.join(self.log_dir, weights[-1])
+            self.model = load_model(self.model, weight_file)
+
         ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.test(
             self.data_loader["test"], self.model
         )
@@ -104,6 +118,10 @@ class ExpRunner:
             ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label)
             self.logger.info(f"ccc: {ccc_dict} mean: {ccc_mean}")
         return
+
+    def run(self):
+        self.train()
+        self.test()
 
 
 if __name__ == "__main__":

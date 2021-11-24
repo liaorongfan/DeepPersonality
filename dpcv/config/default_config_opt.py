@@ -7,39 +7,52 @@ from easydict import EasyDict as CfgNode
 __C = CfgNode()
 # Consumers can get config by:
 cfg = __C
-
-# --------------------------------------------------- dataset config node ----------------------------------------------
+""" Follow commont steps to config a experiment:
+step 1 : prepare dataset
+step 2 : build a dataloader
+step 3 : build a model
+step 4 : set a loss function
+step 5 : set a solver 
+step 6 : build a trainer 
+step 7 : set test metric
+"""
+# ------------------------------------------- step 1 : dataset config node ---------------------------------------------
 __C.DATA = CfgNode()
 
 __C.DATA.ROOT = "datasets"
 
+__C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
 __C.DATA.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 
+__C.DATA.VALID_IMG_DATA = "image_data/valid_data"
 __C.DATA.VALID_AUD_DATA = "raw_voice/validationData"
 __C.DATA.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
 
+__C.DATA.TEST_IMG_DATA = "image_data/test_data"
 __C.DATA.TEST_AUD_DATA = "raw_voice/testData"
-__C.DATA.TEST_LABEL_DATA = "annotation/annotation_validation.pkl"
+__C.DATA.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 
-# -------------------------------------------------- dataloader config node --------------------------------------------
+# ------------------------------------------ step 2 : dataloader config node -------------------------------------------
 __C.DATA_LOADER = CfgNode()
 # name of dataloader build function
-__C.DATA_LOADER.NAME = "build_audio_loader"
-__C.DATA_LOADER.BATCH_SIZE = 128
+__C.DATA_LOADER.NAME = "single_frame_data_loader"
+__C.DATA_LOADER.TRAIN_BATCH_SIZE = 48
+__C.DATA_LOADER.VALID_BATCH_SIZE = 32
 __C.DATA_LOADER.NUM_WORKERS = 0
+__C.DATA_LOADER.SHUFFLE = True
 
-# ----------------------------------------------------- model config node ----------------------------------------------
+# ------------------------------------------ step 3 : model config node ------------------------------------------------
 __C.MODEL = CfgNode()
 __C.MODEL.NAME = "se_resnet50"
 __C.MODEL.PRETRAIN = False
 __C.MODEL.NUM_CLASS = 5
 
-# ----------------------------------------------------- loss config node ----------------------------------------------
+# ------------------------------------------ step 4 : loss config node -------------------------------------------------
 __C.LOSS = CfgNode()
 __C.LOSS.NAME = "mean_square_error"
 
-# ---------------------------------------------------- solver config node ----------------------------------------------
+# ------------------------------------------ step 5 : solver config node -----------------------------------------------
 __C.SOLVER = CfgNode()
 __C.SOLVER.NAME = "sgd"
 __C.SOLVER.LR_INIT = 0.01
@@ -48,271 +61,24 @@ __C.SOLVER.WEIGHT_DECAY = 0.0005
 __C.SOLVER.SCHEDULER = "multi_step_scale"
 __C.SOLVER.FACTOR = 0.1
 __C.SOLVER.MILESTONE = [100, 120]
-# # Initial learning rate
-# __C.TRAIN.LEARNING_RATE = 0.001
-#
-# # Momentum
-# __C.TRAIN.MOMENTUM = 0.9
-#
-# # Weight decay, for regularization
-# __C.TRAIN.WEIGHT_DECAY = 0.0001
-#
-# # Factor for reducing the learning rate
-# __C.TRAIN.GAMMA = 0.1
-#
-# # Step size for reducing the learning rate, currently only support one step
-# __C.TRAIN.STEPSIZE = [30000]
-#
-# # Iteration intervals for showing the loss during training, on command line interface
-# __C.TRAIN.DISPLAY = 10
-#
-# # Whether to double the learning rate for bias
-# __C.TRAIN.DOUBLE_BIAS = True
-#
-# # Whether to initialize the weights with truncated normal distribution
-# __C.TRAIN.TRUNCATED = False
-#
-# # Whether to have weight decay on bias as well
-# __C.TRAIN.BIAS_DECAY = False
-#
-# # Whether to add ground truth boxes to the pool when sampling regions
-# __C.TRAIN.USE_GT = False
-#
-# # Whether to use aspect-ratio grouping of training images, introduced merely for saving
-# # GPU memory
-# __C.TRAIN.ASPECT_GROUPING = False
-#
-# # The number of snapshots kept, older ones are deleted to save space
-# __C.TRAIN.SNAPSHOT_KEPT = 3
-#
-# # The time interval for saving tensorflow summaries
-# __C.TRAIN.SUMMARY_INTERVAL = 180
-#
-# # Scale to use during training (can list multiple scales)
-# # The scale is the pixel size of an image's shortest side
-# __C.TRAIN.SCALES = (600,)
-#
-# # Max pixel size of the longest side of a scaled input image
-# __C.TRAIN.MAX_SIZE = 1000
-#
-# # Images to use per minibatch
-# __C.TRAIN.IMS_PER_BATCH = 1
-#
-# # Minibatch size (number of regions of interest [ROIs])
-# __C.TRAIN.BATCH_SIZE = 128
-#
-# # Fraction of minibatch that is labeled foreground (i.e. class > 0)
-# __C.TRAIN.FG_FRACTION = 0.25
-#
-# # Overlap threshold for a ROI to be considered foreground (if >= FG_THRESH)
-# __C.TRAIN.FG_THRESH = 0.5
-#
-# # Overlap threshold for a ROI to be considered background (class = 0 if
-# # overlap in [LO, HI))
-# __C.TRAIN.BG_THRESH_HI = 0.5
-# __C.TRAIN.BG_THRESH_LO = 0.1
-#
-# # Use horizontally-flipped images during training?
-# __C.TRAIN.USE_FLIPPED = True
-#
-# # Train bounding-box regressors
-# __C.TRAIN.BBOX_REG = True
-#
-# # Overlap required between a ROI and ground-truth box in order for that ROI to
-# # be used as a bounding-box regression training example
-# __C.TRAIN.BBOX_THRESH = 0.5
-#
-# # Iterations between snapshots
-# __C.TRAIN.SNAPSHOT_ITERS = 5000
-#
-# # solver.prototxt specifies the snapshot path prefix, this adds an optional
-# # infix to yield the path: <prefix>[_<infix>]_iters_XYZ.caffemodel
-# __C.TRAIN.SNAPSHOT_PREFIX = 'res101_faster_rcnn'
-#
-# # Normalize the targets (subtract empirical mean, divide by empirical stddev)
-# __C.TRAIN.BBOX_NORMALIZE_TARGETS = True
-#
-# # Deprecated (inside weights)
-# __C.TRAIN.BBOX_INSIDE_WEIGHTS = (1.0, 1.0, 1.0, 1.0)
-#
-# # Normalize the targets using "precomputed" (or made up) means and stdevs
-# # (BBOX_NORMALIZE_TARGETS must also be True)
-# __C.TRAIN.BBOX_NORMALIZE_TARGETS_PRECOMPUTED = True
-#
-# __C.TRAIN.BBOX_NORMALIZE_MEANS = (0.0, 0.0, 0.0, 0.0)
-#
-# __C.TRAIN.BBOX_NORMALIZE_STDS = (0.1, 0.1, 0.2, 0.2)
-#
-# # Train using these proposals
-# __C.TRAIN.PROPOSAL_METHOD = 'gt'
-#
-# # Make minibatches from images that have similar aspect ratios (i.e. both
-# # tall and thin or both short and wide) in order to avoid wasting computation
-# # on zero-padding.
-#
-# # Use RPN to detect objects
-# __C.TRAIN.HAS_RPN = True
-#
-# # IOU >= thresh: positive example
-# __C.TRAIN.RPN_POSITIVE_OVERLAP = 0.7
-#
-# # IOU < thresh: negative example
-# __C.TRAIN.RPN_NEGATIVE_OVERLAP = 0.3
-#
-# # If an anchor satisfied by positive and negative conditions set to negative
-# __C.TRAIN.RPN_CLOBBER_POSITIVES = False
-#
-# # Max number of foreground examples
-# __C.TRAIN.RPN_FG_FRACTION = 0.5
-#
-# # Total number of examples
-# __C.TRAIN.RPN_BATCHSIZE = 256
-#
-# # NMS threshold used on RPN proposals
-# __C.TRAIN.RPN_NMS_THRESH = 0.7
-#
-# # Number of top scoring boxes to keep before apply NMS to RPN proposals
-# __C.TRAIN.RPN_PRE_NMS_TOP_N = 12000
-#
-# # Number of top scoring boxes to keep after applying NMS to RPN proposals
-# __C.TRAIN.RPN_POST_NMS_TOP_N = 2000
-#
-# # Deprecated (outside weights)
-# __C.TRAIN.RPN_BBOX_INSIDE_WEIGHTS = (1.0, 1.0, 1.0, 1.0)
-#
-# # Give the positive RPN examples weight of p * 1 / {num positives}
-# # and give negatives a weight of (1 - p)
-# # Set to -1.0 to use uniform example weighting
-# __C.TRAIN.RPN_POSITIVE_WEIGHT = -1.0
-#
-# # Whether to use all ground truth bounding boxes for training,
-# # For COCO, setting USE_ALL_GT to False will exclude boxes that are flagged as ''iscrowd''
-# __C.TRAIN.USE_ALL_GT = True
-#
-# #
-# # Testing options
-# #
-# __C.TEST = edict()
-#
-# # Scale to use during testing (can NOT list multiple scales)
-# # The scale is the pixel size of an image's shortest side
-# __C.TEST.SCALES = (600,)
-#
-# # Max pixel size of the longest side of a scaled input image
-# __C.TEST.MAX_SIZE = 1000
-#
-# # Overlap threshold used for non-maximum suppression (suppress boxes with
-# # IoU >= this threshold)
-# __C.TEST.NMS = 0.3
-#
-# # Experimental: treat the (K+1) units in the cls_score layer as linear
-# # predictors (trained, eg, with one-vs-rest SVMs).
-# __C.TEST.SVM = False
-#
-# # Test using bounding-box regressors
-# __C.TEST.BBOX_REG = True
-#
-# # Propose boxes
-# __C.TEST.HAS_RPN = False
-#
-# # Test using these proposals
-# __C.TEST.PROPOSAL_METHOD = 'gt'
-#
-# # NMS threshold used on RPN proposals
-# __C.TEST.RPN_NMS_THRESH = 0.7
-#
-# # Number of top scoring boxes to keep before apply NMS to RPN proposals
-# __C.TEST.RPN_PRE_NMS_TOP_N = 6000
-#
-# # Number of top scoring boxes to keep after applying NMS to RPN proposals
-# __C.TEST.RPN_POST_NMS_TOP_N = 300
-#
-# # Proposal height and width both need to be greater than RPN_MIN_SIZE (at orig image scale)
-# # __C.TEST.RPN_MIN_SIZE = 16
-#
-# # Testing mode, default to be 'nms', 'top' is slower but better
-# # See report for details
-# __C.TEST.MODE = 'nms'
-#
-# # Only useful when TEST.MODE is 'top', specifies the number of top proposals to select
-# __C.TEST.RPN_TOP_N = 5000
-#
-# #
-# # ResNet options
-# #
-#
-# __C.RESNET = edict()
-#
-# # Option to set if max-pooling is appended after crop_and_resize.
-# # if true, the region will be resized to a square of 2xPOOLING_SIZE,
-# # then 2x2 max-pooling is applied; otherwise the region will be directly
-# # resized to a square of POOLING_SIZE
-# __C.RESNET.MAX_POOL = False
-#
-# # Number of fixed blocks during training, by default the first of all 4 blocks is fixed
-# # Range: 0 (none) to 3 (all)
-# __C.RESNET.FIXED_BLOCKS = 1
-#
-# #
-# # MobileNet options
-# #
-#
-# __C.MOBILENET = edict()
-#
-# # Whether to regularize the depth-wise filters during training
-# __C.MOBILENET.REGU_DEPTH = False
-#
-# # Number of fixed layers during training, by default the bottom 5 of 14 layers is fixed
-# # Range: 0 (none) to 12 (all)
-# __C.MOBILENET.FIXED_LAYERS = 5
-#
-# # Weight decay for the mobilenet weights
-# __C.MOBILENET.WEIGHT_DECAY = 0.00004
-#
-# # Depth multiplier
-# __C.MOBILENET.DEPTH_MULTIPLIER = 1.
-#
-# #
-# # MISC
-# #
-#
-# # Pixel mean values (BGR order) as a (1, 1, 3) array
-# # We use the same pixel mean for all networks even though it's not exactly what
-# # they were trained with
-# __C.PIXEL_MEANS = np.array([[[102.9801, 115.9465, 122.7717]]])
-#
-# # For reproducibility
-# __C.RNG_SEED = 3
-#
-# # Root directory of project
-# __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
-#
-# # Data directory
-# __C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
-#
-# # Name (or path to) the matlab executable
-# __C.MATLAB = 'matlab'
-#
-# # Place outputs under an experiments directory
-# __C.EXP_DIR = 'default'
-#
-# # Use GPU implementation of non-maximum suppression
-# __C.USE_GPU_NMS = True
-#
-# # Default pooling mode
-# __C.POOLING_MODE = 'align'
-#
-# # Size of the pooled region after RoI pooling
-# __C.POOLING_SIZE = 7
-#
-# # Anchor scales for RPN
-# __C.ANCHOR_SCALES = [8, 16, 32]
-#
-# # Anchor ratios for RPN
-# __C.ANCHOR_RATIOS = [0.5, 1, 2]
-#
-# # Number of filters for the RPN layer
-# __C.RPN_CHANNELS = 512
+
+# ------------------------------------------- step 6:  train config node -----------------------------------------------
+__C.TRAIN = CfgNode()
+__C.TRAIN.TRAINER = "ImageModalTrainer"
+__C.TRAIN.START_EPOCH = 0
+__C.TRAIN.MAX_EPOCH = 150
+__C.TRAIN.PRE_TRAINED_MODEL = None
+__C.TRAIN.RESUME = None
+__C.TRAIN.LOG_INTERVAL = 10
+__C.TRAIN.OUTPUT_DIR = "output"
+# ------------------------------------------- step 7:  test config node ------------------------------------------------
+__C.TEST = CfgNode()
+__C.TEST.TEST_ONLY = False
+__C.TEST.WEIGHT = ""
+__C.TEST.COMPUTE_PCC = True
+__C.TEST.COMPUTE_CCC = True
+
+# ======================================================================================================================
 
 
 def get_output_dir(imdb, weights_filename):

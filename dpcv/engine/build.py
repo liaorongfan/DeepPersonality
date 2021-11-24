@@ -4,6 +4,6 @@ TRAINER_REGISTRY = Registry("TRAINER")
 
 
 def build_trainer(cfg, collector, logger):
-    name = cfg.TRAINER.NAME
+    name = cfg.TRAIN.TRAINER
     trainer_cls = TRAINER_REGISTRY.get(name)
-    return trainer_cls(cfg, collector, logger)
+    return trainer_cls(cfg.TRAIN, collector, logger)
