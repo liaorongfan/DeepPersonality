@@ -94,7 +94,7 @@ class ExpRunner:
     def test(self, weight=None):
         self.logger.info("Test only mode")
         cfg = self.cfg.TEST
-        cfg.WEIGHT =  weight if weight else cfg.WEIGHT
+        cfg.WEIGHT = weight if weight else cfg.WEIGHT
 
         if cfg.WEIGHT:
             self.model = load_model(self.model, cfg.WEIGHT)
@@ -125,13 +125,10 @@ class ExpRunner:
 
 
 if __name__ == "__main__":
-    # args = parse_args()
-    import os
     import torch
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
 
     exp_runner = ExpRunner(test_cfg)
-    xin = torch.randn((1, 3, 224, 224)).cuda()
+    xin = torch.randn((1, 3, 112, 112)).cuda()
     y = exp_runner.model(xin)
     print(y.shape)
-    # main(args, cfg)

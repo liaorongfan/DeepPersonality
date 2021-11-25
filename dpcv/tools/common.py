@@ -26,6 +26,7 @@ def setup_seed(seed=12345):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Training')
+    parser.add_argument("--cfg-file", default=None, help="experiment config file")
     parser.add_argument('--lr', default=None, help='learning rate')
     parser.add_argument('--bs', default=None, help='training batch size')
     parser.add_argument("--resume", default=None, help="saved model path to last training epoch")

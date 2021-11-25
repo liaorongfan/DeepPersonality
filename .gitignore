@@ -18,6 +18,7 @@ datasets/*.txt
 datasets/annotation
 datasets/va_data
 pretrained/
+output/
 /snippet
 
 # current output files

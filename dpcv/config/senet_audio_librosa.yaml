@@ -1,0 +1,13 @@
+DATA:
+  TRAIN_AUD_DATA: "voice_data/voice_librosa/train_data"
+  VALID_AUD_DATA: "voice_data/voice_librosa/valid_data"
+  TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
+DATA_LOADER:
+  NAME: "voice_librosa_loader"
+  TRAIN_BATCH_SIZE: 32
+MODEL:
+  NAME: "se_resnet50"
+TRAIN:
+  TRAINER: "AudioTrainer"
+  OUTPUT_DIR: "results/senet_aud_librosa"
+

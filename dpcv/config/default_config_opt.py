@@ -1,7 +1,6 @@
 import os
 import os.path as osp
 import numpy as np
-# `pip install easydict` if you don't have it
 from easydict import EasyDict as CfgNode
 
 __C = CfgNode()
@@ -18,7 +17,6 @@ step 7 : set test metric
 """
 # ------------------------------------------- step 1 : dataset config node ---------------------------------------------
 __C.DATA = CfgNode()
-
 __C.DATA.ROOT = "datasets"
 
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
@@ -70,7 +68,7 @@ __C.TRAIN.MAX_EPOCH = 150
 __C.TRAIN.PRE_TRAINED_MODEL = None
 __C.TRAIN.RESUME = None
 __C.TRAIN.LOG_INTERVAL = 10
-__C.TRAIN.OUTPUT_DIR = "output"
+__C.TRAIN.OUTPUT_DIR = "results"
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
 __C.TEST = CfgNode()
 __C.TEST.TEST_ONLY = False
@@ -148,7 +146,7 @@ def cfg_from_file(filename):
     """Load a config file and merge it into the default options."""
     import yaml
     with open(filename, 'r') as f:
-        yaml_cfg = CfgNode(yaml.load(f))
+        yaml_cfg = CfgNode(yaml.safe_load(f))
 
     _merge_a_into_b(yaml_cfg, __C)
 
