@@ -1,0 +1,12 @@
+DATA:
+  TRAIN_AUD_DATA: "voice_data/voice_librosa/train_data"
+  VALID_AUD_DATA: "voice_data/voice_librosa/valid_data"
+  TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
+DATA_LOADER:
+  NAME: "voice_librosa_loader"
+  TRAIN_BATCH_SIZE: 16
+MODEL:
+  NAME: "get_hr_net_model"
+TRAIN:
+  TRAINER: "AudioTrainer"
+  OUTPUT_DIR: "results/hrnet_aud_librosa"

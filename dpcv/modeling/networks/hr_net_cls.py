@@ -7,6 +7,8 @@ import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .build import NETWORK_REGISTRY
+
 
 hr_net_cfg = EasyDict(
     {'MODEL': {'EXTRA': {'STAGE1': {'BLOCK': 'BOTTLENECK',
@@ -525,7 +527,8 @@ class HighResolutionNet(nn.Module):
             self.load_state_dict(model_dict)
 
 
-def get_hr_net_model(**kwargs):
+@NETWORK_REGISTRY.register()
+def get_hr_net_model(cfg=None, **kwargs):
     config = hr_net_cfg
     model = HighResolutionNet(config, **kwargs)
     model.init_weights()

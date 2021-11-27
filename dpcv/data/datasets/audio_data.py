@@ -63,6 +63,20 @@ class VoiceLibrosa(AudioData):
         return aud_ts
 
 
+class VoiceLibrosaSwinTransformer(AudioData):
+
+    def transform(self, aud_ft):
+        _, _, length = aud_ft.shape
+        shape_size = 224 * 224 * 3
+        if length < shape_size:
+            aud_padding = np.zeros((1, 1, shape_size))
+            aud_padding[..., :length] = aud_ft
+            aud_ft = aud_padding
+        aud_trans = aud_ft[..., :shape_size].reshape(224, 224, 3).transpose(2, 0, 1)
+        aud_ts = torch.as_tensor(aud_trans, dtype=torch.float32)
+        return aud_ts
+
+
 @DATA_LOADER_REGISTRY.register()
 def build_audio_loader(cfg, mode="train"):
     if mode == "train":
@@ -111,6 +125,38 @@ def voice_librosa_loader(cfg, mode="train"):
         )
     elif mode == "test":
         dataset = VoiceLibrosa(
+            cfg.DATA.ROOT,  # "../datasets",
+            cfg.DATA.TEST_AUD_DATA,  # "raw_voice/testData",
+            cfg.DATA.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+        )
+    else:
+        raise ValueError("mode must be one of 'train' or 'valid' or test' ")
+
+    data_loader = DataLoader(
+        dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def voice_librosa_swin_transformer_loader(cfg, mode="train"):
+    if mode == "train":
+        dataset = VoiceLibrosaSwinTransformer(
+            cfg.DATA.ROOT,  # "../datasets",
+            cfg.DATA.TRAIN_AUD_DATA,  # "raw_voice/trainingData",
+            cfg.DATA.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
+        )
+    elif mode == "valid":
+        dataset = VoiceLibrosaSwinTransformer(
+            cfg.DATA.ROOT,  # "../datasets",
+            cfg.DATA.VALID_AUD_DATA,  # "raw_voice/validationData",
+            cfg.DATA.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+        )
+    elif mode == "test":
+        dataset = VoiceLibrosaSwinTransformer(
             cfg.DATA.ROOT,  # "../datasets",
             cfg.DATA.TEST_AUD_DATA,  # "raw_voice/testData",
             cfg.DATA.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",

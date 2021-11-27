@@ -13,9 +13,8 @@ import torch
 import torch.nn as nn
 import torch.utils.checkpoint as checkpoint
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
-# from yacs.config import CfgNode as CN
 from easydict import EasyDict as CN
-
+from .build import NETWORK_REGISTRY
 
 def swin_config():
     _C = CN()
@@ -635,7 +634,8 @@ class SwinTransformer(nn.Module):
         return flops
 
 
-def get_swin_transformer_model():
+@NETWORK_REGISTRY.register()
+def get_swin_transformer_model(cfg=None):
     config = swin_config()
     model = SwinTransformer(
         img_size=config.DATA.IMG_SIZE,

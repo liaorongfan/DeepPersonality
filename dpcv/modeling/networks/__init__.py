@@ -1,1 +1,3 @@
 from .se_net import se_resnet50
+from .hr_net_cls import get_hr_net_model
+from .swin_transformer import get_swin_transformer_model
