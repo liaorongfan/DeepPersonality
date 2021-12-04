@@ -10,7 +10,7 @@ class TrainSummary:
         self.epoch_acc = {"train": [], "valid": []}
         self._best_acc = [0]
         self._best_epoch = [0]
-        self.model_save_flag = []
+        self.model_save_flag = [0]
         self.valid_info = {"ocean_acc": []}
 
     def update_best_acc(self, acc):
@@ -95,7 +95,9 @@ class TrainSummary:
         """record mean loss value of each validation epoch"""
         self.epoch_acc["valid"].append(np.mean(np.array(acc_list)))
 
-    def draw_epo_info(self, epochs, log_dir):
+    def draw_epo_info(self, epochs=None, log_dir=None):
+        if not epochs:
+            epochs = len(self.epoch_loss["train"])
         plt_x = np.arange(0, epochs)
         plot_line(
             plt_x, self.epoch_loss["train"],

@@ -1,4 +1,6 @@
 import torch
+import torch.nn as nn
+from .build import LOSS_FUNC_REGISTRY
 
 
 def one_hot_CELoss(pred, label):
@@ -17,6 +19,16 @@ class BellLoss:
         exponent = - torch.square(pred - label) / (2 * torch.square(self.theta))
         loss = self.gama * (1 - torch.exp(exponent)).sum()
         return loss
+
+
+@LOSS_FUNC_REGISTRY.register()
+def crnet_loss_func():
+    return {
+        "ce_loss": one_hot_CELoss,
+        "bell_loss": BellLoss(),
+        "mse_loss": nn.MSELoss(),
+        "l1_loss": nn.L1Loss()
+    }
 
 
 if __name__ == "__main__":

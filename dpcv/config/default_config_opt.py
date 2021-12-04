@@ -40,6 +40,7 @@ __C.DATA_LOADER.TRAIN_BATCH_SIZE = 48
 __C.DATA_LOADER.VALID_BATCH_SIZE = 32
 __C.DATA_LOADER.NUM_WORKERS = 0
 __C.DATA_LOADER.SHUFFLE = True
+__C.DATA_LOADER.DROP_LAST = True
 
 # ------------------------------------------ step 3 : model config node ------------------------------------------------
 __C.MODEL = CfgNode()
@@ -57,6 +58,8 @@ __C.SOLVER.NAME = "sgd"
 __C.SOLVER.LR_INIT = 0.01
 __C.SOLVER.WEIGHT_DECAY = 0.0005
 __C.SOLVER.MOMENTUM = 0.0
+__C.SOLVER.BETA_1 = 0.5
+__C.SOLVER.BETA_2 = 0.999
 __C.SOLVER.SCHEDULER = "multi_step_scale"
 __C.SOLVER.FACTOR = 0.1
 __C.SOLVER.MILESTONE = [100, 120]

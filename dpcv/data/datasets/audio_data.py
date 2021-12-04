@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from dpcv.data.datasets.bi_modal_data import VideoData
+from dpcv.data.datasets.cr_data import CRNetData
 from torch.utils.data import DataLoader
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
 import torch
@@ -97,6 +98,28 @@ class VoiceLibrosa(AudioData):
         return torch.as_tensor(wav_tmp, dtype=torch.float32)
 
 
+@DATA_LOADER_REGISTRY.register()
+class VoiceCRNetData(AudioData):
+
+    def __getitem__(self, index):
+        aud_data = self.get_wave_data(index)
+        aud_data = self.transform(aud_data)
+        label = self.get_ocean_label(index)
+        label_cls = torch.as_tensor(CRNetData.cls_encode(label), dtype=torch.float32)
+        return {
+            "aud_data": aud_data,
+            "aud_label": label,
+            "aud_label_cls": label_cls,
+        }
+
+    def transform(self, aud_ft):
+        if aud_ft.shape[-1] < 244832:
+            aud_ft_pad = np.zeros((1, 1, 244832))
+            aud_ft_pad[..., :aud_ft.shape[-1]] = aud_ft
+            aud_ft = aud_ft_pad
+        return torch.as_tensor(aud_ft, dtype=torch.float32)
+
+
 class _VoiceLibrosa(AudioData):
 
     def transform(self, aud_ft):
@@ -126,21 +149,21 @@ class VoiceLibrosaSwinTransformer(AudioData):
 def build_audio_loader(cfg, dataset_cls, mode="train"):
     if mode == "train":
         dataset = dataset_cls(
-            cfg.DATA.ROOT,  # "../datasets",
-            cfg.DATA.TRAIN_AUD_DATA,  # "raw_voice/trainingData",
-            cfg.DATA.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
+            cfg.DATA.ROOT,
+            cfg.DATA.TRAIN_AUD_DATA,
+            cfg.DATA.TRAIN_LABEL_DATA,
         )
     elif mode == "valid":
         dataset = dataset_cls(
-            cfg.DATA.ROOT,  # "../datasets",
-            cfg.DATA.VALID_AUD_DATA,  # "raw_voice/validationData",
-            cfg.DATA.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            cfg.DATA.ROOT,
+            cfg.DATA.VALID_AUD_DATA,
+            cfg.DATA.VALID_LABEL_DATA,
         )
     elif mode == "test":
         dataset = dataset_cls(
-            cfg.DATA.ROOT,  # "../datasets",
-            cfg.DATA.TEST_AUD_DATA,  # "raw_voice/testData",
-            cfg.DATA.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            cfg.DATA.ROOT,
+            cfg.DATA.TEST_AUD_DATA,
+            cfg.DATA.TEST_LABEL_DATA,
         )
     else:
         raise ValueError("mode must be one of 'train' or 'valid' or test' ")
@@ -148,6 +171,8 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
     data_loader = DataLoader(
         dataset,
         batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=cfg.DATA_LOADER.SHUFFLE,
+        drop_last=cfg.DATA_LOADER.DROP_LAST,
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )
 
@@ -158,21 +183,21 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
 def voice_librosa_loader(cfg, mode="train"):
     if mode == "train":
         dataset = _VoiceLibrosa(
-            cfg.DATA.ROOT,  # "../datasets",
-            cfg.DATA.TRAIN_AUD_DATA,  # "raw_voice/trainingData",
-            cfg.DATA.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
+            cfg.DATA.ROOT,
+            cfg.DATA.TRAIN_AUD_DATA,
+            cfg.DATA.TRAIN_LABEL_DATA,
         )
     elif mode == "valid":
         dataset = _VoiceLibrosa(
-            cfg.DATA.ROOT,  # "../datasets",
-            cfg.DATA.VALID_AUD_DATA,  # "raw_voice/validationData",
-            cfg.DATA.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            cfg.DATA.ROOT,
+            cfg.DATA.VALID_AUD_DATA,
+            cfg.DATA.VALID_LABEL_DATA,
         )
     elif mode == "test":
         dataset = _VoiceLibrosa(
-            cfg.DATA.ROOT,  # "../datasets",
-            cfg.DATA.TEST_AUD_DATA,  # "raw_voice/testData",
-            cfg.DATA.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            cfg.DATA.ROOT,
+            cfg.DATA.TEST_AUD_DATA,
+            cfg.DATA.TEST_LABEL_DATA,
         )
     else:
         raise ValueError("mode must be one of 'train' or 'valid' or test' ")
@@ -190,21 +215,21 @@ def voice_librosa_loader(cfg, mode="train"):
 def voice_librosa_swin_transformer_loader(cfg, mode="train"):
     if mode == "train":
         dataset = VoiceLibrosaSwinTransformer(
-            cfg.DATA.ROOT,  # "../datasets",
-            cfg.DATA.TRAIN_AUD_DATA,  # "raw_voice/trainingData",
-            cfg.DATA.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
+            cfg.DATA.ROOT,
+            cfg.DATA.TRAIN_AUD_DATA,
+            cfg.DATA.TRAIN_LABEL_DATA,
         )
     elif mode == "valid":
         dataset = VoiceLibrosaSwinTransformer(
-            cfg.DATA.ROOT,  # "../datasets",
-            cfg.DATA.VALID_AUD_DATA,  # "raw_voice/validationData",
-            cfg.DATA.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            cfg.DATA.ROOT,
+            cfg.DATA.VALID_AUD_DATA,
+            cfg.DATA.VALID_LABEL_DATA,
         )
     elif mode == "test":
         dataset = VoiceLibrosaSwinTransformer(
-            cfg.DATA.ROOT,  # "../datasets",
-            cfg.DATA.TEST_AUD_DATA,  # "raw_voice/testData",
-            cfg.DATA.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            cfg.DATA.ROOT,
+            cfg.DATA.TEST_AUD_DATA,
+            cfg.DATA.TEST_LABEL_DATA,
         )
     else:
         raise ValueError("mode must be one of 'train' or 'valid' or test' ")
@@ -220,13 +245,16 @@ def voice_librosa_swin_transformer_loader(cfg, mode="train"):
 
 if __name__ == "__main__":
 
-    dataset = VoiceLibrosa(
+    dataset = VoiceCRNetData(
         "../../../datasets",
         "voice_data/voice_librosa/train_data",
         "annotation/annotation_training.pkl",
     )
     for i in range(len(dataset)):
+        if i > 3:
+            break
         a = dataset[i]
+        print(a)
     # data_loader = DataLoader(dataset, batch_size=8, num_workers=0)
     # for i, batch in enumerate(data_loader):
     #     print(batch["aud_data"].shape, batch["aud_label"].shape)

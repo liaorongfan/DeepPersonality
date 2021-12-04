@@ -3,6 +3,7 @@ import torch.nn as nn
 from dpcv.modeling.module.bi_modal_resnet_module import AudioVisualResNet, AudInitStage
 from dpcv.modeling.module.bi_modal_resnet_module import BiModalBasicBlock, VisInitStage
 from dpcv.modeling.module.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1, vis_conv3x3, vis_conv1x1
+from .build import NETWORK_REGISTRY
 
 
 class CRNet(nn.Module):
@@ -74,10 +75,59 @@ class CRNet(nn.Module):
         return cls_guide, out
 
 
+@NETWORK_REGISTRY.register()
+class CRNetAud(nn.Module):
+    def __init__(self):
+        super(CRNetAud, self).__init__()
+        self.train_guider_epo = 30  # default train 50 epochs for classification guidence
+        self.train_regressor = False
+        self.audio_branch = AudioVisualResNet(
+            in_channels=1, init_stage=AudInitStage,
+            block=BiModalBasicBlock, conv=[aud_conv1x9, aud_conv1x1],
+            layers=[3, 4, 6, 3],
+            out_spatial=(1, 4)
+        )
+
+        self.wav_cls_guide = nn.Conv2d(512, 20, (1, 4))
+        self.out_map = nn.Linear(512, 1)
+
+    def set_train_classifier_epo(self, epo):
+        self.train_guider_epo = epo
+
+    def set_train_regressor(self):
+        self.train_regressor = True
+
+    def forward(self, audio_wav):
+        aud_feature = self.audio_branch(audio_wav)
+        # ---- first training stage class guide -----
+        wav_cls = self.wav_cls_guide(aud_feature)
+
+        wav_cls = wav_cls.view(wav_cls.size(0), 5, -1)
+        cls_guide = wav_cls  # torch.stack([wav_cls], dim=-1).mean(dim=-1).squeeze()
+        if not self.train_regressor:
+            return wav_cls
+        # --- second training stage guided regress ---
+        wav_cls_feature = aud_feature.view(aud_feature.size(0), 512, 4).permute(0, 2, 1)
+        wav_cls_score = torch.softmax(wav_cls, -1)
+        guided_wav_reg = torch.matmul(wav_cls_score, wav_cls_feature)  # where i = {1,2,3,4,5}
+
+        out_reg = guided_wav_reg
+        out = self.out_map(out_reg)
+        out = out.view(out.size(0), -1)
+
+        return cls_guide, out
+
+
 def get_crnet_model(only_train_guider=True):
     cr_net = CRNet(only_train_guider)
-    cr_net.to(device=torch.device("cuda" if torch.cuda.is_available() else "cup"))
+    cr_net.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return cr_net
+
+
+@NETWORK_REGISTRY.register()
+def get_crnet_aud_model(cfg):
+    cr_net_aud = CRNetAud()
+    return cr_net_aud.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
 if __name__ == "__main__":
@@ -86,10 +136,13 @@ if __name__ == "__main__":
     global_img_input = torch.randn(2, 3, 112, 112)
     local_img_input = torch.randn(2, 3, 112, 112)
     wav_input = torch.randn(2, 1, 1, 244832)
-    model = CRNet(only_train_guider=True)
-    y = model(global_img_input, local_img_input, wav_input)
+    # model = CRNet(only_train_guider=True)
+    # y = model(global_img_input, local_img_input, wav_input)
+    model = CRNetAud(only_train_guider=True)
+    y = model(wav_input)
     print(y.shape)
 
     model.train_guider = False
-    cls, reg = model(global_img_input, local_img_input, wav_input)
+    # cls, reg = model(global_img_input, local_img_input, wav_input)
+    cls, reg = model(wav_input)
     print(cls.shape, reg.shape)

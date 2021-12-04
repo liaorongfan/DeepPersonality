@@ -7,7 +7,7 @@ def setup():
     args = parse_args()
     if args.cfg_file:
         cfg_from_file(args.cfg_file)
-    cfg_from_list(args.opts)
+    # cfg_from_list(args.opts)
 
 
 if __name__ == "__main__":

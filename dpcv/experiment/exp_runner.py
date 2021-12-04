@@ -60,7 +60,25 @@ class ExpRunner:
     def build_trainer(self):
         return build_trainer(self.cfg, self.collector, self.logger)
 
-    def train(self):
+    def before_train(self, cfg):
+        # cfg = self.cfg.TRAIN
+        if cfg.RESUME:
+            self.model, self.optimizer, epoch = resume_training(cfg.RESUME, self.model, self.optimizer)
+            cfg.START_EPOCH = epoch
+            self.logger.info(f"resume training from {cfg.RESUME}")
+
+    def train_epochs(self, cfg):
+        # cfg = self.cfg.TRAIN
+        for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
+            self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
+            self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, epoch)
+            self.scheduler.step()
+
+            if self.collector.model_save:
+                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+                self.collector.update_best_epoch(epoch)
+
+    def train_(self):
         cfg = self.cfg.TRAIN
         if cfg.RESUME:
             self.model, self.optimizer, epoch = resume_training(cfg.RESUME, self.model, self.optimizer)
@@ -84,6 +102,23 @@ class ExpRunner:
                 self.collector.best_epoch,
             )
         )
+
+    def after_train(self, cfg):
+        # cfg = self.cfg.TRAIN
+        self.collector.draw_epo_info(log_dir=self.log_dir)
+        self.logger.info(
+            "{} done, best acc: {} in :{}".format(
+                datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
+                self.collector.best_valid_acc,
+                self.collector.best_epoch,
+            )
+        )
+
+    def train(self):
+        cfg = self.cfg.TRAIN
+        self.before_train(cfg)
+        self.train_epochs(cfg)
+        self.after_train(cfg)
 
     def test(self, weight=None):
         self.logger.info("Test only mode")
@@ -120,6 +155,7 @@ class ExpRunner:
 
 if __name__ == "__main__":
     import torch
+
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
 
     exp_runner = ExpRunner(test_cfg)

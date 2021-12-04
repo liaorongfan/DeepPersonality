@@ -8,7 +8,7 @@ sys.path.append(os.path.join(BASE_DIR, '..'))
 cfg = EasyDict()
 _C = cfg
 # if only test or resume training or train from scratch ----------------------------------------------------------------
-_C.TEST_ONLY = True
+_C.TEST_ONLY = False
 _C.WEIGHT = "../results/cr_net/exp4_02-02/checkpoint_48.pkl"
 # _C.WEIGHT = "../results/cr_net/10-22_01-38/checkpoint_85.pkl"
 # __C.RESUME = "../results/07-04_20-13/checkpoint_14.pkl"
@@ -25,7 +25,7 @@ _C.VALID_IMG_FACE_DATA = "image_data/valid_data_face"
 _C.TEST_IMG_DATA = "image_data/test_data"
 _C.TEST_IMG_FACE_DATA = "image_data/test_data_face"
 
-_C.TRAIN_AUD_DATA = "voice_data/voice_librosa/training_data"
+_C.TRAIN_AUD_DATA = "voice_data/voice_librosa/train_data"
 _C.VALID_AUD_DATA = "voice_data/voice_librosa/valid_data"
 _C.TEST_AUD_DATA = "voice_data/voice_librosa/test_data"
 

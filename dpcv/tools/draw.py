@@ -32,7 +32,6 @@ def show_confMat(confusion_mat, classes, set_name, out_dir, epoch=999, verbose=F
     plt.ylabel('True label')
     plt.title("Confusion_Matrix_{}_{}".format(set_name, epoch))
 
-    # 打印数字
     if perc:
         cls_per_nums = confusion_mat.sum(axis=0)
         conf_mat_per = confusion_mat / cls_per_nums
@@ -44,7 +43,6 @@ def show_confMat(confusion_mat, classes, set_name, out_dir, epoch=999, verbose=F
         for i in range(confusion_mat_tmp.shape[0]):
             for j in range(confusion_mat_tmp.shape[1]):
                 plt.text(x=j, y=i, s=int(confusion_mat[i, j]), va='center', ha='center', color='red', fontsize=10)
-    # 保存
     plt.savefig(os.path.join(out_dir, "Confusion_Matrix_{}.png".format(set_name)))
     plt.close()
 
