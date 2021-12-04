@@ -5,12 +5,6 @@ from dpcv.modeling.module.bi_modal_resnet_module import BiModalBasicBlock, VisIn
 from dpcv.modeling.module.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1, vis_conv3x3, vis_conv1x1
 
 
-# import torch.utils.model_zoo as model_zoo
-# model_urls = {
-#     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
-# }
-
-
 class CRNet(nn.Module):
     def __init__(self, only_train_guider=False):
         super(CRNet, self).__init__()

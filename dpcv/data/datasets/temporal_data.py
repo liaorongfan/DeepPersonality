@@ -16,34 +16,7 @@ from data.transforms.transform import set_lstm_transform
 class TemporalData(VideoData):
     def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None):
         super().__init__(data_root, img_dir, label_file, audio_dir)
-        # self.data_root = data_root
-        # self.audio_dir = audio_dir
-        # self.img_dir_pt = img_dir
         self.transform = transform
-        # self.img_dir_ls = self.parse_img_dir(img_dir)  # every directory name indeed a video
-        # self.annotation = self.parse_annotation(label_file)
-
-    # def parse_img_dir(self, img_dir):
-    #     img_dir_ls = os.listdir(os.path.join(self.data_root, img_dir))
-    #     img_dir_ls = [img_dir.replace("_aligned", "") for img_dir in img_dir_ls if "aligned" in img_dir]
-    #     return img_dir_ls
-    #
-    # def parse_annotation(self, label_file):
-    #     label_path = os.path.join(self.data_root, label_file)
-    #     with open(label_path, "rb") as f:
-    #         annotation = pickle.load(f, encoding="latin1")
-    #     return annotation
-    #
-    # def _find_ocean_score(self, index):
-    #     video_name = f"{self.img_dir_ls[index]}.mp4"
-    #     score = [
-    #         self.annotation["openness"][video_name],
-    #         self.annotation["conscientiousness"][video_name],
-    #         self.annotation["extraversion"][video_name],
-    #         self.annotation["agreeableness"][video_name],
-    #         self.annotation["neuroticism"][video_name],
-    #     ]
-    #     return score
 
     def __getitem__(self, idx):
         anno_score = self.get_ocean_label(idx)
@@ -67,8 +40,6 @@ class TemporalData(VideoData):
         return len(self.img_dir_ls)
 
     def _get_statistic_img_sample(self, index):
-        # img_dir_name = f"{self.img_dir_ls[index]}_aligned"
-        # img_dir_path = os.path.join(self.data_root, self.img_dir_pt, img_dir_name)
         imgs = glob.glob(self.img_dir_ls[index] + "/*.jpg")
         imgs = sorted(imgs, key=lambda x: int(Path(x).stem[5:]))
         if len(imgs) > 10:

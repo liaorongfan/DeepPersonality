@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from .build import NETWORK_REGISTRY
 
 
 class BiModelLSTM(nn.Module):
@@ -106,7 +107,8 @@ def get_img_modal_lstm_model():
     return img_lstm
 
 
-def get_aud_modal_lstm_model():
+@NETWORK_REGISTRY.register()
+def get_aud_modal_lstm_model(cfg=None):
     aud_lstm = AudioLSTM()
     aud_lstm.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return aud_lstm

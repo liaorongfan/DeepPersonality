@@ -35,6 +35,7 @@ __C.DATA.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 __C.DATA_LOADER = CfgNode()
 # name of dataloader build function
 __C.DATA_LOADER.NAME = "single_frame_data_loader"
+__C.DATA_LOADER.DATASET = ""
 __C.DATA_LOADER.TRAIN_BATCH_SIZE = 48
 __C.DATA_LOADER.VALID_BATCH_SIZE = 32
 __C.DATA_LOADER.NUM_WORKERS = 0
@@ -55,7 +56,7 @@ __C.SOLVER = CfgNode()
 __C.SOLVER.NAME = "sgd"
 __C.SOLVER.LR_INIT = 0.01
 __C.SOLVER.WEIGHT_DECAY = 0.0005
-
+__C.SOLVER.MOMENTUM = 0.0
 __C.SOLVER.SCHEDULER = "multi_step_scale"
 __C.SOLVER.FACTOR = 0.1
 __C.SOLVER.MILESTONE = [100, 120]

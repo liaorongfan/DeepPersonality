@@ -1,0 +1,17 @@
+DATA:
+  TRAIN_AUD_DATA: "voice_data/voice_librosa/train_data"
+  VALID_AUD_DATA: "voice_data/voice_librosa/valid_data"
+  TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
+DATA_LOADER:
+  NAME: "build_audio_loader"
+  DATASET: "VoiceLibrosa"
+  TRAIN_BATCH_SIZE: 128
+MODEL:
+  NAME: "get_audio_resnet_model"
+SOLVER:
+  LR_INIT: 0.0002
+  MILESTONE: [200, 250]
+TRAIN:
+  TRAINER: "AudioTrainer"
+  MAX_EPOCH: 300
+  OUTPUT_DIR: "results/aud_res18"

@@ -107,29 +107,29 @@ def make_data_loader(cfg, mode=None):
     transforms = set_crnet_transform()
     if mode == "train":
         dataset = CRNetData(
-            "../datasets",
-            "image_data/train_data",
-            "image_data/train_data_face",
-            "voice_data/train_data",  # default train_data_244832 form librosa
-            "annotation/annotation_training.pkl",
+            cfg.DATA_ROOT,  # "../datasets",
+            cfg.TRAIN_IMG_DATA,  # "image_data/train_data",
+            cfg.TRAIN_IMG_FACE_DATA,  # "image_data/train_data_face",
+            cfg.TRAIN_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
+            cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms
         )
     elif mode == "valid":
         dataset = CRNetData(
-            "../datasets",
-            "image_data/valid_data",
-            "image_data/valid_data_face",
-            "voice_data/valid_data",
-            "annotation/annotation_validation.pkl",
+            cfg.DATA_ROOT,  # "../datasets",
+            cfg.VALID_IMG_DATA,  # "image_data/train_data",
+            cfg.VALID_IMG_FACE_DATA,  # "image_data/train_data_face",
+            cfg.VALID_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
+            cfg.VALID_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms
         )
     else:
         dataset = CRNetData(
-            "../datasets",
-            "image_data/test_data",
-            "image_data/test_data_face",
-            "voice_data/test_data",
-            "annotation/annotation_test.pkl",
+            cfg.DATA_ROOT,  # "../datasets",
+            cfg.TEST_IMG_DATA,  # "image_data/train_data",
+            cfg.TEST_IMG_FACE_DATA,  # "image_data/train_data_face",
+            cfg.TEST_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
+            cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms
         )
     data_loader = DataLoader(

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .build import NETWORK_REGISTRY
 # import torch.utils.model_zoo as model_zoo
 
 backbone = {
@@ -71,6 +72,32 @@ def make_layers(cfg, batch_norm=False):
     return nn.Sequential(*layers)
 
 
+class AudLinearRegressor(nn.Module):
+
+    def __init__(self):
+        super(AudLinearRegressor, self).__init__()
+        self.linear = nn.Linear(79534, 5)
+        self._init_weight()
+
+    def _init_weight(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, 0, 0.01)
+                nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        x = self.linear(x)
+        x = torch.sigmoid(x)
+        return x
+
+
+@NETWORK_REGISTRY.register()
+def get_aud_linear_regressor(cfg=None):
+    model = AudLinearRegressor()
+    model.to(device=(torch.device("cuda" if torch.cuda.is_available() else "cpu")))
+    return model
+
+
 def get_dan_model(pretrained=False, **kwargs):
     """DAN 16-layer model (configuration "VGG16")
 
@@ -95,10 +122,15 @@ def get_dan_model(pretrained=False, **kwargs):
 
 
 if __name__ == "__main__":
-    model = get_dan_model(pretrained=True)
-    x = torch.randn(2, 3, 244, 244).cuda()
+    model = get_aud_linear_regressor()
+    x = torch.randn(2, 79534).cuda()
     y = model(x)
-    print(y, y.shape)
+    print(y.shape)
+
+    # model = get_dan_model(pretrained=True)
+    # x = torch.randn(2, 3, 244, 244).cuda()
+    # y = model(x)
+    # print(y, y.shape)
 
 """
 questions:

@@ -14,16 +14,24 @@ _C.WEIGHT = "../results/cr_net/exp4_02-02/checkpoint_48.pkl"
 # __C.RESUME = "../results/07-04_20-13/checkpoint_14.pkl"
 _C.RESUME = None
 # data related config --------------------------------------------------------------------------------------------------
-_C.DATA_ROOT = "DeepPersonality/datasets/"
-_C.OUTPUT_DIR = "../results/cr_net"
-_C.TRAIN_IMG_DATA = "image_data/training_data"
-_C.VALID_IMG_DATA = "image_data/validation_data"
+_C.DATA_ROOT = "../datasets/"
 
-_C.TRAIN_AUD_DATA = "voice_data/training_data"
-_C.VALID_AUD_DATA = "voiceData/validation_data"
+_C.TRAIN_IMG_DATA = "image_data/train_data"
+_C.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
+
+_C.VALID_IMG_DATA = "image_data/valid_data"
+_C.VALID_IMG_FACE_DATA = "image_data/valid_data_face"
+
+_C.TEST_IMG_DATA = "image_data/test_data"
+_C.TEST_IMG_FACE_DATA = "image_data/test_data_face"
+
+_C.TRAIN_AUD_DATA = "voice_data/voice_librosa/training_data"
+_C.VALID_AUD_DATA = "voice_data/voice_librosa/valid_data"
+_C.TEST_AUD_DATA = "voice_data/voice_librosa/test_data"
 
 _C.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 _C.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
+_C.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 # data loader related config -------------------------------------------------------------------------------------------
 _C.TRAIN_BATCH_SIZE = 32
 _C.VALID_BATCH_SIZE = 32
@@ -45,4 +53,5 @@ _C.TRAIN_CLS_EPOCH = 30
 _C.MAX_EPOCH = 100
 # logging related setting ----------------------------------------------------------------------------------------------
 _C.LOG_INTERVAL = 20
+_C.OUTPUT_DIR = "../results/cr_net"
 

@@ -1,0 +1,19 @@
+DATA:
+  TRAIN_AUD_DATA: "voice_data/voice_mfcc/train_data_mfcc"
+  VALID_AUD_DATA: "voice_data/voice_mfcc/valid_data_mfcc"
+  TEST_AUD_DATA: "voice_data/voice_mfcc/test_data_mfcc"
+DATA_LOADER:
+  NAME: "build_audio_loader"
+  DATASET: "VoiceMfcc"
+  TRAIN_BATCH_SIZE: 128
+MODEL:
+  NAME: "get_aud_modal_lstm_model"
+SOLVER:
+  LR_INIT: 0.05
+  MOMENTUM: 0.9
+  WEIGHT_DECAY: 0.0005
+  MILESTONE: [500, 800, 900]
+TRAIN:
+  TRAINER: "AudioTrainer"
+  MAX_EPOCH: 1000
+  OUTPUT_DIR: "results/aud_lstm"

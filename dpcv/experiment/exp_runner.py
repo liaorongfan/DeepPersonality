@@ -43,13 +43,7 @@ class ExpRunner:
         self.trainer = self.build_trainer()
 
     def build_dataloader(self):
-        dataloader = build_dataloader(self.cfg)
-        data_loader_dicts = {
-            "train": dataloader(self.cfg, mode="train"),
-            "valid": dataloader(self.cfg, mode="valid"),
-            "test": dataloader(self.cfg, mode="test"),
-        }
-        return data_loader_dicts
+        return build_dataloader(self.cfg)
 
     def build_model(self):
         return build_model(self.cfg)
