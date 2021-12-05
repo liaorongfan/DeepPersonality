@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
+from dpcv.modeling.module.weight_init_helper import initialize_weights
 from .build import NETWORK_REGISTRY
 
 
 class BiModelLSTM(nn.Module):
-    def __init__(self):
+    def __init__(self, init_weights=True):
         super(BiModelLSTM, self).__init__()
         self.audio_branch = nn.Linear(in_features=68, out_features=32)
         self.image_branch_conv = nn.Sequential(
@@ -30,6 +31,9 @@ class BiModelLSTM(nn.Module):
         self.lstm = nn.LSTM(input_size=160, hidden_size=512)
         self.out_linear = nn.Linear(in_features=512, out_features=5)
 
+        if init_weights:
+            initialize_weights(self)
+
     def forward(self, audio_feature, img_feature):
         x_audio = self.audio_branch(audio_feature)  # (bs * 6, 32)
         x_img = self.image_branch_conv(img_feature)  # (bs * 6, 16 * 8 * 8)
@@ -41,6 +45,19 @@ class BiModelLSTM(nn.Module):
         x = x.permute(1, 0, 2)  # x_shape = (bs, 6, 5)
         y = torch.sigmoid(x).mean(dim=1)  # y_shape = (bs, 5)
         return y
+
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, 0, 0.01)
+                nn.init.constant_(m.bias, 0)
 
 
 class ImgLSTM(nn.Module):
@@ -96,6 +113,13 @@ class AudioLSTM(nn.Module):
 
 
 def get_bi_modal_lstm_model():
+    bi_modal_lstm = BiModelLSTM()
+    bi_modal_lstm.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return bi_modal_lstm
+
+
+@NETWORK_REGISTRY.register()
+def bi_modal_lstm_model(cfg=None):
     bi_modal_lstm = BiModelLSTM()
     bi_modal_lstm.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return bi_modal_lstm

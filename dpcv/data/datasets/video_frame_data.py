@@ -6,6 +6,7 @@ import numpy as np
 import glob
 from dpcv.data.datasets.bi_modal_data import VideoData
 from data.transforms.transform import set_transform_op
+from data.transforms.build import build_transform_opt
 from .build import DATA_LOADER_REGISTRY
 
 
@@ -82,7 +83,7 @@ def make_data_loader(cfg, mode="train"):
 @DATA_LOADER_REGISTRY.register()
 def single_frame_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
-    transform = set_transform_op()
+    transform = build_transform_opt(cfg)
     if mode == "train":
         data_set = SingleFrameData(
             cfg.DATA.ROOT,

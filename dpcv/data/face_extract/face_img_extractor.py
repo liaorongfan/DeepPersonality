@@ -10,7 +10,8 @@ class FaceImageExtractor:
     def __init__(self, data_root, detector_path):
         """
         args:
-            data_root:(str) where to save the video directory
+            data_root:(str) : where to save the processed video directory
+            detector_path:(str) : the path to dlib face detector model
         """
         self.data_root = data_root
         self.video_name = None

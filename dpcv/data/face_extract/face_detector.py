@@ -1,9 +1,6 @@
-import sys
-import os, math
-import dlib
-import glob
-from skimage import io
+import math
 import cv2
+import dlib
 import numpy as np
 
 
@@ -184,3 +181,17 @@ class FaceDetection:
         # draw bounding box
         win.add_overlay(self.rects)
         dlib.hit_enter_to_continue()
+
+
+if __name__ == "__main__":
+    from PIL import Image
+    dector = FaceDetection(
+        "/home/rongfan/05-personality_traits/DeepPersonality/pre_trained_weights/shape_predictor_68_face_landmarks.dat")
+    img = Image.open(
+        "/home/rongfan/05-personality_traits/DeepPersonality/datasets/image_data/test_data/--Ymqszjv54.000/frame_1.jpg")
+    img = np.array(img)
+    dector.find_face(img)
+    dector.show_detected_face(img)
+    face = dector.run(img)
+    Image.fromarray(face).show()
+

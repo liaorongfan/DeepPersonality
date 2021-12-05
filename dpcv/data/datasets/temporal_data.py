@@ -11,6 +11,8 @@ from pathlib import Path
 import random
 import numpy as np
 from data.transforms.transform import set_lstm_transform
+from data.transforms.build import build_transform_opt
+from .build import DATA_LOADER_REGISTRY
 
 
 class TemporalData(VideoData):
@@ -98,6 +100,47 @@ def make_data_loader(cfg, mode):
         shuffle=True,
         num_workers=0,  # cfg.NUM_WORKS
         drop_last=True,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def bimodal_lstm_data_loader(cfg, mode):
+    assert (mode in ["train", "valid", "test"]), " 'mode' only supports 'train' 'valid' 'test' "
+    transforms = build_transform_opt(cfg)
+    if mode == "train":
+        dataset = TemporalData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TRAIN_IMG_DATA,
+            cfg.DATA.TRAIN_AUD_DATA,
+            cfg.DATA.TRAIN_LABEL_DATA,
+            transforms
+        )
+        batch_size = cfg.DATA_LOADER.TRAIN_BATCH_SIZE
+    elif mode == "valid":
+        dataset = TemporalData(
+            cfg.DATA.ROOT,
+            cfg.DATA.VALID_IMG_DATA,
+            cfg.DATA.VALID_AUD_DATA,
+            cfg.DATA.VALID_LABEL_DATA,
+            transforms
+        )
+        batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+    else:
+        dataset = TemporalData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TEST_IMG_DATA,
+            cfg.DATA.TEST_AUD_DATA,
+            cfg.DATA.TEST_LABEL_DATA,
+            transforms
+        )
+        batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=batch_size,
+        shuffle=cfg.DATA_LOADER.SHUFFLE,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,  # cfg.NUM_WORKS
+        drop_last=cfg.DATA_LOADER.DROP_LAST,
     )
     return data_loader
 

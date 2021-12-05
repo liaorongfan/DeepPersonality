@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.optim as optim
 from dpcv.config.deep_bimodal_regression_cfg import cfg
 from dpcv.engine.bi_modal_trainer import ImageModalTrainer
-from dpcv.modeling.networks.dan import get_dan_model
+from dpcv.modeling.networks.dan import get_model
 from dpcv.tools.common import setup_seed, setup_config
 from dpcv.tools.logger import make_logger
 from dpcv.tools.common import parse_args
@@ -21,7 +21,7 @@ def main(args, cfg):
         "valid": make_data_loader(cfg, mode="valid"),
         "test": make_data_loader(cfg, mode="test"),
     }
-    model = get_dan_model(pretrained=True)
+    model = get_model(pretrained=True)
     loss_f = nn.MSELoss()
 
     optimizer = optim.SGD(model.parameters(), lr=cfg.LR_INIT,  weight_decay=cfg.WEIGHT_DECAY)

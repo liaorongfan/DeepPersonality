@@ -1,6 +1,8 @@
 """
 transform operation for different networks
+for vgg face mean = (131.0912, 103.8827, 91.4953) no std
 """
+from .build import TRANSFORM_REGISTRY
 
 
 def set_transform_op():
@@ -12,6 +14,19 @@ def set_transform_op():
         transforms.CenterCrop((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(norm_mean, norm_std)
+    ])
+    return transforms
+
+
+@TRANSFORM_REGISTRY.register()
+def standard_transform_op():
+    import torchvision.transforms as transforms
+    transforms = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomHorizontalFlip(0.5),
+        transforms.CenterCrop((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
     return transforms
 
@@ -42,12 +57,14 @@ def set_vat_transform_op():
     return transforms
 
 
+@TRANSFORM_REGISTRY.register()
 def set_lstm_transform():
     import torchvision.transforms as transforms
     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
     norm_std = [0.229, 0.224, 0.225]
     transforms = transforms.Compose([
         transforms.Resize(112),
+        transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
         transforms.Normalize(norm_mean, norm_std)
     ])

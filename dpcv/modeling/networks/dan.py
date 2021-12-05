@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .build import NETWORK_REGISTRY
+from dpcv.modeling.module.weight_init_helper import initialize_weights
 # import torch.utils.model_zoo as model_zoo
 
 backbone = {
@@ -25,7 +26,8 @@ class DAN(nn.Module):
         self.linear_2 = nn.Linear(1024, num_classes)
 
         if init_weights:
-            self._initialize_weights()
+            # self._initialize_weights()
+            initialize_weights(self)
 
     def forward(self, x):
         x = self.features(x)
@@ -98,7 +100,30 @@ def get_aud_linear_regressor(cfg=None):
     return model
 
 
-def get_dan_model(pretrained=False, **kwargs):
+@NETWORK_REGISTRY.register()
+def dan_model(cfg):
+
+    kwargs = {'init_weights': True}
+    if cfg.MODEL.PRETRAIN:
+        kwargs["init_weights"] = False
+
+    dan = DAN(make_layers(backbone['VGG16'], batch_norm=True), **kwargs)
+
+    if cfg.MODEL.PRETRAIN:
+        print("load pretained model weights")
+        pretrained_dict = torch.load("../pre_trained_weights/vgg16_bn-6c64b313.pth")
+        model_dict = dan.state_dict()
+        # 1. filter out unnecessary keys -------------------------------------------------------------------------------
+        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+        # 2. overwrite entries in the existing state dict --------------------------------------------------------------
+        model_dict.update(pretrained_dict)
+        dan.load_state_dict(model_dict)
+        # model.load_state_dict(model_zoo.load_url(model_urls['vgg16']))
+    dan.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return dan
+
+
+def get_model(pretrained=False, **kwargs):
     """DAN 16-layer model (configuration "VGG16")
 
     Args:

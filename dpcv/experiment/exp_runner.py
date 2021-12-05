@@ -132,6 +132,7 @@ class ExpRunner:
                 [file for file in os.listdir(self.log_dir) if file.endswith(".pkl") and ("last" not in file)]
             )
             weight_file = os.path.join(self.log_dir, weights[-1])
+            print(f"test with model {weight_file}")
             self.model = load_model(self.model, weight_file)
 
         ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.test(

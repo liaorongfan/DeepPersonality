@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 import os
 import zipfile
 from tqdm import tqdm
@@ -148,7 +147,7 @@ def video2img_val(zipfile_val, saved_to="image_data/valid_data"):
 
 
 def video2img_test(zipfile_test, saved_to="image_data/test_data"):
-    for i in range(7, 11):
+    for i in range(1, 11):
         zipfilename = 'test_' + str(i) + '.zip'
         # Accessing the zipfile i
         archive = zipfile.ZipFile(os.path.join(zipfile_test + zipfilename), 'r')
