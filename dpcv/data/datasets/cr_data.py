@@ -7,8 +7,9 @@ import random
 import numpy as np
 from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
-from data.transforms.transform import set_crnet_transform
-
+from .build import DATA_LOADER_REGISTRY
+from data.transforms.transform import set_crnet_transform, crnet_frame_face_transform
+from dpcv.data.transforms.build import build_transform_opt
 
 class CRNetData(VideoData):
     def __init__(self, data_root, img_dir, face_img_dir, audio_dir, label_file, transform=None):
@@ -27,8 +28,8 @@ class CRNetData(VideoData):
         anno_cls_encode = self.cls_encode(anno_score)
 
         if self.transform:
-            glo_img = self.transform(glo_img)
-            loc_img = self.transform(loc_img)
+            glo_img = self.transform["frame"](glo_img)
+            loc_img = self.transform["face"](loc_img)
         wav_aud = torch.as_tensor(wav_aud, dtype=glo_img.dtype)
         anno_score = torch.as_tensor(anno_score, dtype=glo_img.dtype)
         anno_cls_encode = torch.as_tensor(anno_cls_encode)
@@ -138,6 +139,50 @@ def make_data_loader(cfg, mode=None):
         shuffle=True,
         num_workers=4,  # cfg.NUM_WORKS
         drop_last=True,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def crnet_data_loader(cfg, mode=None):
+    assert (mode in ["train", "valid", "test"]), " 'mode' only supports 'train' and 'valid'"
+
+    transforms = build_transform_opt(cfg)
+    data_cfg = cfg.DATA
+    if mode == "train":
+        dataset = CRNetData(
+            data_cfg.ROOT,  # "../datasets",
+            data_cfg.TRAIN_IMG_DATA,  # "image_data/train_data",
+            data_cfg.TRAIN_IMG_FACE_DATA,  # "image_data/train_data_face",
+            data_cfg.TRAIN_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
+            data_cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
+            transforms
+        )
+    elif mode == "valid":
+        dataset = CRNetData(
+            data_cfg.ROOT,  # "../datasets",
+            data_cfg.VALID_IMG_DATA,  # "image_data/train_data",
+            data_cfg.VALID_IMG_FACE_DATA,  # "image_data/train_data_face",
+            data_cfg.VALID_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
+            data_cfg.VALID_LABEL_DATA,  # "annotation/annotation_training.pkl",
+            transforms
+        )
+    else:
+        dataset = CRNetData(
+            data_cfg.ROOT,  # "../datasets",
+            data_cfg.TEST_IMG_DATA,  # "image_data/train_data",
+            data_cfg.TEST_IMG_FACE_DATA,  # "image_data/train_data_face",
+            data_cfg.TEST_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
+            data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
+            transforms
+        )
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        shuffle=loader_cfg.SHUFFLE,
+        num_workers=loader_cfg.NUM_WORKERS,  # cfg.NUM_WORKS
+        drop_last=loader_cfg.DROP_LAST,
     )
     return data_loader
 

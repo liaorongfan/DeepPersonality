@@ -3,12 +3,13 @@ import torch.nn as nn
 from dpcv.modeling.module.bi_modal_resnet_module import AudioVisualResNet, AudInitStage
 from dpcv.modeling.module.bi_modal_resnet_module import VisInitStage, BiModalBasicBlock
 from dpcv.modeling.module.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1, vis_conv3x3, vis_conv1x1
+from dpcv.modeling.module.weight_init_helper import initialize_weights
 from .build import NETWORK_REGISTRY
 
 
 class AudioVisualResNet18(nn.Module):
 
-    def __init__(self):
+    def __init__(self, init_weights=True):
         super(AudioVisualResNet18, self).__init__()
         self.audio_branch = AudioVisualResNet(
             in_channels=1, init_stage=AudInitStage,
@@ -23,6 +24,9 @@ class AudioVisualResNet18(nn.Module):
             layers=[2, 2, 2, 2]
         )
         self.linear = nn.Linear(512, 5)
+
+        if init_weights:
+            initialize_weights(self)
 
     def forward(self, aud_input, vis_input):
         aud_x = self.audio_branch(aud_input)
@@ -57,6 +61,13 @@ class AudioResNet18(nn.Module):
         x = self.linear(aud_x)
         x = torch.sigmoid(x)
         return x
+
+
+@NETWORK_REGISTRY.register()
+def audiovisual_resnet(cfg=None):
+    multi_modal_model = AudioVisualResNet18()
+    multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return multi_modal_model
 
 
 def get_audiovisual_resnet_model():

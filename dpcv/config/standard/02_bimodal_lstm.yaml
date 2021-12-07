@@ -7,7 +7,7 @@ DATA:
   TEST_AUD_DATA: "voice_data/voice_mfcc/test_data_mfcc"
 DATA_LOADER:
   NAME: "bimodal_lstm_data_loader"
-  TRANSFORM: "set_lstm_transform"  # for different input image resolution
+  TRANSFORM: "face_image_transform"  # for different input image resolution
   TRAIN_BATCH_SIZE: 64
   NUM_WORKERS: 4
 MODEL:

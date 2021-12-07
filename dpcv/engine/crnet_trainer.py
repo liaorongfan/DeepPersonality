@@ -149,7 +149,7 @@ class CRNetTrainer(BiModalTrainer):
 
 
 @TRAINER_REGISTRY.register()
-class CRNetAudTrainer(BiModalTrainer):
+class CRNetTrainer2(BiModalTrainer):
 
     def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
         model.train()
@@ -167,13 +167,13 @@ class CRNetAudTrainer(BiModalTrainer):
             inputs, cls_label, reg_label = self.data_fmt(data)
             # forward
             if not model.train_regressor:
-                cls_score = model(inputs)
+                cls_score = model(*inputs)
                 loss = loss_f["ce_loss"](cls_score, cls_label)
                 optimizer[0].zero_grad()
                 loss.backward()
                 optimizer[0].step()
             else:
-                cls_score, reg_pred = model(inputs)
+                cls_score, reg_pred = model(*inputs)
                 loss = self.loss_compute(loss_f, reg_pred, reg_label, cls_score, cls_label, epoch_idx)
                 # backward
                 optimizer[1].zero_grad()
@@ -223,7 +223,7 @@ class CRNetAudTrainer(BiModalTrainer):
                 ocean_acc_epoch = []
                 for i, data in enumerate(data_loader):
                     inputs, cls_label, reg_label = self.data_fmt(data)
-                    cls_score, reg_pred = model(inputs)
+                    cls_score, reg_pred = model(*inputs)
                     loss = self.loss_compute(loss_f, reg_pred, reg_label, cls_score, cls_label, epoch_idx)
                     loss_batch_list.append(loss.item())
                     ocean_acc_batch = (1 - torch.abs(reg_pred.cpu() - reg_label.cpu())).mean(dim=0).clip(min=0)
@@ -265,7 +265,7 @@ class CRNetAudTrainer(BiModalTrainer):
             output_list = []
             for data in tqdm(data_loader):
                 inputs, cls_label, labels = self.data_fmt(data)
-                _, outputs = model(inputs)
+                _, outputs = model(*inputs)
 
                 outputs = outputs.cpu().detach()
                 labels = labels.cpu().detach()
@@ -283,8 +283,8 @@ class CRNetAudTrainer(BiModalTrainer):
     def data_fmt(self, data):
         for k, v in data.items():
             data[k] = v.to(self.device)
-        inputs = data["aud_data"]
-        cls_label, reg_label = data["aud_label_cls"], data["aud_label"]
+        inputs = data["glo_img"], data["loc_img"], data["wav_aud"]
+        cls_label, reg_label = data["cls_label"], data["reg_label"]
         return inputs, cls_label, reg_label
 
     def loss_compute(self, loss_f, reg_pred, reg_label, cls_score, cls_label, epoch_idx):
@@ -295,3 +295,13 @@ class CRNetAudTrainer(BiModalTrainer):
         loss_4 = lambda_ * loss_f["ce_loss"](cls_score, cls_label)
         loss = loss_1 + loss_2 + loss_3 + loss_4
         return loss
+
+
+@TRAINER_REGISTRY.register()
+class CRNetAudTrainer(CRNetTrainer2):
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs = data["aud_data"]
+        cls_label, reg_label = data["aud_label_cls"], data["aud_label"]
+        return (inputs,), cls_label, reg_label

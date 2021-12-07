@@ -22,12 +22,12 @@ _C.TRAIN_IMG_DATA = "image_data/train_data"
 _C.VALID_IMG_DATA = "image_data/valid_data"
 _C.TEST_IMG_DATA = "image_data/test_data"
 
-_C.TRAIN_AUD_DATA = "voice_data/train_data"
-_C.VALID_AUD_DATA = "voice_data/valid_data"
-_C.TEST_AUD_DATA = "voice_data/test_data"
+_C.TRAIN_AUD_DATA = "voice_data/voice_librosa/train_data"
+_C.VALID_AUD_DATA = "voice_data/voice_librosa/valid_data"
+_C.TEST_AUD_DATA = "voice_data/voice_librosa/test_data"
 
 _C.TRAINVAL_IMG_DATA = ["image_data/train_data", "image_data/valid_data"]
-_C.TRAINVAL_AUD_DATA = ["voice_data/trainingData", "voice_data/validationData"]
+_C.TRAINVAL_AUD_DATA = ["voice_data/voice_librosa/trainingData", "voice_data/voice_librosa/validationData"]
 
 _C.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 _C.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"

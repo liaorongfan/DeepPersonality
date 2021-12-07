@@ -122,12 +122,12 @@ class AudioVisualResNet(nn.Module):
         self.layer4 = self._make_layer(block, channels[3], layers[3], stride=2)
         self.avgpool = nn.AdaptiveAvgPool2d(out_spatial)
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
+        # for m in self.modules():
+        #     if isinstance(m, nn.Conv2d):
+        #         nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+        #     elif isinstance(m, nn.BatchNorm2d):
+        #         nn.init.constant_(m.weight, 1)
+        #         nn.init.constant_(m.bias, 0)
         if zero_init_residual:
             for m in self.modules():
                 if isinstance(m, block):

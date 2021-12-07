@@ -9,6 +9,8 @@ import pickle
 import numpy as np
 from dpcv.data.datasets.bi_modal_data import VideoData
 from data.transforms.transform import set_audio_visual_transform
+from dpcv.data.transforms.build import build_transform_opt
+from .build import DATA_LOADER_REGISTRY
 from random import shuffle
 
 
@@ -34,7 +36,6 @@ class AudioVisualData(VideoData):
 
     def get_image_data(self, idx):
         img_dir_path = self.img_dir_ls[idx]
-        # img_dir_path = os.path.join(self.data_root, self.img_dir, img_dir)
         img_paths = glob.glob(img_dir_path + "/*.jpg")
         img_path = random.choice(img_paths)
         try:
@@ -46,7 +47,7 @@ class AudioVisualData(VideoData):
     def get_wave_data(self, idx):
 
         img_dir_path = self.img_dir_ls[idx]
-        wav_path = img_dir_path.replace("image_data", "voice_data") + ".wav.npy"
+        wav_path = img_dir_path.replace("image_data", "voice_data/voice_librosa") + ".wav.npy"
         wav_ft = np.load(wav_path)
         try:
             n = np.random.randint(0, len(wav_ft) - 50176)
@@ -176,6 +177,47 @@ def make_data_loader(cfg, mode):
         drop_last=True
     )
 
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def bimodal_resnet_data_loader(cfg, mode):
+    assert (mode in ["train", "valid", "test"]), " 'mode' only supports 'train' 'valid' 'test' "
+    transforms = build_transform_opt(cfg)
+    if mode == "train":
+        dataset = AudioVisualData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TRAIN_IMG_DATA,
+            cfg.DATA.TRAIN_AUD_DATA,
+            cfg.DATA.TRAIN_LABEL_DATA,
+            transforms
+        )
+        batch_size = cfg.DATA_LOADER.TRAIN_BATCH_SIZE
+    elif mode == "valid":
+        dataset = AudioVisualData(
+            cfg.DATA.ROOT,
+            cfg.DATA.VALID_IMG_DATA,
+            cfg.DATA.VALID_AUD_DATA,
+            cfg.DATA.VALID_LABEL_DATA,
+            transforms
+        )
+        batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+    else:
+        dataset = AudioVisualData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TEST_IMG_DATA,
+            cfg.DATA.TEST_AUD_DATA,
+            cfg.DATA.TEST_LABEL_DATA,
+            transforms
+        )
+        batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=batch_size,
+        shuffle=cfg.DATA_LOADER.SHUFFLE,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,  # cfg.NUM_WORKS
+        drop_last=cfg.DATA_LOADER.DROP_LAST,
+    )
     return data_loader
 
 

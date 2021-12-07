@@ -20,14 +20,17 @@ __C.DATA = CfgNode()
 __C.DATA.ROOT = "datasets"
 
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
+__C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
 __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
 __C.DATA.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 
 __C.DATA.VALID_IMG_DATA = "image_data/valid_data"
+__C.DATA.VALID_IMG_FACE_DATA = "image_data/valid_data_face"
 __C.DATA.VALID_AUD_DATA = "raw_voice/validationData"
 __C.DATA.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
 
 __C.DATA.TEST_IMG_DATA = "image_data/test_data"
+__C.DATA.TEST_IMG_FACE_DATA = "image_data/test_data_face"
 __C.DATA.TEST_AUD_DATA = "raw_voice/testData"
 __C.DATA.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 
@@ -35,7 +38,7 @@ __C.DATA.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 __C.DATA_LOADER = CfgNode()
 # name of dataloader build function
 __C.DATA_LOADER.NAME = "single_frame_data_loader"
-__C.DATA_LOADER.DATASET = None
+__C.DATA_LOADER.DATASET = ""
 __C.DATA_LOADER.TRANSFORM = ""
 __C.DATA_LOADER.TRAIN_BATCH_SIZE = 48
 __C.DATA_LOADER.VALID_BATCH_SIZE = 32

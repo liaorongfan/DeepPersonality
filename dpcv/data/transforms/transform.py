@@ -19,7 +19,7 @@ def set_transform_op():
 
 
 @TRANSFORM_REGISTRY.register()
-def standard_transform_op():
+def standard_frame_transform():
     import torchvision.transforms as transforms
     transforms = transforms.Compose([
         transforms.Resize(256),
@@ -29,6 +29,42 @@ def standard_transform_op():
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
     return transforms
+
+
+@TRANSFORM_REGISTRY.register()
+def face_image_transform():
+    import torchvision.transforms as transforms
+    norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
+    norm_std = [0.229, 0.224, 0.225]
+    transforms = transforms.Compose([
+        transforms.Resize(112),
+        transforms.RandomHorizontalFlip(0.5),
+        transforms.ToTensor(),
+        transforms.Normalize(norm_mean, norm_std)
+    ])
+    return transforms
+
+
+@TRANSFORM_REGISTRY.register()
+def crnet_frame_face_transform():
+    import torchvision.transforms as transforms
+    norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
+    norm_std = [0.229, 0.224, 0.225]
+
+    frame_transforms = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomHorizontalFlip(0.5),
+        transforms.CenterCrop((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(norm_mean, norm_std)
+    ])
+    face_transforms = transforms.Compose([
+        transforms.Resize(112),
+        transforms.RandomHorizontalFlip(0.5),
+        transforms.ToTensor(),
+        transforms.Normalize(norm_mean, norm_std)
+    ])
+    return {"frame": frame_transforms, "face": face_transforms}
 
 
 def set_tpn_transform_op():
@@ -57,20 +93,6 @@ def set_vat_transform_op():
     return transforms
 
 
-@TRANSFORM_REGISTRY.register()
-def set_lstm_transform():
-    import torchvision.transforms as transforms
-    norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
-    norm_std = [0.229, 0.224, 0.225]
-    transforms = transforms.Compose([
-        transforms.Resize(112),
-        transforms.RandomHorizontalFlip(0.5),
-        transforms.ToTensor(),
-        transforms.Normalize(norm_mean, norm_std)
-    ])
-    return transforms
-
-
 def set_crnet_transform():
     import torchvision.transforms as transforms
     # norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
@@ -80,7 +102,7 @@ def set_crnet_transform():
         transforms.CenterCrop((112, 112))
         # transforms.Normalize(norm_mean, norm_std)
     ])
-    return transforms
+    return {"frame": transforms, "face": transforms}
 
 
 def set_audio_visual_transform():

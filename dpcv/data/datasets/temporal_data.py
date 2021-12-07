@@ -10,7 +10,7 @@ from PIL import Image
 from pathlib import Path
 import random
 import numpy as np
-from data.transforms.transform import set_lstm_transform
+from data.transforms.transform import face_image_transform
 from data.transforms.build import build_transform_opt
 from .build import DATA_LOADER_REGISTRY
 
@@ -66,7 +66,7 @@ class TemporalData(VideoData):
 
 def make_data_loader(cfg, mode):
     assert (mode in ["train", "valid", "test"]), " 'mode' only supports 'train' 'valid' 'test' "
-    transforms = set_lstm_transform()
+    transforms = face_image_transform()
     if mode == "train":
         dataset = TemporalData(
             cfg.DATA_ROOT,
@@ -146,7 +146,7 @@ def bimodal_lstm_data_loader(cfg, mode):
 
 
 if __name__ == "__main__":
-    trans = set_lstm_transform()
+    trans = face_image_transform()
     data_set = TemporalData(
         "../../../datasets",
         "image_data/train_data_face",

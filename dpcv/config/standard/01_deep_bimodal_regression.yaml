@@ -4,8 +4,9 @@ DATA:
   TEST_IMG_DATA: "image_data/test_data"
 DATA_LOADER:
   NAME: "single_frame_data_loader"
-  TRANSFORM: "standard_transform_op"
+  TRANSFORM: "standard_frame_transform"
   TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 4
 MODEL:
   NAME: "dan_model"
 LOSS:
