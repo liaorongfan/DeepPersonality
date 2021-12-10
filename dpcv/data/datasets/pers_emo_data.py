@@ -7,7 +7,9 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from dpcv.data.datasets.bi_modal_data import VideoData
+from data.transforms.build import build_transform_opt
 from data.transforms.transform import set_per_transform
+from .build import DATA_LOADER_REGISTRY
 
 
 class PersEmoNData(VideoData):
@@ -136,6 +138,53 @@ def make_data_loader(cfg, mode=None):
         batch_size=1,
         shuffle=cfg.SHUFFLE,
         num_workers=cfg.NUM_WORKS
+    )
+
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def peremon_data_loader(cfg, mode=None):
+    per_trans = build_transform_opt(cfg)
+    emo_trans = build_transform_opt(cfg)
+    data_cfg = cfg.DATA
+    if mode == "train":
+        dataset = PersEmoNData(
+            data_cfg.ROOT,  # "../datasets/",
+            data_cfg.TRAIN_IMG_DATA,  # "image_data/train_data_face",
+            data_cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
+            data_cfg.VA_DATA,  # "va_data/cropped_aligned",
+            data_cfg.VA_TRAIN_LABEL,  # "va_data/va_label/VA_Set/Train_Set",
+            per_trans=per_trans,
+            emo_trans=emo_trans,
+        )
+    elif mode == "valid":
+        dataset = PersEmoNData(
+            data_cfg.ROOT,  # "../datasets/",
+            data_cfg.VALID_IMG_DATA,  # "image_data/valid_data_face",
+            data_cfg.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            data_cfg.VA_DATA,  # "va_data/cropped_aligned",
+            data_cfg.VA_VALID_LABEL,  # "va_data/va_label/VA_Set/Validation_Set",
+            per_trans=per_trans,
+            emo_trans=emo_trans,
+        )
+    else:
+        dataset = PersEmoNData(
+            data_cfg.ROOT,  # "../datasets/",
+            data_cfg.TEST_IMG_DATA,  # "image_data/valid_data_face",
+            data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            data_cfg.VA_DATA,  # "va_data/cropped_aligned",
+            data_cfg.VA_VALID_LABEL,  # "va_data/va_label/VA_Set/Validation_Set",
+            per_trans=per_trans,
+            emo_trans=emo_trans,
+        )
+
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=1,
+        shuffle=loader_cfg.SHUFFLE,
+        num_workers=loader_cfg.NUM_WORKERS
     )
 
     return data_loader

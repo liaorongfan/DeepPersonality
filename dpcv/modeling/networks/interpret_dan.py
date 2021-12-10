@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 from dpcv.modeling.networks.dan import make_layers, backbone
+from .build import NETWORK_REGISTRY
+from dpcv.modeling.module.weight_init_helper import initialize_weights
 # import torch.utils.model_zoo as model_zoo
 
 
@@ -12,7 +14,7 @@ class InterpretDAN(nn.Module):
         self.glo_ave_pooling = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512, num_classes)
         if init_weights:
-            self._initialize_weights()
+            initialize_weights(self)
 
     def forward(self, x):
         x = self.features(x)
@@ -21,19 +23,6 @@ class InterpretDAN(nn.Module):
         x = self.fc(x)
         x = torch.sigmoid(x)  # since the regression range always fall in (0, 1)
         return x
-
-    def _initialize_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                nn.init.constant_(m.bias, 0)
 
 
 def get_interpret_dan_model(cfg, pretrained=False, **kwargs):
@@ -57,6 +46,13 @@ def get_interpret_dan_model(cfg, pretrained=False, **kwargs):
         interpret_dan.load_state_dict(model_dict)
         # load pre_trained model from model_zoo for standard models in pytorch -----------------------------------------
         # model.load_state_dict(model_zoo.load_url(model_urls['vgg16']))
+    interpret_dan.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return interpret_dan
+
+
+@NETWORK_REGISTRY.register()
+def interpret_dan_model(cfg):
+    interpret_dan = InterpretDAN(make_layers(backbone['VGG16'], batch_norm=True))
     interpret_dan.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return interpret_dan
 

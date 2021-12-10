@@ -16,7 +16,6 @@ _C.COMPUTE_PCC = True
 _C.COMPUTE_CCC = True
 # data set split config ------------------------------------------------------------------------------------------------
 _C.DATA_ROOT = "../datasets/"
-_C.OUTPUT_DIR = "../results/per_emo"
 _C.TRAIN_IMG_DATA = "image_data/train_data_face"
 _C.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 _C.VA_DATA = "va_data/cropped_aligned"
@@ -34,7 +33,7 @@ _C.NUM_WORKS = 4
 _C.START_EPOCH = 0
 _C.MAX_EPOCH = 600
 # optimizer config -----------------------------------------------------------------------------------------------------
-_C.LR_INIT = 0.01
+_C.LR_INIT = 0.001
 _C.MOMENTUM = 0.9
 _C.WEIGHT_DECAY = 0.0005
 _C.FACTOR = 0.5
@@ -44,3 +43,4 @@ _C.PRE_TRAINED_MODEL = None
 _C.RESUME = None
 # _C.RESUME = "../results/per_emo/11-03_01-42/checkpoint_782.pkl"
 _C.LOG_INTERVAL = 20
+_C.OUTPUT_DIR = "../results/per_emo"

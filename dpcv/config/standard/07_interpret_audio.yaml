@@ -1,0 +1,23 @@
+DATA:
+  TRAIN_AUD_DATA: "raw_voice/trainingData"
+  VALID_AUD_DATA: "raw_voice/validationData"
+  TEST_AUD_DATA: "raw_voice/testData"
+DATA_LOADER:
+  NAME: "interpret_audio_dataloader"
+  TRAIN_BATCH_SIZE: 128
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "interpret_audio_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.05
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [80, 100, 150]
+TRAIN:
+  TRAINER: "AudioTrainer"
+  MAX_EPOCH: 200
+  OUTPUT_DIR: "results/standard/07_interpret_audio"

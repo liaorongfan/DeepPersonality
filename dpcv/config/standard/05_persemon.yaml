@@ -1,0 +1,30 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data_face"
+  VALID_IMG_DATA: "image_data/valid_data_face"
+  TEST_IMG_DATA: "image_data/test_data_face"
+  VA_DATA: "va_data/cropped_aligned"
+  VA_TRAIN_LABEL: "va_data/va_label/VA_Set/Train_Set"
+  VA_VALID_LABEL: "va_data/va_label/VA_Set/Validation_Set"
+  TRAIN_AUD_DATA: "voice_data/voice_librosa/train_data"
+  VALID_AUD_DATA: "voice_data/voice_librosa/valid_data"
+  TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
+DATA_LOADER:
+  NAME: "peremon_data_loader"
+  TRANSFORM: "face_image_transform"
+  TRAIN_BATCH_SIZE: 8
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "pers_emo_model"
+LOSS:
+  NAME: "PeremonLoss"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [50, 100, 150]
+TRAIN:
+  TRAINER: "PersEmoTrainer"
+  MAX_EPOCH: 200
+  OUTPUT_DIR: "results/standard/05_peremon"

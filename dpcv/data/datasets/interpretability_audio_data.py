@@ -1,5 +1,6 @@
 import os
 from dpcv.data.datasets.bi_modal_data import VideoData
+from .build import DATA_LOADER_REGISTRY
 import torch
 import torchaudio
 from torch.utils.data import DataLoader
@@ -87,6 +88,38 @@ def make_data_loader(cfg, mode="train"):
 
     return data_loader
 
+
+@DATA_LOADER_REGISTRY.register()
+def interpret_audio_dataloader(cfg, mode):
+    data_cfg = cfg.DATA
+    if mode == "train":
+        dataset = InterpretAudio(
+            data_cfg.ROOT,  # "../datasets",
+            data_cfg.TRAIN_AUD_DATA,  # "raw_voice/trainingData",
+            data_cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
+        )
+    elif mode == "valid":
+        dataset = InterpretAudio(
+            data_cfg.ROOT,  # "../datasets",
+            data_cfg.VALID_AUD_DATA,  # "raw_voice/validationData",
+            data_cfg.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+        )
+    elif mode == "test":
+        dataset = InterpretAudio(
+            data_cfg.ROOT,  # "../datasets",
+            data_cfg.TEST_AUD_DATA,  # "raw_voice/testData",
+            data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+        )
+    else:
+        raise ValueError("mode must be one of 'train' or 'valid' or test' ")
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        num_workers=loader_cfg.NUM_WORKERS,
+    )
+
+    return data_loader
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt

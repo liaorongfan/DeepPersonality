@@ -18,7 +18,6 @@ step 7 : set test metric
 # ------------------------------------------- step 1 : dataset config node ---------------------------------------------
 __C.DATA = CfgNode()
 __C.DATA.ROOT = "datasets"
-
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
 __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
@@ -34,6 +33,9 @@ __C.DATA.TEST_IMG_FACE_DATA = "image_data/test_data_face"
 __C.DATA.TEST_AUD_DATA = "raw_voice/testData"
 __C.DATA.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 
+__C.DATA.VA_DATA = "va_data/cropped_aligned"
+__C.DATA.VA_TRAIN_LABEL = "va_data/va_label/VA_Set/Train_Set"
+__C.DATA.VA_VALID_LABEL = "va_data/va_label/VA_Set/Validation_Set"
 # ------------------------------------------ step 2 : dataloader config node -------------------------------------------
 __C.DATA_LOADER = CfgNode()
 # name of dataloader build function

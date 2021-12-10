@@ -15,7 +15,6 @@ _C.COMPUTE_PCC = True
 _C.COMPUTE_CCC = True
 
 # data set split config ------------------------------------------------------------------------------------------------
-_C.OUTPUT_DIR = "../results/interpret_aud"
 _C.DATA_ROOT = "../datasets"
 
 _C.TRAIN_AUD_DATA = "raw_voice/trainingData"
@@ -43,3 +42,4 @@ _C.MILESTONE = [50, 70, 90]
 _C.RESUME = None
 
 _C.LOG_INTERVAL = 10
+_C.OUTPUT_DIR = "../results/interpret_aud"

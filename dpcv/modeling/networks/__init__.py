@@ -6,4 +6,8 @@ from dpcv.modeling.networks import (
     bi_modal_lstm,
     audio_visual_residual,
     cr_net,
+    sphereface_net,
+    interpret_dan,
 )
+from .audio_interpretability_net import interpret_audio_model
+

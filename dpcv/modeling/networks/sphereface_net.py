@@ -7,6 +7,8 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 from torch.nn import Parameter
 import math
+from dpcv.modeling.module.weight_init_helper import initialize_weights
+from .build import NETWORK_REGISTRY
 
 
 class SphereFEM(nn.Module):
@@ -93,7 +95,7 @@ class SphereFEM(nn.Module):
 
 
 class PersEmoN(nn.Module):
-    def __init__(self, feature_extractor):
+    def __init__(self, feature_extractor, init_weights=True):
         super(PersEmoN, self).__init__()
         self.efm = feature_extractor
         self.pam = nn.Linear(512, 5)
@@ -104,6 +106,9 @@ class PersEmoN(nn.Module):
             nn.Linear(128, 5),
         )
         self.data_classifier = nn.Linear(512, 2)
+
+        if init_weights:
+            initialize_weights(self)
 
     def forward(self, x_p, x_e):
         x_p = self.efm(x_p)
@@ -121,6 +126,13 @@ class PersEmoN(nn.Module):
 
 
 def get_pers_emo_model():
+    multi_modal_model = PersEmoN(SphereFEM())
+    multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return multi_modal_model
+
+
+@NETWORK_REGISTRY.register()
+def pers_emo_model(cfg=None):
     multi_modal_model = PersEmoN(SphereFEM())
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
