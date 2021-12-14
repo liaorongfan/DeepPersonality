@@ -6,6 +6,8 @@ from functools import partial
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .build import NETWORK_REGISTRY
+from dpcv.modeling.module.weight_init_helper import initialize_weights
 
 
 def get_inplanes():
@@ -118,7 +120,8 @@ class ResNet(nn.Module):
         no_max_pool=False,
         shortcut_type='B',
         widen_factor=1.0,
-        n_classes=5
+        n_classes=5,
+        init_weights=True,
     ):
         super().__init__()
 
@@ -146,12 +149,14 @@ class ResNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         self.fc = nn.Linear(block_inplanes[3] * block.expansion, n_classes)
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv3d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, nn.BatchNorm3d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
+        if init_weights:
+            initialize_weights(self)
+        # for m in self.modules():
+        #     if isinstance(m, nn.Conv3d):
+        #         nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+        #     elif isinstance(m, nn.BatchNorm3d):
+        #         nn.init.constant_(m.weight, 1)
+        #         nn.init.constant_(m.bias, 0)
 
     def _downsample_basic_block(self, x, planes, stride):
         out = F.avg_pool3d(x, kernel_size=1, stride=stride)
@@ -229,6 +234,12 @@ def get_3d_resnet_model(model_depth, **kwargs):
     elif model_depth == 152:
         model = ResNet(Bottleneck, [3, 8, 36, 3], get_inplanes(), **kwargs)
 
+    return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+@NETWORK_REGISTRY.register()
+def resnet50_3d_model(cfg):
+    model = ResNet(Bottleneck, [3, 4, 6, 3], get_inplanes())
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 

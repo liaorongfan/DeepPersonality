@@ -1,0 +1,6 @@
+DATA_LOADER:
+  TRAIN_BATCH_SIZE: 24
+MODEL:
+  NAME: "swin_transformer_model"
+TRAIN:
+  OUTPUT_DIR: "results/standard/10_swin_transformer"

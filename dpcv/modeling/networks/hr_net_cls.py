@@ -7,6 +7,7 @@ import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from dpcv.modeling.module.weight_init_helper import initialize_weights
 from .build import NETWORK_REGISTRY
 
 
@@ -274,7 +275,7 @@ blocks_dict = {
 
 class HighResolutionNet(nn.Module):
 
-    def __init__(self, cfg, **kwargs):
+    def __init__(self, cfg, init_weights=True, **kwargs):
         super(HighResolutionNet, self).__init__()
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False)
@@ -332,6 +333,9 @@ class HighResolutionNet(nn.Module):
         self.final_layer = self._make_head(pre_stage_channels)
 
         self.classifier = nn.Linear(2048, cfg["MODEL"]["NUM_CLASSES"])
+
+        if init_weights:
+            initialize_weights(self)
 
     def _make_head(self, pre_stage_channels):
         head_block = Bottleneck
@@ -527,11 +531,18 @@ class HighResolutionNet(nn.Module):
             self.load_state_dict(model_dict)
 
 
-@NETWORK_REGISTRY.register()
 def get_hr_net_model(cfg=None, **kwargs):
     config = hr_net_cfg
     model = HighResolutionNet(config, **kwargs)
     model.init_weights()
+    model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return model
+
+
+@NETWORK_REGISTRY.register()
+def hr_net_model(cfg=None, **kwargs):
+    config = hr_net_cfg
+    model = HighResolutionNet(config, **kwargs)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 

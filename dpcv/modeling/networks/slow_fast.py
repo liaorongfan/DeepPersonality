@@ -6,6 +6,7 @@ import torch.nn as nn
 from dpcv.modeling.module import weight_init_helper as init_helper
 from functools import partial
 from dpcv.modeling.module import stem_helper, resnet_helper
+from .build import NETWORK_REGISTRY
 from easydict import EasyDict
 
 # Number of blocks for different stages given the model depth.
@@ -70,7 +71,6 @@ _TEMPORAL_KERNEL_BASIS = {
         [[3]],  # res5 temporal kernels.
     ],
 }
-
 
 _POOL1 = {
     "2d": [[1, 1, 1]],
@@ -171,15 +171,15 @@ class FuseFastToSlow(nn.Module):
     """
 
     def __init__(
-        self,
-        dim_in,
-        fusion_conv_channel_ratio,
-        fusion_kernel,
-        alpha,
-        eps=1e-5,
-        bn_mmt=0.1,
-        inplace_relu=True,
-        norm_module=nn.BatchNorm3d,
+            self,
+            dim_in,
+            fusion_conv_channel_ratio,
+            fusion_kernel,
+            alpha,
+            eps=1e-5,
+            bn_mmt=0.1,
+            inplace_relu=True,
+            norm_module=nn.BatchNorm3d,
     ):
         """
         Args:
@@ -265,8 +265,8 @@ class SubBatchNorm3d(nn.Module):
         """
         mean = means.view(n, -1).sum(0) / n
         std = (
-            stds.view(n, -1).sum(0) / n
-            + ((means.view(n, -1) - mean) ** 2).view(n, -1).sum(0) / n
+                stds.view(n, -1).sum(0) / n
+                + ((means.view(n, -1) - mean) ** 2).view(n, -1).sum(0) / n
         )
         return mean.detach(), std.detach()
 
@@ -308,12 +308,12 @@ class ResNetBasicHead(nn.Module):
     """
 
     def __init__(
-        self,
-        dim_in,
-        num_classes,
-        pool_size,
-        dropout_rate=0.0,
-        act_func="softmax",
+            self,
+            dim_in,
+            num_classes,
+            pool_size,
+            dropout_rate=0.0,
+            act_func="softmax",
     ):
         """
         The `__init__` method of any subclass should also contain these
@@ -335,7 +335,7 @@ class ResNetBasicHead(nn.Module):
         """
         super(ResNetBasicHead, self).__init__()
         assert (
-            len({len(pool_size), len(dim_in)}) == 1
+                len({len(pool_size), len(dim_in)}) == 1
         ), "pathway dimensions are not consistent."
         self.num_pathways = len(pool_size)
 
@@ -365,7 +365,7 @@ class ResNetBasicHead(nn.Module):
 
     def forward(self, inputs):
         assert (
-            len(inputs) == self.num_pathways
+                len(inputs) == self.num_pathways
         ), "Input tensor does not contain {} pathway".format(self.num_pathways)
         pool_out = []
         for pathway in range(self.num_pathways):
@@ -447,7 +447,7 @@ class SlowFast(nn.Module):
         width_per_group = cfg.RESNET.WIDTH_PER_GROUP  # 64
         dim_inner = num_groups * width_per_group
         out_dim_ratio = (
-            cfg.SLOWFAST.BETA_INV // cfg.SLOWFAST.FUSION_CONV_CHANNEL_RATIO
+                cfg.SLOWFAST.BETA_INV // cfg.SLOWFAST.FUSION_CONV_CHANNEL_RATIO
         )
 
         temp_kernel = _TEMPORAL_KERNEL_BASIS[cfg.MODEL.ARCH]
@@ -643,6 +643,11 @@ class SlowFast(nn.Module):
 def get_slow_fast_model():
     slow_fast_model = SlowFast(slow_fast_cfg)
     return slow_fast_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+@NETWORK_REGISTRY.register()
+def slow_fast_model(cfg=None):
+    return SlowFast(slow_fast_cfg).to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
 if __name__ == "__main__":

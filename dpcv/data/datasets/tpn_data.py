@@ -2,6 +2,11 @@ import torch
 from torch.utils.data import DataLoader
 from data.transforms.transform import set_tpn_transform_op
 from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop
+from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
+from dpcv.data.datasets.common import VideoLoader
+from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
 
 
 class TPNData(VideoFrameSegmentData):
@@ -21,10 +26,6 @@ class TPNData(VideoFrameSegmentData):
 
 
 def make_data_loader(cfg, mode="train"):
-    from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop
-    from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
-    from dpcv.data.datasets.common import VideoLoader
-
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = set_tpn_transform_op()
     temporal_transform = [TemporalRandomCrop(8)]
@@ -72,6 +73,61 @@ def make_data_loader(cfg, mode="train"):
         batch_size=cfg.TRAIN_BATCH_SIZE,
         shuffle=cfg.SHUFFLE,
         num_workers=cfg.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def tpn_data_loader(cfg, mode="train"):
+    assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
+    spatial_transform = build_transform_opt(cfg)
+    temporal_transform = [TemporalRandomCrop(8)]
+    temporal_transform = TemporalCompose(temporal_transform)
+    video_loader = VideoLoader()
+    data_cfg = cfg.DATA
+    if mode == "train":
+        data_set = TPNData(
+            data_cfg.ROOT,
+            data_cfg.TRAIN_IMG_DATA,
+            data_cfg.TRAIN_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+    elif mode == "valid":
+        data_set = TPNData(
+            data_cfg.ROOT,
+            data_cfg.VALID_IMG_DATA,
+            data_cfg.VALID_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+    elif mode == "trainval":
+        data_set = TPNData(
+            data_cfg.ROOT,
+            data_cfg.TRAINVAL_IMG_DATA,
+            data_cfg.TRAINVAL_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+    else:
+        data_set = TPNData(
+            data_cfg.ROOT,
+            data_cfg.TEST_IMG_DATA,
+            data_cfg.TEST_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset=data_set,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        shuffle=loader_cfg.SHUFFLE,
+        num_workers=loader_cfg.NUM_WORKERS,
     )
     return data_loader
 

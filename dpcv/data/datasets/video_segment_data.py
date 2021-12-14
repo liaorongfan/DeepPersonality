@@ -4,6 +4,11 @@ import glob
 from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from data.transforms.transform import set_transform_op
+from data.transforms.build import build_transform_opt
+from .build import DATA_LOADER_REGISTRY
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop
+from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
+from dpcv.data.datasets.common import VideoLoader
 
 
 class VideoFrameSegmentData(VideoData):
@@ -48,13 +53,10 @@ class VideoFrameSegmentData(VideoData):
 
 
 def make_data_loader(cfg, mode="train"):
-    from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop
-    from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
-    from dpcv.data.datasets.common import VideoLoader
 
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = set_transform_op()
-    temporal_transform = [TemporalRandomCrop(16)]
+    temporal_transform = [TemporalRandomCrop(32)]
     temporal_transform = TemporalCompose(temporal_transform)
     video_loader = VideoLoader()
 
@@ -103,6 +105,62 @@ def make_data_loader(cfg, mode="train"):
     return data_loader
 
 
+@DATA_LOADER_REGISTRY.register()
+def spatial_temporal_data_loader(cfg, mode="train"):
+
+    assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
+    spatial_transform = build_transform_opt(cfg)
+    temporal_transform = [TemporalRandomCrop(32)]
+    temporal_transform = TemporalCompose(temporal_transform)
+    video_loader = VideoLoader()
+    data_cfg = cfg.DATA
+    if mode == "train":
+        data_set = VideoFrameSegmentData(
+            data_cfg.ROOT,
+            data_cfg.TRAIN_IMG_DATA,
+            data_cfg.TRAIN_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+    elif mode == "valid":
+        data_set = VideoFrameSegmentData(
+            data_cfg.ROOT,
+            data_cfg.VALID_IMG_DATA,
+            data_cfg.VALID_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+    elif mode == "trainval":
+        data_set = VideoFrameSegmentData(
+            data_cfg.ROOT,
+            data_cfg.TRAINVAL_IMG_DATA,
+            data_cfg.TRAINVAL_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+    else:
+        data_set = VideoFrameSegmentData(
+            data_cfg.ROOT,
+            data_cfg.TEST_IMG_DATA,
+            data_cfg.TEST_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset=data_set,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        shuffle=loader_cfg.SHUFFLE,
+        num_workers=loader_cfg.NUM_WORKERS,
+    )
+    return data_loader
+
+
 if __name__ == "__main__":
     import os
     from dpcv.config.interpret_dan_cfg import cfg
@@ -121,5 +179,5 @@ if __name__ == "__main__":
     for i, item in enumerate(data_loader):
         print(item["image"].shape, item["label"].shape)
 
-        # if i > 5:
-        #     break
+        if i > 5:
+            break

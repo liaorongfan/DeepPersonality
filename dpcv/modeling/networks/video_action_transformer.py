@@ -7,6 +7,8 @@ from torch import nn
 import math
 import torchvision
 from torch.autograd import Variable
+from dpcv.modeling.module.weight_init_helper import initialize_weights
+from .build import NETWORK_REGISTRY
 
 
 class FeedForward(nn.Module):
@@ -210,11 +212,13 @@ class SemiTransformer(nn.Module):
 
 
     """
-    def __init__(self, num_classes, seq_len):  # seq_len --> num_frames
+    def __init__(self, num_classes, seq_len, init_weights=True):  # seq_len --> num_frames
         super(SemiTransformer, self).__init__()
         resnet50 = torchvision.models.resnet50(pretrained=True)
         self.base = nn.Sequential(*list(resnet50.children())[:-2])
         self.tail = Tail(num_classes, seq_len)
+        if init_weights:
+            initialize_weights(self)
 
     def forward(self, x):
         b = x.size(0)
@@ -226,6 +230,12 @@ class SemiTransformer(nn.Module):
 
 
 def get_vat_model():
+    model = SemiTransformer(num_classes=5, seq_len=16)
+    return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+@NETWORK_REGISTRY.register()
+def vat_model(cfg=None):
     model = SemiTransformer(num_classes=5, seq_len=16)
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 

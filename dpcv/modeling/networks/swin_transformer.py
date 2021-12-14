@@ -14,6 +14,7 @@ import torch.nn as nn
 import torch.utils.checkpoint as checkpoint
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 from easydict import EasyDict as CN
+from dpcv.modeling.module.weight_init_helper import initialize_weights
 from .build import NETWORK_REGISTRY
 
 def swin_config():
@@ -534,7 +535,8 @@ class SwinTransformer(nn.Module):
                  window_size=7, mlp_ratio=4., qkv_bias=True, qk_scale=None,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
                  norm_layer=nn.LayerNorm, ape=False, patch_norm=True,
-                 use_checkpoint=False, **kwargs):
+                 use_checkpoint=False, init_weights=True,
+                 **kwargs):
         super().__init__()
 
         self.num_classes = num_classes
@@ -585,11 +587,13 @@ class SwinTransformer(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool1d(1)
         self.head = nn.Linear(self.num_features, num_classes) if num_classes > 0 else nn.Identity()
 
+        # if init_weights:
+        #     initialize_weights(self)  # in line with other models evaluated on personality
         self.apply(self._init_weights)
 
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
-            trunc_normal_(m.weight, std=.02)
+            trunc_normal_(m.weight, std=.01)
             if isinstance(m, nn.Linear) and m.bias is not None:
                 nn.init.constant_(m.bias, 0)
         elif isinstance(m, nn.LayerNorm):
@@ -634,8 +638,31 @@ class SwinTransformer(nn.Module):
         return flops
 
 
-@NETWORK_REGISTRY.register()
 def get_swin_transformer_model(cfg=None):
+    config = swin_config()
+    model = SwinTransformer(
+        img_size=config.DATA.IMG_SIZE,
+        patch_size=config.MODEL.SWIN.PATCH_SIZE,
+        in_chans=config.MODEL.SWIN.IN_CHANS,
+        num_classes=config.MODEL.NUM_CLASSES,
+        embed_dim=config.MODEL.SWIN.EMBED_DIM,
+        depths=config.MODEL.SWIN.DEPTHS,
+        num_heads=config.MODEL.SWIN.NUM_HEADS,
+        window_size=config.MODEL.SWIN.WINDOW_SIZE,
+        mlp_ratio=config.MODEL.SWIN.MLP_RATIO,
+        qkv_bias=config.MODEL.SWIN.QKV_BIAS,
+        qk_scale=config.MODEL.SWIN.QK_SCALE,
+        drop_rate=config.MODEL.DROP_RATE,
+        drop_path_rate=config.MODEL.DROP_PATH_RATE,
+        ape=config.MODEL.SWIN.APE,
+        patch_norm=config.MODEL.SWIN.PATCH_NORM,
+        use_checkpoint=config.TRAIN.USE_CHECKPOINT
+    )
+    return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+
+@NETWORK_REGISTRY.register()
+def swin_transformer_model(cfg=None):
     config = swin_config()
     model = SwinTransformer(
         img_size=config.DATA.IMG_SIZE,

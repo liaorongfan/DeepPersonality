@@ -1,0 +1,4 @@
+MODEL:
+  NAME: "hr_net_model"
+TRAIN:
+  OUTPUT_DIR: "results/standard/09_hrnet"

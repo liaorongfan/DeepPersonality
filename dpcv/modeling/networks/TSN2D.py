@@ -1,5 +1,6 @@
 from dpcv.modeling.module.tpn.base import BaseRecognizer
 from dpcv.modeling.module.tpn import resnet_mm, cls_head_module, simple_consensus, simple_spatial_module, tpn
+from .build import NETWORK_REGISTRY
 import torch
 from torch.autograd import Variable
 
@@ -258,7 +259,12 @@ class TSN2D(BaseRecognizer):
 
 
 def get_tpn_model():
+    model = TSN2D(**args)
+    return model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
+
+@NETWORK_REGISTRY.register()
+def tpn_model(cfg=None):
     model = TSN2D(**args)
     return model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 

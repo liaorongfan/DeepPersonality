@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
+from dpcv.modeling.module.weight_init_helper import initialize_weights
 import torch
 
 
@@ -101,7 +102,7 @@ class ResNet(nn.Module):
     """
     Note: that class is not a formal resnet but with a sigmoid function for the last fc layer
     """
-    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False):
+    def __init__(self, block, layers, num_classes=1000, init_weights=True, zero_init_residual=False):
         super(ResNet, self).__init__()
         self.inplanes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -116,12 +117,19 @@ class ResNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
+        # if init_weights:
+        #     initialize_weights(self)
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
+            # elif isinstance(m, nn.Linear):
+            #     nn.init.normal_(m.weight, 0, 0.01)
+            #     nn.init.constant_(m.bias, 0)
 
         # Zero-initialize the last BN in each residual branch,
         # so that the residual branch starts with zeros, and each residual block behaves like an identity.
@@ -231,7 +239,7 @@ if __name__ == "__main__":
     import torch
     model = resnet18(pretrained=False)
 
-    # 替换网络层
+    # change network layer
     for name, module in model.named_modules():
         print("layer name:{}, layer instance:{}".format(name, module))
     in_feat_num = model.fc.in_features

@@ -15,7 +15,6 @@ _C.COMPUTE_PCC = True
 _C.COMPUTE_CCC = True
 # data set split config ------------------------------------------------------------------------------------------------
 _C.DATA_ROOT = "../datasets/"
-_C.OUTPUT_DIR = "../results/slow_fast"
 _C.TRAIN_IMG_DATA = "image_data/train_data"
 _C.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 _C.VALID_IMG_DATA = "image_data/valid_data"
@@ -41,3 +40,4 @@ _C.MILESTONE = [250, 280]
 _C.RESUME = None
 
 _C.LOG_INTERVAL = 20
+_C.OUTPUT_DIR = "../results/slow_fast"
