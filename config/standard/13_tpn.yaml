@@ -5,7 +5,7 @@ DATA_LOADER:
 MODEL:
   NAME: "tpn_model"
 SOLVER:
-  LR_INIT: 0.005
+  LR_INIT: 0.001
 TRAIN:
   TRAINER: "TPNTrainer"
   OUTPUT_DIR: "results/standard/13_tpn"

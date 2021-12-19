@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from data.transforms.transform import set_tpn_transform_op
+from dpcv.data.transforms.transform import set_tpn_transform_op
 from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose

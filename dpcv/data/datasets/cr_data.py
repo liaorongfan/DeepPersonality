@@ -8,8 +8,9 @@ import numpy as np
 from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from .build import DATA_LOADER_REGISTRY
-from data.transforms.transform import set_crnet_transform, crnet_frame_face_transform
+from dpcv.data.transforms.transform import set_crnet_transform, crnet_frame_face_transform
 from dpcv.data.transforms.build import build_transform_opt
+
 
 class CRNetData(VideoData):
     def __init__(self, data_root, img_dir, face_img_dir, audio_dir, label_file, transform=None):

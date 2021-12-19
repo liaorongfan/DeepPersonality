@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from data.transforms.transform import set_vat_transform_op
+from dpcv.data.transforms.transform import set_vat_transform_op
 from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
 from dpcv.data.datasets.tpn_data import TPNData as VATDAta
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop

@@ -5,16 +5,20 @@ from dpcv.experiment.exp_runner import ExpRunner
 
 def setup():
     args = parse_args()
-    if args.cfg_file:
+    if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
-    # cfg_from_list(args.opts)
+    if args.set_cfgs is not None:
+        cfg_from_list(args.set_cfgs)
+    return args
+
+
+def main():
+    args = setup()
+    runner = ExpRunner(cfg)
+    if args.test_only:
+        return runner.test()
+    runner.run()
 
 
 if __name__ == "__main__":
-    import os
-    os.chdir("..")
-    setup()
-    runner = ExpRunner(cfg)
-    # specify weight file is also workable
-    # runner.test("path/to/weight.pkl")
-    runner.test()
+    main()

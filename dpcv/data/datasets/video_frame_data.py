@@ -5,8 +5,8 @@ from PIL import Image
 import numpy as np
 import glob
 from dpcv.data.datasets.bi_modal_data import VideoData
-from data.transforms.transform import set_transform_op
-from data.transforms.build import build_transform_opt
+from dpcv.data.transforms.transform import set_transform_op
+from dpcv.data.transforms.build import build_transform_opt
 from .build import DATA_LOADER_REGISTRY
 
 

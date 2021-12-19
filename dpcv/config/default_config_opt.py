@@ -76,7 +76,7 @@ __C.TRAIN.TRAINER = "ImageModalTrainer"
 __C.TRAIN.START_EPOCH = 0
 __C.TRAIN.MAX_EPOCH = 120
 __C.TRAIN.PRE_TRAINED_MODEL = None
-__C.TRAIN.RESUME = None
+__C.TRAIN.RESUME = ""
 __C.TRAIN.LOG_INTERVAL = 10
 __C.TRAIN.OUTPUT_DIR = "results"
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
@@ -120,8 +120,8 @@ def get_output_tb_dir(imdb, weights_filename):
 
 
 def _merge_a_into_b(a, b):
-    """Merge config dictionary a into config dictionary b, clobbering the
-    options in b whenever they are also specified in a.
+    """ Merge config dictionary a into config dictionary b, clobbering the
+        options in b whenever they are also specified in a.
     """
     if type(a) is not CfgNode:
         return
@@ -137,10 +137,9 @@ def _merge_a_into_b(a, b):
             if isinstance(b[k], np.ndarray):
                 v = np.array(v, dtype=b[k].dtype)
             else:
-                raise ValueError(('Type mismatch ({} vs. {}) '
-                                  'for config key: {}').format(type(b[k]),
-                                                               type(v), k))
-
+                raise ValueError(
+                    'Type mismatch ({} vs. {}) ''for config key: {}'.format(type(b[k]), type(v), k)
+                )
         # recursively merge dicts
         if type(v) is CfgNode:
             try:

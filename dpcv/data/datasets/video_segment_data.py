@@ -3,8 +3,8 @@ from torch.utils.data import DataLoader
 import glob
 from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
-from data.transforms.transform import set_transform_op
-from data.transforms.build import build_transform_opt
+from dpcv.data.transforms.transform import set_transform_op
+from dpcv.data.transforms.build import build_transform_opt
 from .build import DATA_LOADER_REGISTRY
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
@@ -110,7 +110,7 @@ def spatial_temporal_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = build_transform_opt(cfg)
-    temporal_transform = [TemporalRandomCrop(32)]
+    temporal_transform = [TemporalRandomCrop(16)]
     temporal_transform = TemporalCompose(temporal_transform)
     video_loader = VideoLoader()
     data_cfg = cfg.DATA

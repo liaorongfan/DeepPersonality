@@ -10,8 +10,8 @@ from PIL import Image
 from pathlib import Path
 import random
 import numpy as np
-from data.transforms.transform import face_image_transform
-from data.transforms.build import build_transform_opt
+from dpcv.data.transforms.transform import face_image_transform
+from dpcv.data.transforms.build import build_transform_opt
 from .build import DATA_LOADER_REGISTRY
 
 

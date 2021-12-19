@@ -25,13 +25,54 @@ def setup_seed(seed=12345):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Training')
-    parser.add_argument("--cfg-file", default=None, help="experiment config file")
-    parser.add_argument('--lr', default=None, help='learning rate')
-    parser.add_argument('--bs', default=None, help='training batch size')
-    parser.add_argument("--resume", default=None, help="saved model path to last training epoch")
-    parser.add_argument('--max_epoch', default=None)
-    # parser.add_argument('--data_root_dir', default=r"datasets", help="path to your dataset")
+    """
+    Parse input arguments
+    """
+    parser = argparse.ArgumentParser(description='deep learning on personality')
+    parser.add_argument(
+        '-c',
+        '--cfg-file',
+        help="experiment config file",
+        default=None,
+        type=str,
+    )
+    parser.add_argument(
+        '--weight',
+        dest='weight',
+        help='initialize with pretrained model weights',
+        type=str,
+    )
+    parser.add_argument(
+        "--test_only",
+        action="store_true",
+        help="only test model on specified weights",
+    )
+    parser.add_argument(
+        '--lr',
+        default=None,
+        help='learning rate',
+    )
+    parser.add_argument(
+        '--bs',
+        default=None,
+        help='training batch size',
+    )
+    parser.add_argument(
+        "--resume",
+        default=None,
+        help="saved model path to last training epoch",
+    )
+    parser.add_argument(
+        '--max_epoch',
+        default=None,
+    )
+    parser.add_argument(
+        '--set',
+        dest='set_cfgs',
+        help='set config keys',
+        default=None,
+        nargs=argparse.REMAINDER,
+    )
     args = parser.parse_args()
     return args
 

@@ -7,8 +7,8 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from dpcv.data.datasets.bi_modal_data import VideoData
-from data.transforms.build import build_transform_opt
-from data.transforms.transform import set_per_transform
+from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.transforms.transform import set_per_transform
 from .build import DATA_LOADER_REGISTRY
 
 
