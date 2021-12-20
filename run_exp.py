@@ -5,8 +5,18 @@ from dpcv.experiment.exp_runner import ExpRunner
 
 def setup():
     args = parse_args()
+
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
+
+    if args.resume:
+        cfg.TRAIN.RESUME = args.resume
+    if args.max_epoch:
+        cfg.TRAIN.MAX_EPOCH = args.max_epoch
+    if args.lr:
+        cfg.SOLVER.RESET_LR = True
+        cfg.SOLVER.LR_INIT = args.lr
+
     if args.set_cfgs is not None:
         cfg_from_list(args.set_cfgs)
     return args

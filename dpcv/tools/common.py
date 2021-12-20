@@ -49,6 +49,7 @@ def parse_args():
     )
     parser.add_argument(
         '--lr',
+        type=float,
         default=None,
         help='learning rate',
     )
@@ -64,6 +65,7 @@ def parse_args():
     )
     parser.add_argument(
         '--max_epoch',
+        type=int,
         default=None,
     )
     parser.add_argument(

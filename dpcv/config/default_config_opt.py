@@ -61,6 +61,7 @@ __C.LOSS.NAME = "mean_square_error"
 # ------------------------------------------ step 5 : solver config node -----------------------------------------------
 __C.SOLVER = CfgNode()
 __C.SOLVER.NAME = "sgd"
+__C.SOLVER.RESET_LR = False
 __C.SOLVER.LR_INIT = 0.01
 __C.SOLVER.WEIGHT_DECAY = 0.0005
 __C.SOLVER.MOMENTUM = 0.9
