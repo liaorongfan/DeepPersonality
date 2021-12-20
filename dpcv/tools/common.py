@@ -31,7 +31,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='deep learning on personality')
     parser.add_argument(
         '-c',
-        '--cfg-file',
+        '--cfg_file',
         help="experiment config file",
         default=None,
         type=str,

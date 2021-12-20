@@ -135,9 +135,8 @@ class ExpRunner:
             self.model = load_model(self.model, cfg.WEIGHT)
         else:
             try:
-                weights = sorted(
-                    [file for file in os.listdir(self.log_dir) if file.endswith(".pkl") and ("last" not in file)]
-                )
+                weights = [file for file in os.listdir(self.log_dir) if file.endswith(".pkl") and ("last" not in file)]
+                weights = sorted(weights, key=lambda x: int(x[11:-4]))
                 weight_file = os.path.join(self.log_dir, weights[-1])
             except IndexError:
                 weight_file = os.path.join(self.log_dir, "checkpoint_last.pkl")
