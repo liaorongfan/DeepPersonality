@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from datetime import datetime
 from dpcv.data.datasets.build import build_dataloader
 from dpcv.modeling.networks.build import build_model
@@ -167,8 +168,12 @@ class ExpRunner:
     @staticmethod
     def latex_info(metric, mean):
         latex_tab = ""
-        for k, v in metric.items():
-            latex_tab += str(v) + " & "
+        if isinstance(metric, dict):
+            for k, v in metric.items():
+                latex_tab += str(v) + " & "
+        else:
+            for v in metric:
+                latex_tab += str(np.round(v, 4)) + " & "
         latex_tab += str(mean)
         print(latex_tab)
 
