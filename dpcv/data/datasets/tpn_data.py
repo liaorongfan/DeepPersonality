@@ -81,7 +81,7 @@ def make_data_loader(cfg, mode="train"):
 def tpn_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = build_transform_opt(cfg)
-    temporal_transform = [TemporalRandomCrop(8)]
+    temporal_transform = [TemporalRandomCrop(16)]
     temporal_transform = TemporalCompose(temporal_transform)
     video_loader = VideoLoader()
     data_cfg = cfg.DATA

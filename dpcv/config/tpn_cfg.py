@@ -9,7 +9,7 @@ cfg = EasyDict()
 _C = cfg
 
 # test related setting  ------------------------------------------------------------------------------------------------
-_C.TEST_ONLY = True
+_C.TEST_ONLY = False
 _C.WEIGHT = "../results/tpn_net/11-12_21-44/checkpoint_139.pkl"
 _C.COMPUTE_PCC = True
 _C.COMPUTE_CCC = True
@@ -38,6 +38,7 @@ _C.WEIGHT_DECAY = 0.0005
 _C.FACTOR = 0.1
 _C.MILESTONE = [80, 90]
 
-_C.RESUME = "../results/tpn_net/11-12_00-02/checkpoint_85.pkl"
+# _C.RESUME = "../results/tpn_net/11-12_00-02/checkpoint_85.pkl"
+_C.RESUME = None
 
 _C.LOG_INTERVAL = 10

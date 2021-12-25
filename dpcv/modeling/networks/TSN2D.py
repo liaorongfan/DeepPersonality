@@ -22,7 +22,7 @@ args = {
         'out_channels': 1024,
         'spatial_modulation_config': {'inplanes': [1024, 2048], 'planes': 2048},
         'temporal_modulation_config': {
-            'scales': (8, 8),
+            'scales': (16, 16),
             'param': {'inplanes': -1, 'planes': -1, 'downsample_scale': -1}
         },
         'upsampling_config': {'scale': (1, 1, 1)},
@@ -272,7 +272,7 @@ def tpn_model(cfg=None):
 if __name__ == "__main__":
 
     model = TSN2D(**args)
-    xin = torch.randn(4, 8, 3, 256, 256)
+    xin = torch.randn(4, 16, 3, 256, 256)
     label = torch.randn(4, 5)
     input = {"num_modalities": [1], "img_group_0": xin, "img_meta": None, "gt_label": label}
     y = model(**input)
