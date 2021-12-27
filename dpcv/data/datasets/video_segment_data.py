@@ -29,7 +29,10 @@ class VideoFrameSegmentData(VideoData):
         return imgs
 
     def image_sample(self, img_dir):
-        frame_indices = self.list_frames(img_dir)
+        if "face" in img_dir:
+            frame_indices = self.list_face_frames(img_dir)
+        else:
+            frame_indices = self.list_frames(img_dir)
         if self.tem_trans is not None:
             frame_indices = self.tem_trans(frame_indices)
         imgs = self._loading(img_dir, frame_indices)
@@ -49,6 +52,13 @@ class VideoFrameSegmentData(VideoData):
         img_path_ls = glob.glob(f"{img_dir}/*.jpg")
         img_path_ls = sorted(img_path_ls, key=lambda x: int(Path(x).stem[6:]))
         frame_indices = [int(Path(path).stem[6:]) for path in img_path_ls]
+        return frame_indices
+
+    @staticmethod
+    def list_face_frames(img_dir):
+        img_path_ls = glob.glob(f"{img_dir}/*.jpg")
+        img_path_ls = sorted(img_path_ls, key=lambda x: int(Path(x).stem[5:]))
+        frame_indices = [int(Path(path).stem[5:]) for path in img_path_ls]
         return frame_indices
 
 
@@ -112,8 +122,13 @@ def spatial_temporal_data_loader(cfg, mode="train"):
     spatial_transform = build_transform_opt(cfg)
     temporal_transform = [TemporalRandomCrop(16)]
     temporal_transform = TemporalCompose(temporal_transform)
-    video_loader = VideoLoader()
+
     data_cfg = cfg.DATA
+    if "face" in data_cfg.TRAIN_IMG_DATA:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"face_{x}.jpg")
+    else:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
+
     if mode == "train":
         data_set = VideoFrameSegmentData(
             data_cfg.ROOT,

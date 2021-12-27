@@ -3,11 +3,13 @@ DATA:
   VALID_IMG_DATA: "image_data/valid_data_face"
   TEST_IMG_DATA: "image_data/test_data_face"
 DATA_LOADER:
-  NAME: "single_frame_data_loader"
+  NAME: "slow_fast_data_loader"
   TRANSFORM: "face_image_x2_transform"
-  TRAIN_BATCH_SIZE: 32
-  NUM_WORKERS: 4
+  TRAIN_BATCH_SIZE: 2
 MODEL:
-  NAME: "se_resnet50"
+  NAME: "slow_fast_model"
+SOLVER:
+  LR_INIT: 0.002
 TRAIN:
-  OUTPUT_DIR: "results/face/01_senet_face"
+  TRAINER: "ImageListTrainer"
+  OUTPUT_DIR: "results/face/05_slow_fast_face"

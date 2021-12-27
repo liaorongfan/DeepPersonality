@@ -6,7 +6,6 @@ from dpcv.modeling.networks.build import build_model
 from dpcv.modeling.loss.build import build_loss_func
 from dpcv.modeling.solver.build import build_solver, build_scheduler
 from dpcv.engine.build import build_trainer
-from dpcv.config.default_config_opt import cfg as test_cfg
 from dpcv.evaluation.summary import TrainSummary
 from dpcv.checkpoint.save import save_model, resume_training, load_model
 from dpcv.evaluation.metrics import compute_pcc, compute_ccc
@@ -85,31 +84,6 @@ class ExpRunner:
                 save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
                 self.collector.update_best_epoch(epoch)
 
-    def train_(self):
-        cfg = self.cfg.TRAIN
-        if cfg.RESUME:
-            self.model, self.optimizer, epoch = resume_training(cfg.RESUME, self.model, self.optimizer)
-            cfg.START_EPOCH = epoch
-            self.logger.info(f"resume training from {cfg.RESUME}")
-
-        for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
-            self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
-            self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, epoch)
-            self.scheduler.step()
-
-            if self.collector.model_save:
-                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
-                self.collector.update_best_epoch(epoch)
-
-        self.collector.draw_epo_info(cfg.MAX_EPOCH - cfg.START_EPOCH, self.log_dir)
-        self.logger.info(
-            "{} done, best acc: {} in :{}".format(
-                datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
-                self.collector.best_valid_acc,
-                self.collector.best_epoch,
-            )
-        )
-
     def after_train(self, cfg):
         # cfg = self.cfg.TRAIN
         self.collector.draw_epo_info(log_dir=self.log_dir)
@@ -148,7 +122,7 @@ class ExpRunner:
             self.data_loader["test"], self.model
         )
         self.logger.info("acc: {} mean: {}".format(ocean_acc, ocean_acc_avg))
-        self.latex_info(ocean_acc, ocean_acc_avg)
+        self.latex_info(ocean_acc, ocean_acc_avg)  # TODO: remove latter
 
         if cfg.COMPUTE_PCC:
             pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label)
@@ -178,12 +152,4 @@ class ExpRunner:
         print(latex_tab)
 
 
-if __name__ == "__main__":
-    import torch
 
-    os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
-
-    exp_runner = ExpRunner(test_cfg)
-    xin = torch.randn((1, 3, 112, 112)).cuda()
-    y = exp_runner.model(xin)
-    print(y.shape)

@@ -8,6 +8,7 @@ from dpcv.data.transforms.build import build_transform_opt
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
 from dpcv.data.datasets.common import VideoLoader
 
+
 class SlowFastData(VideoFrameSegmentData):
 
     def __getitem__(self, index):
@@ -92,9 +93,13 @@ def slow_fast_data_loader(cfg, mode="train"):
     spatial_transform = build_transform_opt(cfg)
     temporal_transform = [TemporalRandomCrop(64)]
     temporal_transform = TemporalCompose(temporal_transform)
-    video_loader = VideoLoader()
 
     data_cfg = cfg.DATA
+    if "face" in data_cfg.TRAIN_IMG_DATA:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"face_{x}.jpg")
+    else:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
+
     if mode == "train":
         data_set = SlowFastData(
             data_cfg.ROOT,

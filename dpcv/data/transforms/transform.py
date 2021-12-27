@@ -46,6 +46,20 @@ def face_image_transform():
 
 
 @TRANSFORM_REGISTRY.register()
+def face_image_x2_transform():
+    import torchvision.transforms as transforms
+    norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
+    norm_std = [0.229, 0.224, 0.225]
+    transforms = transforms.Compose([
+        transforms.Resize(224),
+        transforms.RandomHorizontalFlip(0.5),
+        transforms.ToTensor(),
+        transforms.Normalize(norm_mean, norm_std)
+    ])
+    return transforms
+
+
+@TRANSFORM_REGISTRY.register()
 def crnet_frame_face_transform():
     import torchvision.transforms as transforms
     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images

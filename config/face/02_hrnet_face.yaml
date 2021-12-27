@@ -8,6 +8,6 @@ DATA_LOADER:
   TRAIN_BATCH_SIZE: 32
   NUM_WORKERS: 4
 MODEL:
-  NAME: "se_resnet50"
+  NAME: "hr_net_model"
 TRAIN:
-  OUTPUT_DIR: "results/face/01_senet_face"
+  OUTPUT_DIR: "results/face/02_hrnet_face"

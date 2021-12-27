@@ -69,13 +69,13 @@ __C.SOLVER.BETA_1 = 0.5
 __C.SOLVER.BETA_2 = 0.999
 __C.SOLVER.SCHEDULER = "multi_step_scale"
 __C.SOLVER.FACTOR = 0.1
-__C.SOLVER.MILESTONE = [80, 100]
+__C.SOLVER.MILESTONE = [200, 280]
 
 # ------------------------------------------- step 6:  train config node -----------------------------------------------
 __C.TRAIN = CfgNode()
 __C.TRAIN.TRAINER = "ImageModalTrainer"
 __C.TRAIN.START_EPOCH = 0
-__C.TRAIN.MAX_EPOCH = 120
+__C.TRAIN.MAX_EPOCH = 300
 __C.TRAIN.PRE_TRAINED_MODEL = None
 __C.TRAIN.RESUME = ""
 __C.TRAIN.LOG_INTERVAL = 10
