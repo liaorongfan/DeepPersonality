@@ -12,6 +12,6 @@ class VideoLoader:
         for i in frame_indices:
             image_path = os.path.join(video_path, self.image_name_formatter(i))
             if os.path.exists(image_path):
-                video.append(Image.open(image_path).convert("RGB"))
+                video.append(Image.open(image_path))
         return video
 

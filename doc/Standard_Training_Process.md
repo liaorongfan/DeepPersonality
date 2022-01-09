@@ -11,7 +11,13 @@ frame = cv2.resize(frame, (456, 256), interpolation=cv2.INTER_CUBIC)
 face = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")(frame)
 face = rotate_face(face)
 ```
-3. Image augmentation operations remain the same for different experiments(models)  
+3. when training every video is down sampled to 100 consecutive frames around 5 frames per second
+```python
+num_img = len(imgs_ls)
+sample_frames = np.linspace(0, num_img, 100, endpoint=False, dtype=np.int16)
+```
+
+4. Image augmentation operations remain the same for different experiments(models)  
 ```python
 transforms = transforms.Compose([
     transforms.Resize(256),

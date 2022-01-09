@@ -9,4 +9,4 @@ DATA_LOADER:
 MODEL:
   NAME: "vat_model"
 TRAIN:
-  OUTPUT_DIR: "results/standard/14_vat"
+  OUTPUT_DIR: "results/face/14_vat"

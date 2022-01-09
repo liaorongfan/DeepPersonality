@@ -1,12 +1,13 @@
 import torch
 from torch.utils.data import DataLoader
 import glob
+import numpy as np
 from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.transforms.transform import set_transform_op
 from dpcv.data.transforms.build import build_transform_opt
 from .build import DATA_LOADER_REGISTRY
-from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalEvenCrop
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.common import VideoLoader
 
@@ -33,6 +34,9 @@ class VideoFrameSegmentData(VideoData):
             frame_indices = self.list_face_frames(img_dir)
         else:
             frame_indices = self.list_frames(img_dir)
+
+        sample_frames = np.linspace(0, len(frame_indices), 100, endpoint=False, dtype=np.int16)
+        frame_indices = np.array(frame_indices)[sample_frames]
         if self.tem_trans is not None:
             frame_indices = self.tem_trans(frame_indices)
         imgs = self._loading(img_dir, frame_indices)

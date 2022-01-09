@@ -12,4 +12,4 @@ SOLVER:
   LR_INIT: 0.001
 TRAIN:
   TRAINER: "TPNTrainer"
-  OUTPUT_DIR: "results/standard/13_tpn"
+  OUTPUT_DIR: "results/face/13_tpn"

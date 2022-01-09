@@ -9,7 +9,7 @@ DATA_LOADER:
 MODEL:
   NAME: "slow_fast_model"
 SOLVER:
-  LR_INIT: 0.002
+  LR_INIT: 0.001
 TRAIN:
   TRAINER: "ImageListTrainer"
   OUTPUT_DIR: "results/face/05_slow_fast_face"
