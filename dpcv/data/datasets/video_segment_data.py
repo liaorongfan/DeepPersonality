@@ -7,7 +7,7 @@ from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.transforms.transform import set_transform_op
 from dpcv.data.transforms.build import build_transform_opt
 from .build import DATA_LOADER_REGISTRY
-from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalEvenCrop
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalEvenCrop, TemporalDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.common import VideoLoader
 
@@ -35,8 +35,6 @@ class VideoFrameSegmentData(VideoData):
         else:
             frame_indices = self.list_frames(img_dir)
 
-        sample_frames = np.linspace(0, len(frame_indices), 100, endpoint=False, dtype=np.int16)
-        frame_indices = np.array(frame_indices)[sample_frames]
         if self.tem_trans is not None:
             frame_indices = self.tem_trans(frame_indices)
         imgs = self._loading(img_dir, frame_indices)
@@ -124,7 +122,9 @@ def spatial_temporal_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = build_transform_opt(cfg)
-    temporal_transform = [TemporalRandomCrop(16)]
+    temporal_transform = [TemporalDownsample(), TemporalRandomCrop(16)]
+    # temporal_transform = [TemporalRandomCrop(16)]
+
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA

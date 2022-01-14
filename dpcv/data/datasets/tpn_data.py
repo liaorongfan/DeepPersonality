@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 from dpcv.data.transforms.transform import set_tpn_transform_op
 from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
-from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.common import VideoLoader
 from dpcv.data.transforms.build import build_transform_opt
@@ -81,7 +81,7 @@ def make_data_loader(cfg, mode="train"):
 def tpn_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = build_transform_opt(cfg)
-    temporal_transform = [TemporalRandomCrop(16)]
+    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA

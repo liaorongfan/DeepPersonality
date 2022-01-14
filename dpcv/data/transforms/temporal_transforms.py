@@ -3,6 +3,7 @@ code modified form https://github.com/kenshohara/3D-ResNets-PyTorch.git
 """
 import random
 import math
+import numpy as np
 
 
 class Compose(object):
@@ -96,6 +97,17 @@ class TemporalRandomCrop(object):
             out = self.loop(out)
 
         return out
+
+
+class TemporalDownsample:
+
+    def __init__(self, length=100):
+        self.len = length
+
+    def __call__(self, frame_indices):
+        sample_frames = np.linspace(0, len(frame_indices), self.len, endpoint=False, dtype=np.int16)
+        frame_indices = np.array(frame_indices)[sample_frames]
+        return frame_indices.tolist()
 
 
 class TemporalEvenCrop(object):

@@ -1,7 +1,7 @@
 DATA_LOADER:
   NAME: "tpn_data_loader"
   TRANSFORM: "set_tpn_transform_op"
-  TRAIN_BATCH_SIZE: 4
+  TRAIN_BATCH_SIZE: 2
 MODEL:
   NAME: "tpn_model"
 SOLVER:
