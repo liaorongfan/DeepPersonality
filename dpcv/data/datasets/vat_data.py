@@ -66,9 +66,11 @@ def make_data_loader(cfg, mode="train"):
 @DATA_LOADER_REGISTRY.register()
 def vat_data_loader(cfg, mode="train"):
 
-    assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = build_transform_opt(cfg)
-    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
+    # temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
+    temporal_transform = [TemporalDownsample(length=16)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA

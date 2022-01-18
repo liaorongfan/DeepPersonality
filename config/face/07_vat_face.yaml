@@ -8,5 +8,7 @@ DATA_LOADER:
   TRAIN_BATCH_SIZE: 4
 MODEL:
   NAME: "vat_model"
+SOLVER:
+  LR_INIT: 0.001
 TRAIN:
-  OUTPUT_DIR: "results/face/14_vat"
+  OUTPUT_DIR: "results/face/07_vat"

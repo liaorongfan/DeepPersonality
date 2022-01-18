@@ -106,7 +106,7 @@ def make_data_loader(cfg, mode):
 
 @DATA_LOADER_REGISTRY.register()
 def bimodal_lstm_data_loader(cfg, mode):
-    assert (mode in ["train", "valid", "test"]), " 'mode' only supports 'train' 'valid' 'test' "
+    assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
     transforms = build_transform_opt(cfg)
     if mode == "train":
         dataset = TemporalData(
@@ -126,6 +126,8 @@ def bimodal_lstm_data_loader(cfg, mode):
             transforms
         )
         batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+    elif mode == "full_test":
+        return
     else:
         dataset = TemporalData(
             cfg.DATA.ROOT,

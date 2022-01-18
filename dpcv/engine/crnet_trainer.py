@@ -1,6 +1,7 @@
 import torch
 from tqdm import tqdm
 from dpcv.engine.bi_modal_trainer import BiModalTrainer
+import numpy as np
 from .build import TRAINER_REGISTRY
 
 
@@ -115,7 +116,7 @@ class CRNetTrainer(BiModalTrainer):
             label_list = []
             output_list = []
             for data in tqdm(data_loader):
-                inputs, cls_label, labels = self.data_fmt(data)
+                inputs, _, labels = self.data_fmt(data)
                 _, outputs = model(*inputs)
 
                 outputs = outputs.cpu().detach()
@@ -131,12 +132,25 @@ class CRNetTrainer(BiModalTrainer):
 
         return ocean_acc_avg, ocean_acc, dataset_output, dataset_label
 
+    def full_test(self, data_loader, model):
+        model.eval()
+        with torch.no_grad():
+
+            for data in tqdm(data_loader):
+                inputs, labels = self.full_test_data_fmt(data)
+                _, outputs = model(*inputs)
+
     def data_fmt(self, data):
         for k, v in data.items():
             data[k] = v.to(self.device)
         inputs = data["glo_img"], data["loc_img"], data["wav_aud"]
         cls_label, reg_label = data["cls_label"], data["reg_label"]
         return inputs, cls_label, reg_label
+
+    def full_test_data_fmt(self, data):
+        inputs = data["glo_img"].to(self.device), data["loc_img"].to(self.device), data["wav_aud"].to(self.device)
+        label = data["reg_label"]
+        return inputs, label
 
     def loss_compute(self, loss_f, reg_pred, reg_label, cls_score, cls_label, epoch_idx):
         loss_1 = loss_f["l1_loss"](reg_pred, reg_label)
@@ -280,12 +294,44 @@ class CRNetTrainer2(BiModalTrainer):
 
         return ocean_acc_avg, ocean_acc, dataset_output, dataset_label
 
+    def full_test(self, data_loader, model):
+        model.eval()
+        model.set_train_regressor()
+        with torch.no_grad():
+            out_ls, label_ls = [], []
+            for data in tqdm(data_loader):
+                inputs, labels = self.full_test_data_fmt(data)
+                _, outputs = model(*inputs)
+                out_ls.append(outputs.mean(0).cpu().detach())
+                label_ls.append(labels)
+            all_out = torch.stack(out_ls, 0)
+            all_label = torch.stack(label_ls, 0)
+            ocean_acc = (1 - torch.abs(all_out - all_label)).mean(0).numpy()
+            ocean_acc_avg = ocean_acc.mean(0)
+
+            ocean_acc_avg_rand = np.round(ocean_acc_avg, 4)
+            ocean_acc_dict = {k: np.round(ocean_acc[i], 4) for i, k in enumerate(["O", "C", "E", "A", "N"])}
+
+            dataset_output = all_out.numpy()
+            dataset_label = all_label.numpy()
+
+            return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label
+
     def data_fmt(self, data):
         for k, v in data.items():
             data[k] = v.to(self.device)
         inputs = data["glo_img"], data["loc_img"], data["wav_aud"]
         cls_label, reg_label = data["cls_label"], data["reg_label"]
         return inputs, cls_label, reg_label
+
+    def full_test_data_fmt(self, data):
+        glo_imgs = torch.stack(data["glo_img"], 0).to(self.device)
+        loc_imgs = torch.stack(data["loc_img"], 0).to(self.device)
+        wav_aud = data["wav_aud"].repeat(100, 1, 1, 1).to(self.device)
+
+        inputs = glo_imgs, loc_imgs, wav_aud
+        label = data["reg_label"]
+        return inputs, label
 
     def loss_compute(self, loss_f, reg_pred, reg_label, cls_score, cls_label, epoch_idx):
         loss_1 = loss_f["l1_loss"](reg_pred, reg_label)

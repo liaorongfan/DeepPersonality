@@ -107,11 +107,40 @@ class BiModalTrainer(object):
             ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
         return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label
 
+    def full_test(self, data_set, model):
+        model.eval()
+        out_ls, label_ls = [], []
+        with torch.no_grad():
+            for data in tqdm(data_set):
+                inputs, label = self.full_test_data_fmt(data)
+                out = model(*inputs)
+                out_ls.append(out.mean(0).cpu().detach())
+                label_ls.append(label)
+        all_out = torch.stack(out_ls, 0)
+        all_label = torch.stack(label_ls, 0)
+        ocean_acc = (1 - torch.abs(all_out - all_label)).mean(0).numpy()
+        ocean_acc_avg = ocean_acc.mean(0)
+
+        ocean_acc_avg_rand = np.round(ocean_acc_avg, 4)
+        ocean_acc_dict = {k: np.round(ocean_acc[i], 4) for i, k in enumerate(["O", "C", "E", "A", "N"])}
+
+        dataset_output = all_out.numpy()
+        dataset_label = all_label.numpy()
+
+        return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label
+
     def data_fmt(self, data):
         for k, v in data.items():
             data[k] = v.to(self.device)
         img_in, aud_in, labels = data["image"], data["audio"], data["label"]
         return (aud_in, img_in), labels
+
+    def full_test_data_fmt(self, data):
+        images, wav, label = data["image"], data["audio"], data["label"]
+        images_in = torch.stack(images, 0).to(self.device)
+        # wav_in = torch.stack([wav] * 100, 0).to(self.device)
+        wav_in = wav.repeat(100, 1, 1, 1).to(self.device)
+        return (wav_in, images_in), label
 
 
 @TRAINER_REGISTRY.register()
@@ -168,6 +197,11 @@ class ImageModalTrainer(BiModalTrainer):
             data[k] = v.to(self.device)
         inputs, labels = data["image"], data["label"]
         return (inputs,), labels
+
+    def full_test_data_fmt(self, data):
+        images, label = data["all_images"], data["label"]
+        images_in = torch.stack(images, 0).to(self.device)
+        return (images_in, ), label
 
 
 @TRAINER_REGISTRY.register()

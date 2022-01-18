@@ -19,5 +19,6 @@ def build_dataloader(cfg):
             "train": dataloader(cfg, mode="train"),
             "valid": dataloader(cfg, mode="valid"),
             "test": dataloader(cfg, mode="test"),
+            "full_test": dataloader(cfg, mode="full_test")
         }
     return data_loader_dicts

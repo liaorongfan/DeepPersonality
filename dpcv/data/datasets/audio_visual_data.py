@@ -16,9 +16,10 @@ from random import shuffle
 
 class AudioVisualData(VideoData):
 
-    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None):
+    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=100):
         super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
+        self.sample_size = sample_size
 
     def __getitem__(self, idx):
         label = self.get_ocean_label(idx)
@@ -37,12 +38,14 @@ class AudioVisualData(VideoData):
     def get_image_data(self, idx):
         img_dir_path = self.img_dir_ls[idx]
         img_paths = glob.glob(img_dir_path + "/*.jpg")
-        img_path = random.choice(img_paths)
+        sample_frames = np.linspace(0, len(img_paths), self.sample_size, endpoint=False, dtype=np.int16)
+        selected = random.choice(sample_frames)
+        # img_path = random.choice(img_paths)
         try:
-            img = Image.open(img_path).convert("RGB")
+            img = Image.open(img_paths[selected]).convert("RGB")
             return img
         except:
-            print(img_path)
+            print(img_paths)
 
     def get_wave_data(self, idx):
 
@@ -60,76 +63,102 @@ class AudioVisualData(VideoData):
             wav_tmp = wav_fill
         return wav_tmp
 
+#
+# class VideoFrameData(Dataset):
+#     """process image data frame by frame
+#
+#     """
+#     def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None):
+#         self.data_root = data_root
+#         self.img_dir = img_dir
+#         self.audio_dir = audio_dir
+#         self.transform = transform
+#         self.img_dir_ls = self.parse_img_dir(img_dir)  # every directory name indeed a video
+#         self.annotation = self.parse_annotation(label_file)
+#         self.frame_data_triplet = self.frame_label_parse()
+#
+#     def frame_label_parse(self):
+#         """
+#         compose frame images with its corresponding audio data path and OCEAN
+#         labels
+#         """
+#         frame_data = []
+#         audio_data = []
+#         label_data = []
+#         for img_dir in self.img_dir_ls:
+#             frames = glob.glob(f"{self.data_root}/{self.img_dir}/{img_dir}/*.jpg")
+#             frame_data.extend(frames)
+#             audio_data.extend([f"{self.data_root}/{self.audio_dir}/{img_dir}.wav.npy" for _ in range(len(frames))])
+#             label_data.extend([self._find_ocean_score(img_dir) for _ in range(len(frames))])
+#         frame_data_triplet = list(zip(frame_data, audio_data, label_data))
+#         shuffle(frame_data_triplet)
+#         return frame_data_triplet
+#
+#     def parse_img_dir(self, img_dir):
+#         img_dir_ls = os.listdir(os.path.join(self.data_root, img_dir))
+#         return img_dir_ls
+#
+#     def parse_annotation(self, label_file):
+#         label_path = os.path.join(self.data_root, label_file)
+#         with open(label_path, "rb") as f:
+#             annotation = pickle.load(f, encoding="latin1")
+#         return annotation
+#
+#     def _find_ocean_score(self, img_dir):
+#         video_name = f"{img_dir}.mp4"
+#         score = [
+#             self.annotation["openness"][video_name],
+#             self.annotation["conscientiousness"][video_name],
+#             self.annotation["extraversion"][video_name],
+#             self.annotation["agreeableness"][video_name],
+#             self.annotation["neuroticism"][video_name],
+#         ]
+#         return score
+#
+#     def __getitem__(self, index):
+#         img_path = self.frame_data_triplet[index][0]
+#         aud_path = self.frame_data_triplet[index][1]
+#         label = self.frame_data_triplet[index][2]
+#
+#         img = Image.open(img_path).convert("RGB")
+#         aud = np.load(aud_path)
+#
+#         if self.transform:
+#             img = self.transform(img)
+#         aud = torch.as_tensor(aud, dtype=img.dtype)
+#         lab = torch.as_tensor(label, dtype=img.dtype)
+#
+#         sample = {"image": img, "audio": aud, "label": lab}
+#         return sample
+#
+#     def __len__(self):
+#         return len(self.frame_data_triplet)
+#
 
-class VideoFrameData(Dataset):
-    """process image data frame by frame
 
-    """
-    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None):
-        self.data_root = data_root
-        self.img_dir = img_dir
-        self.audio_dir = audio_dir
-        self.transform = transform
-        self.img_dir_ls = self.parse_img_dir(img_dir)  # every directory name indeed a video
-        self.annotation = self.parse_annotation(label_file)
-        self.frame_data_triplet = self.frame_label_parse()
+class ALLSampleAudioVisualData(AudioVisualData):
 
-    def frame_label_parse(self):
-        """
-        compose frame images with its corresponding audio data path and OCEAN
-        labels
-        """
-        frame_data = []
-        audio_data = []
-        label_data = []
-        for img_dir in self.img_dir_ls:
-            frames = glob.glob(f"{self.data_root}/{self.img_dir}/{img_dir}/*.jpg")
-            frame_data.extend(frames)
-            audio_data.extend([f"{self.data_root}/{self.audio_dir}/{img_dir}.wav.npy" for _ in range(len(frames))])
-            label_data.extend([self._find_ocean_score(img_dir) for _ in range(len(frames))])
-        frame_data_triplet = list(zip(frame_data, audio_data, label_data))
-        shuffle(frame_data_triplet)
-        return frame_data_triplet
-
-    def parse_img_dir(self, img_dir):
-        img_dir_ls = os.listdir(os.path.join(self.data_root, img_dir))
-        return img_dir_ls
-
-    def parse_annotation(self, label_file):
-        label_path = os.path.join(self.data_root, label_file)
-        with open(label_path, "rb") as f:
-            annotation = pickle.load(f, encoding="latin1")
-        return annotation
-
-    def _find_ocean_score(self, img_dir):
-        video_name = f"{img_dir}.mp4"
-        score = [
-            self.annotation["openness"][video_name],
-            self.annotation["conscientiousness"][video_name],
-            self.annotation["extraversion"][video_name],
-            self.annotation["agreeableness"][video_name],
-            self.annotation["neuroticism"][video_name],
-        ]
-        return score
-
-    def __getitem__(self, index):
-        img_path = self.frame_data_triplet[index][0]
-        aud_path = self.frame_data_triplet[index][1]
-        label = self.frame_data_triplet[index][2]
-
-        img = Image.open(img_path).convert("RGB")
-        aud = np.load(aud_path)
+    def __getitem__(self, idx):
+        label = self.get_ocean_label(idx)
+        imgs = self.get_image_data(idx)
+        wav = self.get_wave_data(idx)
 
         if self.transform:
-            img = self.transform(img)
-        aud = torch.as_tensor(aud, dtype=img.dtype)
-        lab = torch.as_tensor(label, dtype=img.dtype)
+            imgs = [self.transform(img) for img in imgs]
 
-        sample = {"image": img, "audio": aud, "label": lab}
+        wav = torch.as_tensor(wav, dtype=imgs[0].dtype)
+        label = torch.as_tensor(label, dtype=imgs[0].dtype)
+
+        sample = {"image": imgs, "audio": wav, "label": label}
         return sample
 
-    def __len__(self):
-        return len(self.frame_data_triplet)
+    def get_image_data(self, idx):
+        img_dir_path = self.img_dir_ls[idx]
+        img_path_ls = glob.glob(f"{img_dir_path}/*.jpg")
+        sample_frames = np.linspace(0, len(img_path_ls), self.sample_size, endpoint=False, dtype=np.int16)
+        img_path_ls_sampled = [img_path_ls[ind] for ind in sample_frames]
+        img_obj_ls = [Image.open(path) for path in img_path_ls_sampled]
+        return img_obj_ls
 
 
 def make_data_loader(cfg, mode):
@@ -182,7 +211,7 @@ def make_data_loader(cfg, mode):
 
 @DATA_LOADER_REGISTRY.register()
 def bimodal_resnet_data_loader(cfg, mode):
-    assert (mode in ["train", "valid", "test"]), " 'mode' only supports 'train' 'valid' 'test' "
+    assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
     transforms = build_transform_opt(cfg)
     if mode == "train":
         dataset = AudioVisualData(
@@ -202,6 +231,14 @@ def bimodal_resnet_data_loader(cfg, mode):
             transforms
         )
         batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+    elif mode == "full_test":
+        return ALLSampleAudioVisualData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TEST_IMG_DATA,
+            cfg.DATA.TEST_AUD_DATA,
+            cfg.DATA.TEST_LABEL_DATA,
+            transforms
+        )
     else:
         dataset = AudioVisualData(
             cfg.DATA.ROOT,

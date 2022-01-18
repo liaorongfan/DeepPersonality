@@ -40,6 +40,31 @@ class SingleFrameData(VideoData):
         return img_path_ls[selected]
 
 
+class AllSampleFrameData(VideoData):
+    def __init__(self, data_root, img_dir, label_file, trans=None):
+        super().__init__(data_root, img_dir, label_file)
+        self.trans = trans
+
+    def __getitem__(self, idx):
+        img_obj_ls = self.get_sample_frames(idx)
+        label = self.get_ocean_label(idx)
+        if self.trans is not None:
+            img_obj_ls = [self.trans(img) for img in img_obj_ls]
+        return {"all_images": img_obj_ls, "label": torch.as_tensor(label)}
+
+    def get_sample_frames(self, idx):
+        img_dir = self.img_dir_ls[idx]
+        # Note randomly ordered after glob search
+        img_path_ls = glob.glob(f"{img_dir}/*.jpg")
+        # downsample the frames to 100 / video
+        sample_frames_id = np.linspace(0, len(img_path_ls), 100, endpoint=False, dtype=np.int16).tolist()
+        img_path_ls_sampled = [img_path_ls[idx] for idx in sample_frames_id]
+        img_obj_ls = [Image.open(img_path) for img_path in img_path_ls_sampled]
+        return img_obj_ls
+
+
+
+
 def make_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
     transform = set_transform_op()
@@ -82,7 +107,10 @@ def make_data_loader(cfg, mode="train"):
 
 @DATA_LOADER_REGISTRY.register()
 def single_frame_data_loader(cfg, mode="train"):
-    assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
+
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
     transform = build_transform_opt(cfg)
     if mode == "train":
         data_set = SingleFrameData(
@@ -105,6 +133,14 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TRAINVAL_LABEL_DATA,
             transform,
         )
+    elif mode == "full_test":
+        return AllSampleFrameData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TEST_IMG_DATA,
+            cfg.DATA.TEST_LABEL_DATA,
+            transform,
+        )
+
     else:
         data_set = SingleFrameData(
             cfg.DATA.ROOT,

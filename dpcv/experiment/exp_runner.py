@@ -101,7 +101,7 @@ class ExpRunner:
         self.train_epochs(cfg)
         self.after_train(cfg)
 
-    def test(self, weight=None):
+    def test(self, weight=None, full_test=False):
         self.logger.info("Test only mode")
         cfg = self.cfg.TEST
         cfg.WEIGHT = weight if weight else cfg.WEIGHT
@@ -118,9 +118,15 @@ class ExpRunner:
             self.logger.info(f"test with model {weight_file}")
             self.model = load_model(self.model, weight_file)
 
-        ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.test(
-            self.data_loader["test"], self.model
-        )
+        if not full_test:
+            ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.test(
+                self.data_loader["test"], self.model
+            )
+        else:
+            ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(
+                self.data_loader["full_test"], self.model
+            )
+
         self.logger.info("acc: {} mean: {}".format(ocean_acc, ocean_acc_avg))
         self.latex_info(ocean_acc, ocean_acc_avg)  # TODO: remove latter
 
