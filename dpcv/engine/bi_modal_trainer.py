@@ -407,7 +407,6 @@ class PersEmoTrainer(BiModalTrainer):
             label_list = []
             output_list = []
             for data in tqdm(data_loader):
-
                 inputs, p_labels, e_labels = self.data_fmt(data)
                 p_score, p_co, e_score, e_co, x_ep = model(*inputs)
                 p_score = p_score.cpu().detach()
@@ -421,6 +420,9 @@ class PersEmoTrainer(BiModalTrainer):
             dataset_output = torch.stack(output_list, dim=0).view(-1, 5).numpy()
             dataset_label = torch.stack(label_list, dim=0).view(-1, 5).numpy()
         return ocean_acc_avg, ocean_acc, dataset_output, dataset_label
+
+    def full_test(self, data_loader, model):
+        return self.test(data_loader, model)
 
 
 @TRAINER_REGISTRY.register()

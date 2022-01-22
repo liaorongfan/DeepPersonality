@@ -5,7 +5,7 @@ DATA:
 DATA_LOADER:
   NAME: "spatial_temporal_data_loader"
   TRANSFORM: "face_image_x2_transform"
-  TRAIN_BATCH_SIZE: 4
+  TRAIN_BATCH_SIZE: 2
   NUM_WORKERS: 4
 MODEL:
   NAME: "resnet50_3d_model"

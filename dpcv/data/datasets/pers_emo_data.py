@@ -100,6 +100,27 @@ class PersEmoNData(VideoData):
         return int(len(self.img_dir_ls) / 10)  # for each mini-batch the author selected 10 videos in chalearn data
 
 
+class AllFramePersEmoNData(PersEmoNData):
+
+    def gather_personality_data(self, index):
+        img_dir = self.img_dir_ls[index]
+        img_ls, label_ls = self.per_img_sample(img_dir)
+        assert len(img_ls) == 100, f"image sample from{img_dir} is not enough"
+        # print(len(img_ls))
+        return img_ls, label_ls
+
+    def per_img_sample(self, img_dir):
+        imgs = glob.glob(f"{img_dir}/*.jpg")
+        selected_idx = np.linspace(0, len(imgs), 100, endpoint=False, dtype=np.int16)
+        selected_img_ls = [imgs[idx] for idx in selected_idx]
+        selected_img_obj = [Image.open(img) for img in selected_img_ls]
+        selected_img_lab = [self.get_per_label(img_dir)] * 100
+        return selected_img_obj, selected_img_lab
+
+    def __len__(self):
+        return len(self.img_dir_ls)
+
+
 def make_data_loader(cfg, mode=None):
     per_trans = set_per_transform()
     emo_trans = set_per_transform()
@@ -163,6 +184,16 @@ def peremon_data_loader(cfg, mode=None):
             data_cfg.ROOT,  # "../datasets/",
             data_cfg.VALID_IMG_DATA,  # "image_data/valid_data_face",
             data_cfg.VALID_LABEL_DATA,  # "annotation/annotation_validation.pkl",
+            data_cfg.VA_DATA,  # "va_data/cropped_aligned",
+            data_cfg.VA_VALID_LABEL,  # "va_data/va_label/VA_Set/Validation_Set",
+            per_trans=per_trans,
+            emo_trans=emo_trans,
+        )
+    elif mode == "full_test":
+        return AllFramePersEmoNData(
+            data_cfg.ROOT,  # "../datasets/",
+            data_cfg.TEST_IMG_DATA,  # "image_data/valid_data_face",
+            data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_validation.pkl",
             data_cfg.VA_DATA,  # "va_data/cropped_aligned",
             data_cfg.VA_VALID_LABEL,  # "va_data/va_label/VA_Set/Validation_Set",
             per_trans=per_trans,

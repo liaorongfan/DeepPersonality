@@ -101,7 +101,7 @@ class ExpRunner:
         self.train_epochs(cfg)
         self.after_train(cfg)
 
-    def test(self, weight=None, full_test=False):
+    def test(self, weight=None, full_test=True):
         self.logger.info("Test only mode")
         cfg = self.cfg.TEST
         cfg.WEIGHT = weight if weight else cfg.WEIGHT

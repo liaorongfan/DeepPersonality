@@ -122,8 +122,9 @@ def spatial_temporal_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = build_transform_opt(cfg)
-    temporal_transform = [TemporalDownsample(), TemporalRandomCrop(16)]
+    # temporal_transform = [TemporalDownsample(), TemporalRandomCrop(16)]
     # temporal_transform = [TemporalRandomCrop(16)]
+    temporal_transform = [TemporalDownsample(32)]
 
     temporal_transform = TemporalCompose(temporal_transform)
 
