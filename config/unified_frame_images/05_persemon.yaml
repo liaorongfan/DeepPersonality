@@ -27,4 +27,4 @@ SOLVER:
 TRAIN:
   TRAINER: "PersEmoTrainer"
   MAX_EPOCH: 200
-  OUTPUT_DIR: "results/standard/05_peremon"
+  OUTPUT_DIR: "results/unified_frame_images/05_peremon"

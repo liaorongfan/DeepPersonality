@@ -3,11 +3,11 @@ DATA:
   VALID_IMG_DATA: "image_data/valid_data_face"
   TEST_IMG_DATA: "image_data/test_data_face"
 DATA_LOADER:
-  NAME: "single_frame_data_loader"
+  NAME: "spatial_temporal_data_loader"
   TRANSFORM: "face_image_x2_transform"
-  TRAIN_BATCH_SIZE: 32
+  TRAIN_BATCH_SIZE: 2
   NUM_WORKERS: 4
 MODEL:
-  NAME: "hr_net_model"
+  NAME: "resnet50_3d_model"
 TRAIN:
-  OUTPUT_DIR: "results/face/02_hrnet_face"
+  OUTPUT_DIR: "results/unified_face_images/04_resnet50_3d_face"

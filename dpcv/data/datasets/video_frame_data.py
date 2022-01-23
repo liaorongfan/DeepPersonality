@@ -63,10 +63,9 @@ class AllSampleFrameData(VideoData):
         return img_obj_ls
 
 
-
-
 def make_data_loader(cfg, mode="train"):
-    assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]),\
+        "'mode' should be 'train' , 'valid' 'trainval' 'test', 'full_test' "
     transform = set_transform_op()
     if mode == "train":
         data_set = SingleFrameData(

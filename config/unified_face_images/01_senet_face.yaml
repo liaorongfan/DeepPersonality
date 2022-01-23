@@ -5,8 +5,9 @@ DATA:
 DATA_LOADER:
   NAME: "single_frame_data_loader"
   TRANSFORM: "face_image_x2_transform"
-  TRAIN_BATCH_SIZE: 24
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 4
 MODEL:
-  NAME: "swin_transformer_model"
+  NAME: "se_resnet50"
 TRAIN:
-  OUTPUT_DIR: "results/face/03_swin_transformer_face"
+  OUTPUT_DIR: "results/unified_face_images/01_senet_face"

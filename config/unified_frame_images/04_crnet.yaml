@@ -27,4 +27,4 @@ SOLVER:
 TRAIN:
   TRAINER: "CRNetTrainer2"
   MAX_EPOCH: 100
-  OUTPUT_DIR: "results/standard/04_crnet"
+  OUTPUT_DIR: "results/unified_frame_images/04_crnet"

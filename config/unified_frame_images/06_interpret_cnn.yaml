@@ -21,4 +21,4 @@ SOLVER:
 TRAIN:
   TRAINER: "ImageModalTrainer"
   MAX_EPOCH: 200
-  OUTPUT_DIR: "results/standard/06_interpret_cnn"
+  OUTPUT_DIR: "results/unified_frame_images/06_interpret_cnn"

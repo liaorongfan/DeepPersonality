@@ -3,11 +3,13 @@ DATA:
   VALID_IMG_DATA: "image_data/valid_data_face"
   TEST_IMG_DATA: "image_data/test_data_face"
 DATA_LOADER:
-  NAME: "spatial_temporal_data_loader"
-  TRANSFORM: "face_image_x2_transform"
+  NAME: "tpn_data_loader"
+  TRANSFORM: "set_tpn_transform_op"
   TRAIN_BATCH_SIZE: 2
-  NUM_WORKERS: 4
 MODEL:
-  NAME: "resnet50_3d_model"
+  NAME: "tpn_model"
+SOLVER:
+  LR_INIT: 0.001
 TRAIN:
-  OUTPUT_DIR: "results/face/04_resnet50_3d_face"
+  TRAINER: "TPNTrainer"
+  OUTPUT_DIR: "results/unified_face_images/13_tpn"

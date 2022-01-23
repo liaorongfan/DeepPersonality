@@ -20,4 +20,4 @@ SOLVER:
 TRAIN:
   TRAINER: "AudioTrainer"
   MAX_EPOCH: 200
-  OUTPUT_DIR: "results/standard/07_interpret_audio"
+  OUTPUT_DIR: "results/unified_frame_images/07_interpret_audio"

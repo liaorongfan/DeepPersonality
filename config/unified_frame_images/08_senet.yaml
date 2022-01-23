@@ -1,0 +1,4 @@
+MODEL:
+  NAME: "se_resnet50"
+TRAIN:
+  OUTPUT_DIR: "results/unified_frame_images/08_senet"

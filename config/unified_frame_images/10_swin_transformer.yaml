@@ -3,4 +3,4 @@ DATA_LOADER:
 MODEL:
   NAME: "swin_transformer_model"
 TRAIN:
-  OUTPUT_DIR: "results/standard/10_swin_transformer"
+  OUTPUT_DIR: "results/unified_frame_images/10_swin_transformer"

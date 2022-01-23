@@ -3,13 +3,11 @@ DATA:
   VALID_IMG_DATA: "image_data/valid_data_face"
   TEST_IMG_DATA: "image_data/test_data_face"
 DATA_LOADER:
-  NAME: "slow_fast_data_loader"
+  NAME: "single_frame_data_loader"
   TRANSFORM: "face_image_x2_transform"
-  TRAIN_BATCH_SIZE: 2
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 4
 MODEL:
-  NAME: "slow_fast_model"
-SOLVER:
-  LR_INIT: 0.001
+  NAME: "hr_net_model"
 TRAIN:
-  TRAINER: "ImageListTrainer"
-  OUTPUT_DIR: "results/face/05_slow_fast_face"
+  OUTPUT_DIR: "results/unified_face_images/02_hrnet_face"

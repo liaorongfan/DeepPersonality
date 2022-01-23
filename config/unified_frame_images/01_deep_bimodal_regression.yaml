@@ -21,4 +21,4 @@ SOLVER:
 TRAIN:
   TRAINER: "ImageModalTrainer"
   MAX_EPOCH: 100
-  OUTPUT_DIR: "results/standard/01_deep_bimodal"
+  OUTPUT_DIR: "results/unified_frame_images/01_deep_bimodal"

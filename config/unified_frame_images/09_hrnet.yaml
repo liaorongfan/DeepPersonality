@@ -1,0 +1,4 @@
+MODEL:
+  NAME: "hr_net_model"
+TRAIN:
+  OUTPUT_DIR: "results/unified_frame_images/09_hrnet"

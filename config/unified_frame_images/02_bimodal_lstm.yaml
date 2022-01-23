@@ -24,4 +24,4 @@ SOLVER:
 TRAIN:
   TRAINER: "BimodalLSTMTrain"
   MAX_EPOCH: 200
-  OUTPUT_DIR: "results/standard/02_bimodal_lstm"
+  OUTPUT_DIR: "results/unified_frame_images/02_bimodal_lstm"

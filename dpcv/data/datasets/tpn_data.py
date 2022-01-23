@@ -83,8 +83,8 @@ def tpn_data_loader(cfg, mode="train"):
         "'mode' should be 'train' , 'valid' or 'trainval'"
 
     spatial_transform = build_transform_opt(cfg)
-    # temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
-    temporal_transform = [TemporalDownsample(length=16)]
+    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
+    # temporal_transform = [TemporalDownsample(length=16)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA

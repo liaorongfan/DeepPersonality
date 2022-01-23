@@ -24,4 +24,4 @@ SOLVER:
 TRAIN:
   TRAINER: "BiModalTrainer"
   MAX_EPOCH: 300
-  OUTPUT_DIR: "results/standard/03_bimodal_resnet"
+  OUTPUT_DIR: "results/unified_frame_images/03_bimodal_resnet"
