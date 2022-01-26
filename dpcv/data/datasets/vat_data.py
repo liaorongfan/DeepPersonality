@@ -2,11 +2,12 @@ import torch
 from torch.utils.data import DataLoader
 from dpcv.data.transforms.transform import set_vat_transform_op
 from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
-from dpcv.data.datasets.tpn_data import TPNData as VATDAta
-from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample
+from dpcv.data.datasets.tpn_data import TPNData as VATData
+from dpcv.data.datasets.tpn_data import FullTestTPNData as FullTestVATData
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
-from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.transforms.build import build_transform_spatial
 from dpcv.data.datasets.common import VideoLoader
 
 
@@ -19,7 +20,7 @@ def make_data_loader(cfg, mode="train"):
     video_loader = VideoLoader()
 
     if mode == "train":
-        data_set = VATDAta(
+        data_set = VATData(
             cfg.DATA_ROOT,
             cfg.TRAIN_IMG_DATA,
             cfg.TRAIN_LABEL_DATA,
@@ -28,7 +29,7 @@ def make_data_loader(cfg, mode="train"):
             temporal_transform,
         )
     elif mode == "valid":
-        data_set = VATDAta(
+        data_set = VATData(
             cfg.DATA_ROOT,
             cfg.VALID_IMG_DATA,
             cfg.VALID_LABEL_DATA,
@@ -37,7 +38,7 @@ def make_data_loader(cfg, mode="train"):
             temporal_transform,
         )
     elif mode == "trainval":
-        data_set = VATDAta(
+        data_set = VATData(
             cfg.DATA_ROOT,
             cfg.TRAINVAL_IMG_DATA,
             cfg.TRAINVAL_LABEL_DATA,
@@ -46,7 +47,7 @@ def make_data_loader(cfg, mode="train"):
             temporal_transform,
         )
     else:
-        data_set = VATDAta(
+        data_set = VATData(
             cfg.DATA_ROOT,
             cfg.TEST_IMG_DATA,
             cfg.TEST_LABEL_DATA,
@@ -68,9 +69,9 @@ def vat_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid' or 'trainval'"
-    spatial_transform = build_transform_opt(cfg)
-    # temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
-    temporal_transform = [TemporalDownsample(length=16)]
+    spatial_transform = build_transform_spatial(cfg)
+    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
+    # temporal_transform = [TemporalDownsample(length=16)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA
@@ -80,7 +81,7 @@ def vat_data_loader(cfg, mode="train"):
         video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
 
     if mode == "train":
-        data_set = VATDAta(
+        data_set = VATData(
             data_cfg.ROOT,
             data_cfg.TRAIN_IMG_DATA,
             data_cfg.TRAIN_LABEL_DATA,
@@ -89,7 +90,7 @@ def vat_data_loader(cfg, mode="train"):
             temporal_transform,
         )
     elif mode == "valid":
-        data_set = VATDAta(
+        data_set = VATData(
             data_cfg.ROOT,
             data_cfg.VALID_IMG_DATA,
             data_cfg.VALID_LABEL_DATA,
@@ -98,7 +99,7 @@ def vat_data_loader(cfg, mode="train"):
             temporal_transform,
         )
     elif mode == "trainval":
-        data_set = VATDAta(
+        data_set = VATData(
             data_cfg.ROOT,
             data_cfg.TRAINVAL_IMG_DATA,
             data_cfg.TRAINVAL_LABEL_DATA,
@@ -106,8 +107,19 @@ def vat_data_loader(cfg, mode="train"):
             spatial_transform,
             temporal_transform,
         )
+    elif mode == "full_test":
+        temporal_transform = [TemporalDownsample(length=100), TemporalEvenCropDownsample(16, 6)]
+        temporal_transform = TemporalCompose(temporal_transform)
+        return FullTestVATData(
+            data_cfg.ROOT,
+            data_cfg.TEST_IMG_DATA,
+            data_cfg.TEST_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
     else:
-        data_set = VATDAta(
+        data_set = VATData(
             data_cfg.ROOT,
             data_cfg.TEST_IMG_DATA,
             data_cfg.TEST_LABEL_DATA,

@@ -5,14 +5,17 @@ import numpy as np
 from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.transforms.transform import set_transform_op
-from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.transforms.build import build_transform_spatial
 from .build import DATA_LOADER_REGISTRY
-from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalEvenCrop, TemporalDownsample
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop,  TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.common import VideoLoader
 
 
 class VideoFrameSegmentData(VideoData):
+    """ Dataloader for 3d models, (3d_resnet, slow-fast, tpn, vat)
+
+    """
     def __init__(self, data_root, img_dir, label_file, video_loader, spa_trans=None, tem_trans=None):
         super().__init__(data_root, img_dir, label_file)
         self.loader = video_loader
@@ -26,10 +29,10 @@ class VideoFrameSegmentData(VideoData):
 
     def get_image_data(self, index):
         img_dir = self.img_dir_ls[index]
-        imgs = self.image_sample(img_dir)
+        imgs = self.frame_sample(img_dir)
         return imgs
 
-    def image_sample(self, img_dir):
+    def frame_sample(self, img_dir):
         if "face" in img_dir:
             frame_indices = self.list_face_frames(img_dir)
         else:
@@ -43,8 +46,6 @@ class VideoFrameSegmentData(VideoData):
     def _loading(self, path, frame_indices):
         clip = self.loader(path, frame_indices)
         if self.spa_trans is not None:
-            # more flexible image preprocess but for simple comparison we just use crop
-            # self.spa_trans.randomize_parameters()
             clip = [self.spa_trans(img) for img in clip]
         clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
         return clip
@@ -62,6 +63,36 @@ class VideoFrameSegmentData(VideoData):
         img_path_ls = sorted(img_path_ls, key=lambda x: int(Path(x).stem[5:]))
         frame_indices = [int(Path(path).stem[5:]) for path in img_path_ls]
         return frame_indices
+
+
+class FullTestVideoSegmentData(VideoFrameSegmentData):
+
+    def __getitem__(self, index):
+        imgs = self.get_image_data(index)
+        label = self.get_ocean_label(index)
+        return {"all_images": imgs, "label": torch.as_tensor(label)}
+
+    def frame_sample(self, img_dir):
+
+        if "face" in img_dir:
+            frame_indices = self.list_face_frames(img_dir)
+        else:
+            frame_indices = self.list_frames(img_dir)
+
+        if self.tem_trans is not None:
+            frame_indices = self.tem_trans(frame_indices)
+        imgs = self.load_batch_images(img_dir, frame_indices)
+        return imgs
+
+    def load_batch_images(self, img_dir, frame_indices_ls):
+        image_segment_obj_ls = []
+        for frame_seg_idx in frame_indices_ls:
+            image_segment_obj = self.loader(img_dir, frame_seg_idx)
+            if self.spa_trans is not None:
+                image_segment_obj = [self.spa_trans(img) for img in image_segment_obj]
+            image_segment_obj = torch.stack(image_segment_obj, 0).permute(1, 0, 2, 3)
+            image_segment_obj_ls.append(image_segment_obj)
+        return image_segment_obj_ls
 
 
 def make_data_loader(cfg, mode="train"):
@@ -123,7 +154,7 @@ def spatial_temporal_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid', 'trainval', 'test' or 'full_test' "
 
-    spatial_transform = build_transform_opt(cfg)
+    spatial_transform = build_transform_spatial(cfg)
     temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
     # temporal_transform = [TemporalRandomCrop(16)]
     # temporal_transform = [TemporalDownsample(32)]
@@ -159,6 +190,17 @@ def spatial_temporal_data_loader(cfg, mode="train"):
             data_cfg.ROOT,
             data_cfg.TRAINVAL_IMG_DATA,
             data_cfg.TRAINVAL_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+    elif mode == "full_test":
+        temporal_transform = [TemporalDownsample(length=100), TemporalEvenCropDownsample(16, 6)]
+        temporal_transform = TemporalCompose(temporal_transform)
+        return FullTestVideoSegmentData(
+            data_cfg.ROOT,
+            data_cfg.TEST_IMG_DATA,
+            data_cfg.TEST_LABEL_DATA,
             video_loader,
             spatial_transform,
             temporal_transform,

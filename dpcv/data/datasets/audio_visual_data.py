@@ -9,7 +9,7 @@ import pickle
 import numpy as np
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.transforms.transform import set_audio_visual_transform
-from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.transforms.build import build_transform_spatial
 from .build import DATA_LOADER_REGISTRY
 from random import shuffle
 
@@ -212,7 +212,7 @@ def make_data_loader(cfg, mode):
 @DATA_LOADER_REGISTRY.register()
 def bimodal_resnet_data_loader(cfg, mode):
     assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
-    transforms = build_transform_opt(cfg)
+    transforms = build_transform_spatial(cfg)
     if mode == "train":
         dataset = AudioVisualData(
             cfg.DATA.ROOT,

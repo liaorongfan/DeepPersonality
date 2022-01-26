@@ -2,9 +2,9 @@ import torch
 from torch.utils.data import DataLoader
 from dpcv.data.transforms.transform import set_transform_op
 from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
-from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample, TemporalTwoEndsCrop
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
-from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.transforms.build import build_transform_spatial
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
 from dpcv.data.datasets.common import VideoLoader
 
@@ -31,6 +31,32 @@ class SlowFastData(VideoFrameSegmentData):
         frame_list = [slow_pathway, fast_pathway]
 
         return frame_list
+
+
+class FullTestSlowFastData(SlowFastData):
+
+    def __getitem__(self, index):
+        img_tensor_ls = self.get_image_data(index)
+        frame_segs = []
+        for img in img_tensor_ls:
+            frame_list = self.pack_pathway_output(img)
+            frame_segs.append(frame_list)
+        label = self.get_ocean_label(index)
+        return {"all_images": frame_segs, "label": torch.as_tensor(label)}
+
+    def frame_sample(self, img_dir):
+        if "face" in img_dir:
+            frame_indices = self.list_face_frames(img_dir)
+        else:
+            frame_indices = self.list_frames(img_dir)
+
+        if self.tem_trans is not None:
+            frame_indices_ls = self.tem_trans(frame_indices)
+        frame_obj_ls = []
+        for frames in frame_indices_ls:
+            imgs = self._loading(img_dir, frames)
+            frame_obj_ls.append(imgs)
+        return frame_obj_ls
 
 
 def make_data_loader(cfg, mode="train"):
@@ -92,8 +118,8 @@ def slow_fast_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid' 'trainval' 'test' and 'full_test' "
 
-    spatial_transform = build_transform_opt(cfg)
-    temporal_transform = [TemporalDownsample(), TemporalRandomCrop(64)]
+    spatial_transform = build_transform_spatial(cfg)
+    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(64)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA
@@ -125,6 +151,17 @@ def slow_fast_data_loader(cfg, mode="train"):
             data_cfg.ROOT,
             data_cfg.TRAINVAL_IMG_DATA,
             data_cfg.TRAINVAL_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+    elif mode == "full_test":
+        temporal_transform = [TemporalDownsample(length=100), TemporalTwoEndsCrop(64)]
+        temporal_transform = TemporalCompose(temporal_transform)
+        return FullTestSlowFastData(
+            data_cfg.ROOT,
+            data_cfg.TEST_IMG_DATA,
+            data_cfg.TEST_LABEL_DATA,
             video_loader,
             spatial_transform,
             temporal_transform,

@@ -7,7 +7,7 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from dpcv.data.datasets.bi_modal_data import VideoData
-from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.transforms.build import build_transform_spatial
 from dpcv.data.transforms.transform import set_per_transform
 from .build import DATA_LOADER_REGISTRY
 
@@ -166,8 +166,8 @@ def make_data_loader(cfg, mode=None):
 
 @DATA_LOADER_REGISTRY.register()
 def peremon_data_loader(cfg, mode=None):
-    per_trans = build_transform_opt(cfg)
-    emo_trans = build_transform_opt(cfg)
+    per_trans = build_transform_spatial(cfg)
+    emo_trans = build_transform_spatial(cfg)
     data_cfg = cfg.DATA
     if mode == "train":
         dataset = PersEmoNData(

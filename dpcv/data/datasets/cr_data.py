@@ -9,7 +9,7 @@ from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from .build import DATA_LOADER_REGISTRY
 from dpcv.data.transforms.transform import set_crnet_transform, crnet_frame_face_transform
-from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.transforms.build import build_transform_spatial
 
 
 class CRNetData(VideoData):
@@ -209,7 +209,7 @@ def crnet_data_loader(cfg, mode=None):
     assert (mode in ["train", "valid", "test", "full_test"]), \
         " 'mode' only supports 'train', 'valid', 'test' and 'full_test' "
 
-    transforms = build_transform_opt(cfg)
+    transforms = build_transform_spatial(cfg)
     data_cfg = cfg.DATA
     if mode == "train":
         dataset = CRNetData(

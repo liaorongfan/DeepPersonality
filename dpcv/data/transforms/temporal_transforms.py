@@ -58,6 +58,18 @@ class TemporalBeginCrop(object):
         return out
 
 
+class TemporalTwoEndsCrop(object):
+
+    def __init__(self, size):
+        self.size = size
+
+    def __call__(self, frame_indices):
+        from_start = frame_indices[:self.size]
+        to_end = frame_indices[-self.size:]
+
+        return [from_start, to_end]
+
+
 class TemporalCenterCrop(object):
 
     def __init__(self, size):
@@ -108,6 +120,24 @@ class TemporalDownsample:
         sample_frames = np.linspace(0, len(frame_indices), self.len, endpoint=False, dtype=np.int16)
         frame_indices = np.array(frame_indices)[sample_frames]
         return frame_indices.tolist()
+
+
+class TemporalEvenCropDownsample:
+
+    def __init__(self, segment_len=16, num_segmets=6):
+        self.segment_len = segment_len
+        self.num_segments = num_segmets
+
+    def __call__(self, frame_indices):
+
+        assert len(frame_indices) > self.num_segments * self.segment_len, \
+            "index out of range, segment_len * num_segments must less then the number of frame_indices"
+        segments = []
+        for i in range(self.num_segments):
+            start_index, end_index = i * self.segment_len, (i + 1) * self.segment_len
+            segments.append([frame_indices[idx] for idx in range(start_index, end_index)])
+
+        return segments
 
 
 class TemporalEvenCrop(object):

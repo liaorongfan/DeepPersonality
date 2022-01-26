@@ -11,7 +11,7 @@ from pathlib import Path
 import random
 import numpy as np
 from dpcv.data.transforms.transform import face_image_transform
-from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.transforms.build import build_transform_spatial
 from .build import DATA_LOADER_REGISTRY
 
 
@@ -107,7 +107,7 @@ def make_data_loader(cfg, mode):
 @DATA_LOADER_REGISTRY.register()
 def bimodal_lstm_data_loader(cfg, mode):
     assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
-    transforms = build_transform_opt(cfg)
+    transforms = build_transform_spatial(cfg)
     if mode == "train":
         dataset = TemporalData(
             cfg.DATA.ROOT,

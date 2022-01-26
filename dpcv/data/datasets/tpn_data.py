@@ -2,10 +2,10 @@ import torch
 from torch.utils.data import DataLoader
 from dpcv.data.transforms.transform import set_tpn_transform_op
 from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
-from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.common import VideoLoader
-from dpcv.data.transforms.build import build_transform_opt
+from dpcv.data.transforms.build import build_transform_spatial
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
 
 
@@ -23,6 +23,37 @@ class TPNData(VideoFrameSegmentData):
             clip = [self.spa_trans(img) for img in clip]
         clip = torch.stack(clip, 0)
         return clip
+
+
+class FullTestTPNData(TPNData):
+
+    def __getitem__(self, index):
+
+        imgs = self.get_image_data(index)
+        label = self.get_ocean_label(index)
+        return {"all_images": imgs, "label": torch.as_tensor(label)}
+
+    def frame_sample(self, img_dir):
+
+        if "face" in img_dir:
+            frame_indices = self.list_face_frames(img_dir)
+        else:
+            frame_indices = self.list_frames(img_dir)
+
+        if self.tem_trans is not None:
+            frame_indices = self.tem_trans(frame_indices)
+        imgs = self.load_batch_images(img_dir, frame_indices)
+        return imgs
+
+    def load_batch_images(self, img_dir, frame_indices_ls):
+        image_segment_obj_ls = []
+        for frame_seg_idx in frame_indices_ls:
+            image_segment_obj = self.loader(img_dir, frame_seg_idx)
+            if self.spa_trans is not None:
+                image_segment_obj = [self.spa_trans(img) for img in image_segment_obj]
+            image_segment_obj = torch.stack(image_segment_obj, 0)
+            image_segment_obj_ls.append(image_segment_obj)
+        return image_segment_obj_ls
 
 
 def make_data_loader(cfg, mode="train"):
@@ -82,7 +113,7 @@ def tpn_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid' or 'trainval'"
 
-    spatial_transform = build_transform_opt(cfg)
+    spatial_transform = build_transform_spatial(cfg)
     temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
     # temporal_transform = [TemporalDownsample(length=16)]
     temporal_transform = TemporalCompose(temporal_transform)
@@ -116,6 +147,17 @@ def tpn_data_loader(cfg, mode="train"):
             data_cfg.ROOT,
             data_cfg.TRAINVAL_IMG_DATA,
             data_cfg.TRAINVAL_LABEL_DATA,
+            video_loader,
+            spatial_transform,
+            temporal_transform,
+        )
+    elif mode == "full_test":
+        temporal_transform = [TemporalDownsample(length=100), TemporalEvenCropDownsample(16, 6)]
+        temporal_transform = TemporalCompose(temporal_transform)
+        return FullTestTPNData(
+            data_cfg.ROOT,
+            data_cfg.TEST_IMG_DATA,
+            data_cfg.TEST_LABEL_DATA,
             video_loader,
             spatial_transform,
             temporal_transform,
