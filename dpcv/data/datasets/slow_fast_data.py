@@ -120,6 +120,7 @@ def slow_fast_data_loader(cfg, mode="train"):
 
     spatial_transform = build_transform_spatial(cfg)
     temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(64)]
+    # temporal_transform = [TemporalDownsample(length=64)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA
