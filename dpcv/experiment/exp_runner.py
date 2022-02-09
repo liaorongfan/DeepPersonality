@@ -1,4 +1,5 @@
 import os
+import json
 import numpy as np
 from datetime import datetime
 from dpcv.data.datasets.build import build_dataloader
@@ -30,6 +31,7 @@ class ExpRunner:
         """
         self.cfg = cfg
         self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR)
+        self.log_cfg_info()
 
         self.data_loader = self.build_dataloader()
 
@@ -128,7 +130,7 @@ class ExpRunner:
             )
 
         self.logger.info("acc: {} mean: {}".format(ocean_acc, ocean_acc_avg))
-        self.latex_info(ocean_acc, ocean_acc_avg)  # TODO: remove latter
+        # self.latex_info(ocean_acc, ocean_acc_avg)  # a helper for latex table
 
         if cfg.COMPUTE_PCC:
             pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label)
@@ -139,6 +141,7 @@ class ExpRunner:
             ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label)
             self.logger.info(f"ccc: {ccc_dict} mean: {ccc_mean}")
             self.latex_info(ccc_dict, ccc_mean)
+
         return
 
     def run(self):
@@ -156,6 +159,13 @@ class ExpRunner:
                 latex_tab += str(np.round(v, 4)) + " & "
         latex_tab += str(mean)
         print(latex_tab)
+
+    def log_cfg_info(self):
+        """
+        record training info for convenience of results analysis
+        """
+        string = json.dumps(self.cfg, sort_keys=True, indent=4, separators=(',', ':'))
+        self.logger.info(string)
 
 
 

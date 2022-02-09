@@ -9,7 +9,7 @@ cfg = EasyDict()
 _C = cfg
 
 # test related setting  ------------------------------------------------------------------------------------------------
-_C.TEST_ONLY = True
+_C.TEST_ONLY = False
 _C.WEIGHT = "../results/interpret_img/09-25_00-00/checkpoint_84.pkl"
 _C.COMPUTE_PCC = True
 _C.COMPUTE_CCC = True

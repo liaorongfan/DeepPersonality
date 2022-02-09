@@ -17,8 +17,8 @@ SOLVER:
   LR_INIT: 0.05
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [80, 90]
+  MILESTONE: [100, 200]
 TRAIN:
   TRAINER: "ImageModalTrainer"
-  MAX_EPOCH: 200
+  MAX_EPOCH: 300
   OUTPUT_DIR: "results/unified_frame_images/06_interpret_cnn"
