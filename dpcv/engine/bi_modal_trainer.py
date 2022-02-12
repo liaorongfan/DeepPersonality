@@ -129,6 +129,17 @@ class BiModalTrainer(object):
 
         return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label
 
+    def data_extract(self, data_set, model):
+        model.eval()
+        out_ls, label_ls = [], []
+        with torch.no_grad():
+            for data in tqdm(data_set):
+                inputs, label = self.full_test_data_fmt(data)
+                out = model(*inputs)
+                out_ls.append(out.cpu())
+                label_ls.append(label.cpu())
+        return {"video_frames_pred": out_ls, "video_label": label_ls}
+
     def data_fmt(self, data):
         for k, v in data.items():
             data[k] = v.to(self.device)

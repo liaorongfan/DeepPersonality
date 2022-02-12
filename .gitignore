@@ -19,6 +19,7 @@ datasets/annotation
 datasets/va_data
 pretrained/
 output/
+mlruns/
 /snippet
 
 # current output files
