@@ -11,20 +11,20 @@ def feature_extract(cfg_file, model_weight, output_dir):
     cfg_from_file(cfg_file)
     runner = ExpRunner(cfg)
     runner.model = load_model(runner.model, model_weight)
-    ocean_acc_avg, ocean_acc, dataset_output, dataset_label = runner.trainer.full_test(
-        setup_dataloader(cfg, mode="test"), runner.model
-    )
-    print(ocean_acc_avg, ocean_acc)
+    # ocean_acc_avg, ocean_acc, dataset_output, dataset_label = runner.trainer.full_test(
+    #     setup_dataloader(cfg, mode="test"), runner.model
+    # )
+    # print(ocean_acc_avg, ocean_acc)
 
-    # for mode in ["train", "valid", "test"]:
-    #     dataloader = setup_dataloader(cfg, mode=mode)
-    #     dataset_output = runner.data_extract(dataloader)
-    #
-    #     if not os.path.exists(output_dir):
-    #         os.makedirs(output_dir)
-    #     save_to_file = os.path.join(output_dir, f"pred_{mode}_output.pkl")
-    #
-    #     torch.save(dataset_output, save_to_file)
+    for mode in ["train", "valid", "test"]:
+        dataloader = setup_dataloader(cfg, mode=mode)
+        dataset_output = runner.data_extract(dataloader)
+
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        save_to_file = os.path.join(output_dir, f"pred_{mode}_output.pkl")
+
+        torch.save(dataset_output, save_to_file)
 
 
 def setup_dataloader(cfg, mode):
@@ -106,10 +106,10 @@ if __name__ == "__main__":
             save_to = os.path.join(os.path.dirname(file), name)
             gen_statistic_data(data_path=file, save_to=save_to)
 
-    feature_extract(
-        cfg_file="config/unified_frame_images/10_swin_transformer.yaml",
-        model_weight="results/unified_frame_images/10_swin_transformer/12-13_21-28/checkpoint_110.pkl",
-        output_dir="swin_frame_pred_output",
-    )
+    # feature_extract(
+    #     cfg_file="config/unified_frame_images/10_swin_transformer.yaml",
+    #     model_weight="results/unified_frame_images/10_swin_transformer/12-13_21-28/checkpoint_110.pkl",
+    #     output_dir="swin_frame_pred_output",
+    # )
 
-    # gen_dataset("senet_frame_pred_output")
+    gen_dataset("swin_frame_pred_output")
