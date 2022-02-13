@@ -15,10 +15,11 @@ class MLP(nn.Module):
         self.relu_1 = nn.ReLU()
         self.hidden_layer_1 = nn.Linear(hidden_units, hidden_units)
         self.relu_2 = nn.ReLU()
-        # self.hidden_layer_2 = nn.Linear(hidden_units, hidden_units)
-        # self.relu_3 = nn.ReLU()
+        self.hidden_layer_2 = nn.Linear(hidden_units, int(hidden_units / 4))
+        self.relu_3 = nn.ReLU()
         # self.dropout = nn.Dropout(0.5)
-        self.output_layer = nn.Linear(hidden_units, 5)
+        self.output_layer = nn.Linear(int(hidden_units / 4), 5)
+        log_param("model", "MLP")
 
     def forward(self, x):
         x = x.reshape(-1, 60)
@@ -26,8 +27,8 @@ class MLP(nn.Module):
         x = self.relu_1(x)
         x = self.hidden_layer_1(x)
         x = self.relu_2(x)
-        # x = self.hidden_layer_2(x)
-        # x = self.relu_3(x)
+        x = self.hidden_layer_2(x)
+        x = self.relu_3(x)
         # x = self.dropout(x)
         x = self.output_layer(x)
         return x
@@ -44,6 +45,7 @@ class StatisticConv1D(nn.Module):
         self.conv3 = nn.Conv1d(in_channels=256, out_channels=1, kernel_size=(1, 1))
         # self.relu3 = nn.ReLU()
         # self.conv4 = nn.Conv1d(in_channels=256, out_channels=1, kernel_size=(1, 1))
+        log_param("model", "Conv1d")
 
     def forward(self, x):
         x = x[..., None]
@@ -84,14 +86,14 @@ class MLPTrainer:
         self.max_epo = max_epo
         self.best_acc = 0
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.l1_loss = nn.MSELoss()
+        # self.loss = nn.SmoothL1Loss()  # nn.L1Loss()  # nn.MSELoss()
+        self.loss = nn.MSELoss()
 
     def train(self, model, data_loader, optimizer, epo):
         model.train()
         for i, data in enumerate(data_loader):
             output = model(data["statistic"].to(self.device))
-            loss = self.l1_loss(output, data["label"].to(self.device))
-            # loss = nn.L1Loss(output, data["label"])
+            loss = self.loss(output, data["label"].to(self.device))
 
             optimizer.zero_grad()
             loss.backward()
@@ -135,7 +137,7 @@ class MLPTrainer:
                 output = model(data["statistic"].to(self.device))
                 batch_acc_ls.append((1 - torch.abs(output.cpu() - data["label"].cpu())).mean(dim=0))
             epo_acc = torch.stack(batch_acc_ls, dim=0).mean().numpy()
-        log_metric("test_acc", float(epo_acc))
+        log_metric("test_acc", float(epo_acc * 100))
         print("TEST: ACC: {:.4f}".format(epo_acc))
 
     def save_model(self, model, epoch, best_acc):
@@ -151,7 +153,7 @@ class MLPTrainer:
 
 def args_parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--lr", default=0.01, type=float, help="learning rate")
+    parser.add_argument("--lr", default=0.1, type=float, help="learning rate")
     parser.add_argument("--bs", default=64, type=int, help="batch size in training")
     parser.add_argument("--max_epoch", default=3000, type=int, help="max training epochs")
     parser.add_argument("--lr_scale_rate", default=0.1, type=float, help="learning rate scale")
@@ -163,13 +165,24 @@ def args_parse():
 
 def main():
     args = args_parse()
-    log_params({"lr": args.lr, "epochs": args.max_epoch})
-    train_data_loader = DataLoader(StatisticData("statistic_train_data.pkl"), batch_size=args.bs, shuffle=True)
-    valid_data_loader = DataLoader(StatisticData("statistic_valid_data.pkl"), batch_size=args.bs, shuffle=False)
-    test_data_loader = DataLoader(StatisticData("statistic_test_data.pkl"), batch_size=args.bs)
+    log_params({"lr": args.lr, "epochs": args.max_epoch, "milestones": args.milestones, "bs": args.bs})
 
-    model = MLP().cuda()  # 0.9109
-    # model = StatisticConv1D().cuda()  # 0.9111
+    dataset = {
+        "train": "senet_frame_pred_output/statistic_train_data.pkl",
+        "valid": "senet_frame_pred_output/statistic_valid_data.pkl",
+        "test": "senet_frame_pred_output/statistic_test_data.pkl",
+    }
+    train_data_loader = DataLoader(
+        StatisticData(dataset["train"]), batch_size=args.bs, shuffle=True
+    )
+    valid_data_loader = DataLoader(
+        StatisticData(dataset["valid"]), batch_size=args.bs, shuffle=False
+    )
+    test_data_loader = DataLoader(
+        StatisticData(dataset["test"]), batch_size=args.bs
+    )
+    # model = MLP().cuda()  # 0.9110
+    model = StatisticConv1D().cuda()  # 0.9111
     optimizer = optim.SGD(model.parameters(), lr=args.lr)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, gamma=args.lr_scale_rate, milestones=args.milestones)
 

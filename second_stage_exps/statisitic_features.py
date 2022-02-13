@@ -2,25 +2,59 @@ import torch
 from dpcv.checkpoint.save import load_model
 from dpcv.config.default_config_opt import cfg, cfg_from_file
 from dpcv.experiment.exp_runner import ExpRunner
+from dpcv.data.transforms.build import build_transform_spatial
+from dpcv.data.datasets.video_frame_data import AllSampleFrameData
 
 
-def feature_extract(cfg_file, model_weight, save_to, data_type="train"):
+def feature_extract(cfg_file, model_weight, output_dir):
 
     cfg_from_file(cfg_file)
-    # switch train valid data to test data to utilize existing method for test data to extract data prediction
-    # to be further modified latter
-    # cfg.DATA.TEST_IMG_DATA = "image_data/valid_data"
-    # cfg.DATA.TEST_IMG_FACE_DATA = 'image_data/valid_data_face'
-    # cfg.DATA.TEST_LABEL_DATA = 'annotation/annotation_validation.pkl'
     runner = ExpRunner(cfg)
     runner.model = load_model(runner.model, model_weight)
-    # ocean_acc_avg, ocean_acc, dataset_output, dataset_label = runner.trainer.full_test(
-    #     runner.data_loader["full_test"], runner.model
-    # )
-    # print(ocean_acc_avg, ocean_acc)
-    dataset_output = runner.data_extract()
+    ocean_acc_avg, ocean_acc, dataset_output, dataset_label = runner.trainer.full_test(
+        setup_dataloader(cfg, mode="test"), runner.model
+    )
+    print(ocean_acc_avg, ocean_acc)
 
-    torch.save(dataset_output, save_to)
+    # for mode in ["train", "valid", "test"]:
+    #     dataloader = setup_dataloader(cfg, mode=mode)
+    #     dataset_output = runner.data_extract(dataloader)
+    #
+    #     if not os.path.exists(output_dir):
+    #         os.makedirs(output_dir)
+    #     save_to_file = os.path.join(output_dir, f"pred_{mode}_output.pkl")
+    #
+    #     torch.save(dataset_output, save_to_file)
+
+
+def setup_dataloader(cfg, mode):
+    assert mode in ["train", "valid", "test"], \
+        f"{mode} should be one of 'train', 'valid' or 'test'"
+
+    transform = build_transform_spatial(cfg)
+    if mode == "test":
+        data_set = AllSampleFrameData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TEST_IMG_DATA,
+            cfg.DATA.TEST_LABEL_DATA,
+            transform,
+        )
+    elif mode == "train":
+        data_set = AllSampleFrameData(
+            cfg.DATA.ROOT,
+            cfg.DATA.TRAIN_IMG_DATA,
+            cfg.DATA.TRAIN_LABEL_DATA,
+            transform,
+        )
+    elif mode == "valid":
+        data_set = AllSampleFrameData(
+            cfg.DATA.ROOT,
+            cfg.DATA.VALID_IMG_DATA,
+            cfg.DATA.VALID_LABEL_DATA,
+            transform,
+        )
+
+    return data_set
 
 
 def gen_statistic_data(data_path, save_to):
@@ -62,12 +96,20 @@ def assemble_pred_statistic(data):
 
 if __name__ == "__main__":
     import os
-    # print("current file", __file__)
+    import glob
     os.chdir("..")
-    # feature_extract(
-    #     cfg_file="config/unified_frame_images/06_interpret_cnn.yaml",
-    #     model_weight="results/unified_frame_images/06_interpret_cnn/checkpoint_interpret-cnn_acc_9118.pkl",
-    #     save_to="pred_test_output.pkl",
-    #     data_type="train",
-    # )
-    gen_statistic_data("pred_test_output.pkl", "statistic_test_data.pkl")
+
+    def gen_dataset(dir):
+        files = glob.glob(f"{dir}/*.pkl")
+        for file in files:
+            name = os.path.split(file)[-1].replace("pred_", "statistic_").replace("output", "data")
+            save_to = os.path.join(os.path.dirname(file), name)
+            gen_statistic_data(data_path=file, save_to=save_to)
+
+    feature_extract(
+        cfg_file="config/unified_frame_images/10_swin_transformer.yaml",
+        model_weight="results/unified_frame_images/10_swin_transformer/12-13_21-28/checkpoint_110.pkl",
+        output_dir="swin_frame_pred_output",
+    )
+
+    # gen_dataset("senet_frame_pred_output")
