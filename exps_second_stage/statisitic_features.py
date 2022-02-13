@@ -1,4 +1,6 @@
 import torch
+import numpy as np
+from scipy import signal
 from dpcv.checkpoint.save import load_model
 from dpcv.config.default_config_opt import cfg, cfg_from_file
 from dpcv.experiment.exp_runner import ExpRunner
@@ -94,6 +96,17 @@ def assemble_pred_statistic(data):
     return statistic_representation
 
 
+def assemble_pred_spectron():
+    tem = np.random.randn(1, 5)
+    pred_fft = np.fft.fft2(tem)
+    pred_fft = pred_fft[:, :3]
+    resample_pred_fft = signal.resample(pred_fft, 100, axis=1)
+    amp = np.abs(resample_pred_fft)
+    phr = np.angle(resample_pred_fft)
+    print(amp)
+    print(phr)
+
+
 if __name__ == "__main__":
     import os
     import glob
@@ -112,4 +125,5 @@ if __name__ == "__main__":
     #     output_dir="swin_frame_pred_output",
     # )
 
-    gen_dataset("swin_frame_pred_output")
+    # gen_dataset("swin_frame_pred_output")
+    assemble_pred_spectron()

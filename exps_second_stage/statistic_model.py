@@ -154,7 +154,7 @@ def args_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument("--lr", default=0.1, type=float, help="learning rate")
     parser.add_argument("--bs", default=64, type=int, help="batch size in training")
-    parser.add_argument("--max_epoch", default=5000, type=int, help="max training epochs")
+    parser.add_argument("--max_epoch", default=3000, type=int, help="max training epochs")
     parser.add_argument("--lr_scale_rate", default=0.1, type=float, help="learning rate scale")
     parser.add_argument("--milestones", default=[1000, 2000], type=list, help="where to scale learning rate")
     parser.add_argument("--output_dir", default="result_statistic", type=str, help="where to save training output")
