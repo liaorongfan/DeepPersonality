@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from scipy import signal
+from tqdm import tqdm
 from dpcv.checkpoint.save import load_model
 from dpcv.config.default_config_opt import cfg, cfg_from_file
 from dpcv.experiment.exp_runner import ExpRunner
@@ -96,15 +97,40 @@ def assemble_pred_statistic(data):
     return statistic_representation
 
 
-def assemble_pred_spectron():
-    tem = np.random.randn(1, 5)
-    pred_fft = np.fft.fft2(tem)
+def assemble_pred_spectrum(data, new_rate=100, top_n=80):
+    # tem = np.random.randn(1, 5)
+    pred_fft = np.fft.fft2(data)
     pred_fft = pred_fft[:, :3]
-    resample_pred_fft = signal.resample(pred_fft, 100, axis=1)
-    amp = np.abs(resample_pred_fft)
-    phr = np.angle(resample_pred_fft)
-    print(amp)
-    print(phr)
+    resample_pred_fft = signal.resample(pred_fft, new_rate, axis=1)
+    amp = np.abs(resample_pred_fft)[:, :top_n]
+    pha = np.angle(resample_pred_fft)[:, :top_n]
+    return amp, pha
+
+
+def gen_spectrum_data(data_path, save_to):
+    data = torch.load(data_path)
+    spec_data_ls = []
+    for pred, label in tqdm(zip(data["video_frames_pred"], data["video_label"])):
+        amp_spectrum, pha_spectrum = [], []
+        for one_frame in pred:
+            amp, pha = assemble_pred_spectrum(one_frame.numpy()[None, :])
+            amp_spectrum.append(amp)
+            pha_spectrum.append(pha)
+        spectrum_data = {
+            "amp_spectrum": np.concatenate(amp_spectrum, axis=0),
+            "pha_spectrum": np.concatenate(pha_spectrum, axis=0),
+            "video_label": label.numpy()
+        }
+        spec_data_ls.append(spectrum_data)
+    torch.save(spec_data_ls, save_to)
+
+
+def gen_dataset(dir, func):
+    files = [file for file in glob.glob(f"{dir}/*.pkl") if "pred_" in os.path.basename(file)]
+    for file in files:
+        name = os.path.split(file)[-1].replace("pred_", "spectrum_").replace("output", "data")
+        save_to = os.path.join(os.path.dirname(file), name)
+        func(data_path=file, save_to=save_to)
 
 
 if __name__ == "__main__":
@@ -112,12 +138,6 @@ if __name__ == "__main__":
     import glob
     os.chdir("..")
 
-    def gen_dataset(dir):
-        files = glob.glob(f"{dir}/*.pkl")
-        for file in files:
-            name = os.path.split(file)[-1].replace("pred_", "statistic_").replace("output", "data")
-            save_to = os.path.join(os.path.dirname(file), name)
-            gen_statistic_data(data_path=file, save_to=save_to)
 
     # feature_extract(
     #     cfg_file="config/unified_frame_images/10_swin_transformer.yaml",
@@ -125,5 +145,4 @@ if __name__ == "__main__":
     #     output_dir="swin_frame_pred_output",
     # )
 
-    # gen_dataset("swin_frame_pred_output")
-    assemble_pred_spectron()
+    gen_dataset("datasets/stage_two/swin_frame_pred_output", func=gen_spectrum_data)
