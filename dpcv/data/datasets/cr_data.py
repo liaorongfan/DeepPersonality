@@ -218,7 +218,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TRAIN_IMG_FACE_DATA,  # "image_data/train_data_face",
             data_cfg.TRAIN_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
-            transforms
+            transforms,
         )
     elif mode == "valid":
         dataset = CRNetData(
@@ -227,7 +227,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.VALID_IMG_FACE_DATA,  # "image_data/train_data_face",
             data_cfg.VALID_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.VALID_LABEL_DATA,  # "annotation/annotation_training.pkl",
-            transforms
+            transforms,
         )
     elif mode == "full_test":
         return AllFrameCRNetData(
@@ -236,7 +236,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TEST_IMG_FACE_DATA,  # "image_data/train_data_face",
             data_cfg.TEST_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
-            transforms
+            transforms,
         )
     else:
         dataset = CRNetData(
@@ -245,7 +245,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TEST_IMG_FACE_DATA,  # "image_data/train_data_face",
             data_cfg.TEST_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
-            transforms
+            transforms,
         )
     loader_cfg = cfg.DATA_LOADER
     data_loader = DataLoader(

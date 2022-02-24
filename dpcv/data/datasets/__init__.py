@@ -8,4 +8,5 @@ from .video_segment_data import spatial_temporal_data_loader
 from .slow_fast_data import slow_fast_data_loader
 from .tpn_data import tpn_data_loader
 from .vat_data import vat_data_loader
+from .second_stage_dataset import statistic_data_loader
 

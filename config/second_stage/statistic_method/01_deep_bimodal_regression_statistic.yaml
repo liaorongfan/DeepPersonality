@@ -1,0 +1,24 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data"
+  VALID_IMG_DATA: "image_data/valid_data"
+  TEST_IMG_DATA: "image_data/test_data"
+DATA_LOADER:
+  NAME: "single_frame_data_loader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "dan_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.05
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [80, 90]
+TRAIN:
+  TRAINER: "ImageModalTrainer"
+  MAX_EPOCH: 100
+  OUTPUT_DIR: "results/unified_frame_images/01_deep_bimodal"

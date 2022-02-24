@@ -1,63 +1,9 @@
+import os
 import torch
+from tqdm import tqdm
+import glob
 import numpy as np
 from scipy import signal
-from tqdm import tqdm
-from dpcv.checkpoint.save import load_model
-from dpcv.config.default_config_opt import cfg, cfg_from_file
-from dpcv.experiment.exp_runner import ExpRunner
-from dpcv.data.transforms.build import build_transform_spatial
-from dpcv.data.datasets.video_frame_data import AllSampleFrameData
-
-
-def feature_extract(cfg_file, model_weight, output_dir):
-
-    cfg_from_file(cfg_file)
-    runner = ExpRunner(cfg)
-    runner.model = load_model(runner.model, model_weight)
-    # ocean_acc_avg, ocean_acc, dataset_output, dataset_label = runner.trainer.full_test(
-    #     setup_dataloader(cfg, mode="test"), runner.model
-    # )
-    # print(ocean_acc_avg, ocean_acc)
-
-    for mode in ["train", "valid", "test"]:
-        dataloader = setup_dataloader(cfg, mode=mode)
-        dataset_output = runner.data_extract(dataloader)
-
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        save_to_file = os.path.join(output_dir, f"pred_{mode}_output.pkl")
-
-        torch.save(dataset_output, save_to_file)
-
-
-def setup_dataloader(cfg, mode):
-    assert mode in ["train", "valid", "test"], \
-        f"{mode} should be one of 'train', 'valid' or 'test'"
-
-    transform = build_transform_spatial(cfg)
-    if mode == "test":
-        data_set = AllSampleFrameData(
-            cfg.DATA.ROOT,
-            cfg.DATA.TEST_IMG_DATA,
-            cfg.DATA.TEST_LABEL_DATA,
-            transform,
-        )
-    elif mode == "train":
-        data_set = AllSampleFrameData(
-            cfg.DATA.ROOT,
-            cfg.DATA.TRAIN_IMG_DATA,
-            cfg.DATA.TRAIN_LABEL_DATA,
-            transform,
-        )
-    elif mode == "valid":
-        data_set = AllSampleFrameData(
-            cfg.DATA.ROOT,
-            cfg.DATA.VALID_IMG_DATA,
-            cfg.DATA.VALID_LABEL_DATA,
-            transform,
-        )
-
-    return data_set
 
 
 def gen_statistic_data(data_path, save_to):
@@ -100,7 +46,7 @@ def assemble_pred_statistic(data):
 def assemble_pred_spectrum(data, new_rate=100, top_n=80):
     # tem = np.random.randn(1, 5)
     pred_fft = np.fft.fft2(data)
-    pred_fft = pred_fft[:, :3]
+    pred_fft = pred_fft[:, :50]
     resample_pred_fft = signal.resample(pred_fft, new_rate, axis=1)
     amp = np.abs(resample_pred_fft)[:, :top_n]
     pha = np.angle(resample_pred_fft)[:, :top_n]
@@ -112,8 +58,8 @@ def gen_spectrum_data(data_path, save_to):
     spec_data_ls = []
     for pred, label in tqdm(zip(data["video_frames_pred"], data["video_label"])):
         amp_spectrum, pha_spectrum = [], []
-        for one_frame in pred:
-            amp, pha = assemble_pred_spectrum(one_frame.numpy()[None, :])
+        for one_channel in pred.T:
+            amp, pha = assemble_pred_spectrum(one_channel.numpy()[None, :])
             amp_spectrum.append(amp)
             pha_spectrum.append(pha)
         spectrum_data = {
@@ -134,15 +80,6 @@ def gen_dataset(dir, func):
 
 
 if __name__ == "__main__":
-    import os
-    import glob
     os.chdir("..")
 
-
-    # feature_extract(
-    #     cfg_file="config/unified_frame_images/10_swin_transformer.yaml",
-    #     model_weight="results/unified_frame_images/10_swin_transformer/12-13_21-28/checkpoint_110.pkl",
-    #     output_dir="swin_frame_pred_output",
-    # )
-
-    gen_dataset("datasets/stage_two/swin_frame_pred_output", func=gen_spectrum_data)
+    gen_dataset("datasets/stage_two/deep_bimodal_reg_pred_output", func=gen_spectrum_data)

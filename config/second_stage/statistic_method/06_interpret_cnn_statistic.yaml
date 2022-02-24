@@ -1,0 +1,23 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/stage_two/interpret-cnn_frame_pred_output/statistic_train_data.pkl"
+  VALID_IMG_DATA: "datasets/stage_two/interpret-cnn_frame_pred_output/statistic_valid_data.pkl"
+  TEST_IMG_DATA: "datasets/stage_two/interpret-cnn_frame_pred_output/statistic_test_data.pkl"
+DATA_LOADER:
+  NAME: "statistic_data_loader"
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "statistic_mlp"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.05
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [1000, 2000]
+TRAIN:
+  TRAINER: "StatisticTrainer"
+  MAX_EPOCH: 3000
+  OUTPUT_DIR: "results_second_stage/statistic/06_interpret_cnn_statistic"

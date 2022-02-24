@@ -232,6 +232,7 @@ class ImageListTrainer(BiModalTrainer):
         inputs = [torch.stack(sque, 0).to(self.device) for sque in zip(*images)]
         return (inputs,), label
 
+
 @TRAINER_REGISTRY.register()
 class TPNTrainer(BiModalTrainer):
     """
@@ -475,6 +476,24 @@ class PersEmoTrainer(BiModalTrainer):
     def full_test(self, data_loader, model):
         return self.test(data_loader, model)
 
+    def full_test_data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.squeeze().to(self.device)
+        per_inputs, emo_inputs = data["per_img"], data["emo_img"],
+        per_labels, emo_labels = data["per_label"], data["emo_label"]
+        return (per_inputs, emo_inputs), per_labels
+
+    def data_extract(self, data_set, model):
+        model.eval()
+        out_ls, label_ls = [], []
+        with torch.no_grad():
+            for data in tqdm(data_set):
+                inputs, label = self.full_test_data_fmt(data)
+                out, *_ = model(*inputs)
+                out_ls.append(out.cpu())
+                label_ls.append(label.cpu())
+        return {"video_frames_pred": out_ls, "video_label": label_ls}
+
 
 @TRAINER_REGISTRY.register()
 class AudioTrainer(BiModalTrainer):
@@ -483,3 +502,10 @@ class AudioTrainer(BiModalTrainer):
         for k, v in data.items():
             data[k] = v.to(self.device)
         return (data["aud_data"],), data["aud_label"]
+
+
+@TRAINER_REGISTRY.register()
+class StatisticTrainer(BiModalTrainer):
+
+    def data_fmt(self, data):
+        return (data["statistic"].to(self.device),), data["label"].to(self.device)

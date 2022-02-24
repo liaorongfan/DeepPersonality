@@ -78,7 +78,7 @@ __C.TRAIN.START_EPOCH = 0
 __C.TRAIN.MAX_EPOCH = 300
 __C.TRAIN.PRE_TRAINED_MODEL = None
 __C.TRAIN.RESUME = ""
-__C.TRAIN.LOG_INTERVAL = 10
+__C.TRAIN.LOG_INTERVAL = 20
 __C.TRAIN.OUTPUT_DIR = "results"
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
 __C.TEST = CfgNode()
