@@ -85,10 +85,12 @@ class ExpRunner:
             if self.collector.model_save:
                 save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
                 self.collector.update_best_epoch(epoch)
+            if epoch == (cfg.MAX_EPOCH - 1):
+                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
 
     def after_train(self, cfg):
         # cfg = self.cfg.TRAIN
-        self.collector.draw_epo_info(log_dir=self.log_dir)
+        # self.collector.draw_epo_info(log_dir=self.log_dir)
         self.logger.info(
             "{} done, best acc: {} in :{}".format(
                 datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
@@ -103,7 +105,7 @@ class ExpRunner:
         self.train_epochs(cfg)
         self.after_train(cfg)
 
-    def test(self, weight=None, full_test=True):
+    def test(self, weight=None):
         self.logger.info("Test only mode")
         cfg = self.cfg.TEST
         cfg.WEIGHT = weight if weight else cfg.WEIGHT
@@ -120,7 +122,7 @@ class ExpRunner:
             self.logger.info(f"test with model {weight_file}")
             self.model = load_model(self.model, weight_file)
 
-        if not full_test:
+        if not self.cfg.TEST.FULL_TEST:
             ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.test(
                 self.data_loader["test"], self.model
             )

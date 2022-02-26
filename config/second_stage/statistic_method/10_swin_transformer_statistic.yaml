@@ -1,11 +1,11 @@
 DATA:
   TRAIN_IMG_DATA: "datasets/stage_two/swin_frame_pred_output/statistic_train_data.pkl"
-  VALID_IMG_DATA: "datasets/stage_two/swin_frame_pred_output/statistic_test_data.pkl"
+  VALID_IMG_DATA: "datasets/stage_two/swin_frame_pred_output/statistic_valid_data.pkl"
   TEST_IMG_DATA: "datasets/stage_two/swin_frame_pred_output/statistic_test_data.pkl"
 DATA_LOADER:
   NAME: "statistic_data_loader"
   TRAIN_BATCH_SIZE: 64
-  NUM_WORKERS: 4
+  NUM_WORKERS: 0
 MODEL:
   NAME: "statistic_mlp"
 LOSS:
@@ -14,7 +14,7 @@ SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
   LR_INIT: 0.1
-  MILESTONE: [2000, 2500]
+  MILESTONE: [1000, 2000]
 TRAIN:
   TRAINER: "StatisticTrainer"
   MAX_EPOCH: 3000

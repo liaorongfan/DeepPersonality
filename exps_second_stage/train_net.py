@@ -18,12 +18,12 @@ def args_parse():
     parser.add_argument("--max_epoch", default=3000, type=int, help="max training epochs")
     parser.add_argument("--lr_scale_rate", default=0.1, type=float, help="learning rate scale")
     parser.add_argument("--milestones", default=[1000, 1500], type=list, help="where to scale learning rate")
-    parser.add_argument("--output_dir", default="result_spectrum", type=str, help="where to save training output")
+    parser.add_argument("--output_dir", default="result_static", type=str, help="where to save training output")
     args = parser.parse_args()
     return args
 
 
-def main():
+def main(test_only=None):
     log_param("exp", "swin")
     args = args_parse()
     log_params({"lr": args.lr, "epochs": args.max_epoch, "milestones": args.milestones, "bs": args.bs})
@@ -35,17 +35,17 @@ def main():
     }
     train_data_loader = DataLoader(
         StatisticData(dataset["train"]), batch_size=args.bs, shuffle=True,
-        num_workers=4,
+        # num_workers=4,
         # StatisticData(dataset["train"]), batch_size = args.bs, shuffle = True
     )
     valid_data_loader = DataLoader(
         StatisticData(dataset["valid"]), batch_size=args.bs, shuffle=False,
-        num_workers=4,
+        # num_workers=4,
         # StatisticData(dataset["valid"]), batch_size = args.bs, shuffle = False
     )
     test_data_loader = DataLoader(
-        StatisticData(dataset["test"]), batch_size=args.bs,
-        num_workers=4,
+        StatisticData(dataset["test"]), batch_size=args.bs, shuffle=False,
+        # num_workers=4,
         # StatisticData(dataset["test"]), batch_size = args.bs
     )
     model = StatisticMLP().cuda()
@@ -57,13 +57,19 @@ def main():
     # trainer = SpectrumTrainer(max_epo=args.max_epoch, output_dir=args.output_dir)
     trainer = MLPTrainer(max_epo=args.max_epoch, output_dir=args.output_dir)
 
-    for epo in range(args.max_epoch):
-        trainer.train(model, train_data_loader, optimizer, epo)
-        trainer.valid(model, valid_data_loader, epo)
-        scheduler.step()
-    trainer.test(model, test_data_loader)
+    if not test_only:
+        for epo in range(args.max_epoch):
+            trainer.train(model, train_data_loader, optimizer, epo)
+            trainer.valid(model, valid_data_loader, epo)
+            scheduler.step()
+        acc = trainer.test(model, test_data_loader)
+        trainer.save_model(model, epo, acc)
+    else:
+        checkpoint = torch.load(test_only)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        acc = trainer.test(model, test_data_loader)
 
 
 if __name__ == "__main__":
     os.chdir("..")
-    main()
+    main("result_static/checkpoint_2999.pkl")

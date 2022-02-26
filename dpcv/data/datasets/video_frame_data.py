@@ -139,7 +139,6 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TEST_LABEL_DATA,
             transform,
         )
-
     else:
         data_set = SingleFrameData(
             cfg.DATA.ROOT,

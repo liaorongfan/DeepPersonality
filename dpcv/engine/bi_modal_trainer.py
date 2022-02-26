@@ -481,7 +481,7 @@ class PersEmoTrainer(BiModalTrainer):
             data[k] = v.squeeze().to(self.device)
         per_inputs, emo_inputs = data["per_img"], data["emo_img"],
         per_labels, emo_labels = data["per_label"], data["emo_label"]
-        return (per_inputs, emo_inputs), per_labels
+        return (per_inputs, emo_inputs), per_labels[0]
 
     def data_extract(self, data_set, model):
         model.eval()

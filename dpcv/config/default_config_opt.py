@@ -83,6 +83,7 @@ __C.TRAIN.OUTPUT_DIR = "results"
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
 __C.TEST = CfgNode()
 __C.TEST.TEST_ONLY = False
+__C.TEST.FULL_TEST = False
 __C.TEST.WEIGHT = ""
 __C.TEST.COMPUTE_PCC = True
 __C.TEST.COMPUTE_CCC = True

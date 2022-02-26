@@ -172,8 +172,8 @@ if __name__ == "__main__":
     os.chdir("..")
 
     feature_extract(
-        cfg_file="config/unified_frame_images/05_persemon.yaml",
-        model_weight="results/unified_frame_images/05_peremon/12-23_00-07/checkpoint_160.pkl",
-        data_loader=setup_persemon_dataloader,
-        output_dir="datasets/stage_two/peremon_pred_output",
+        cfg_file="config/unified_frame_images/09_hrnet.yaml",
+        model_weight="results/unified_frame_images/09_hrnet/checkpoint_hrnet_acc_905.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/stage_two/hrnet_pred_output",
     )

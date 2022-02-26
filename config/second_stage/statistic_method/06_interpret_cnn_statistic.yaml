@@ -13,9 +13,7 @@ LOSS:
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.05
-  WEIGHT_DECAY: 0.0005
-  MOMENTUM: 0.9
+  LR_INIT: 0.1
   MILESTONE: [1000, 2000]
 TRAIN:
   TRAINER: "StatisticTrainer"

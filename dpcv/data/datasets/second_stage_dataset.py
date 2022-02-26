@@ -42,20 +42,23 @@ def statistic_data_loader(cfg, mode):
     assert mode in ["train", "valid", "test", "full_test"], \
         f"{mode} should be one of 'train', 'valid' or 'test'"
 
+    SHUFFLE = True
+
     data_cfg = cfg.DATA
     if mode == "train":
         dataset = StatisticData(data_cfg.TRAIN_IMG_DATA)
     elif mode == "valid":
         dataset = StatisticData(data_cfg.VALID_IMG_DATA)
+        SHUFFLE = False
     else:
         dataset = StatisticData(data_cfg.TEST_IMG_DATA)
-
+        SHUFFLE = False
     loader_cfg = cfg.DATA_LOADER
     data_loader = DataLoader(
         dataset,
         batch_size=loader_cfg.TRAIN_BATCH_SIZE,
         num_workers=loader_cfg.NUM_WORKERS,
-        shuffle=loader_cfg.SHUFFLE
+        shuffle=SHUFFLE
     )
     return data_loader
 

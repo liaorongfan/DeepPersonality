@@ -342,6 +342,18 @@ class CRNetTrainer2(BiModalTrainer):
         loss = loss_1 + loss_2 + loss_3 + loss_4
         return loss
 
+    def data_extract(self, data_set, model):
+        model.eval()
+        model.set_train_regressor()
+        out_ls, label_ls = [], []
+        with torch.no_grad():
+            for data in tqdm(data_set):
+                inputs, label = self.full_test_data_fmt(data)
+                _, out = model(*inputs)
+                out_ls.append(out.cpu())
+                label_ls.append(label.cpu())
+        return {"video_frames_pred": out_ls, "video_label": label_ls}
+
 
 @TRAINER_REGISTRY.register()
 class CRNetAudTrainer(CRNetTrainer2):

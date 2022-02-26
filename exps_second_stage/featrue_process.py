@@ -74,7 +74,10 @@ def gen_spectrum_data(data_path, save_to):
 def gen_dataset(dir, func):
     files = [file for file in glob.glob(f"{dir}/*.pkl") if "pred_" in os.path.basename(file)]
     for file in files:
-        name = os.path.split(file)[-1].replace("pred_", "spectrum_").replace("output", "data")
+        if "spectrum" in str(func):
+            name = os.path.split(file)[-1].replace("pred_", "spectrum_").replace("output", "data")
+        elif "statistic" in str(func):
+            name = os.path.split(file)[-1].replace("pred_", "statistic_").replace("output", "data")
         save_to = os.path.join(os.path.dirname(file), name)
         func(data_path=file, save_to=save_to)
 
@@ -82,4 +85,4 @@ def gen_dataset(dir, func):
 if __name__ == "__main__":
     os.chdir("..")
 
-    gen_dataset("datasets/stage_two/deep_bimodal_reg_pred_output", func=gen_spectrum_data)
+    gen_dataset("datasets/stage_two/hrnet_pred_output", func=gen_statistic_data)

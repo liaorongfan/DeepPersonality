@@ -70,6 +70,7 @@ class MLPTrainer:
             epo_acc = torch.stack(batch_acc_ls, dim=0).mean().numpy()
         log_metric("test_acc", float(epo_acc * 100))
         print("TEST: ACC: {:.4f}".format(epo_acc))
+        return epo_acc
 
     def save_model(self, model, epoch, best_acc):
 
