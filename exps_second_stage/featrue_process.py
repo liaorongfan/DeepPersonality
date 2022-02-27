@@ -101,4 +101,8 @@ def gen_dataset(dir, func, method):
 if __name__ == "__main__":
     os.chdir("..")
 
-    gen_dataset("datasets/stage_two/hrnet_pred_output", func=gen_spectrum_data, method=select_pred_spectrum)
+    gen_dataset(
+        "datasets/stage_two/persemon_pred_output",
+        func=gen_spectrum_data,
+        method=select_pred_spectrum,
+    )

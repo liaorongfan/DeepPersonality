@@ -13,9 +13,9 @@ LOSS:
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.005
-  MILESTONE: [500, 800]
+  LR_INIT: 0.01
+  MILESTONE: [40,]
 TRAIN:
   TRAINER: "SpectrumTrainer"
-  MAX_EPOCH: 100
-  OUTPUT_DIR: "results_second_stage/spectrum/09_hrnet_statistic"
+  MAX_EPOCH: 50
+  OUTPUT_DIR: "results_second_stage/spectrum/09_hrnet_spectrum"

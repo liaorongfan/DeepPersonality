@@ -14,13 +14,16 @@ class SpectrumConv1D(nn.Module):
             nn.Conv1d(
                 in_channels=2, out_channels=hidden_units[0], kernel_size=(1, 7), padding=(0, 3)
             ),
-            # nn.BatchNorm1d(hidden_units[0]),
+            nn.ReLU(),
+            nn.Conv1d(
+                in_channels=hidden_units[0], out_channels=hidden_units[1], kernel_size=(1, 5), padding=(0, 2)
+            ),
             nn.ReLU(),
         )
         self.conv_up_scale = nn.Sequential(
             nn.Conv1d(
-                in_channels=hidden_units[0], out_channels=hidden_units[1],
-                kernel_size=(1, 5), padding=(0, 2),
+                in_channels=hidden_units[1], out_channels=hidden_units[1],
+                kernel_size=(1, 3), padding=(0, 1),
             ),
             nn.ReLU(),
 
@@ -50,8 +53,10 @@ class SpectrumConv1D(nn.Module):
 
     def forward(self, x):
         x = self.conv_in(x)           # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
+        identical = x
         x = self.conv_up_scale(x)     # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
         x = self.conv_down_scale(x)   # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
+        x += identical
         x = self.conv_out(x)          # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
         x = x.squeeze(1)              # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
         x = x.squeeze()               # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
