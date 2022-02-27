@@ -11,11 +11,11 @@ class SpectrumData(Dataset):
 
     def __getitem__(self, idx):
         sample = self.sample_ls[idx]
-        return {
-            "amp_spectrum": sample["amp_spectrum"],
-            "pha_spectrum": sample["pha_spectrum"],
-            "label": sample["video_label"],
-        }
+        amp_spectrum = torch.as_tensor(sample["amp_spectrum"], dtype=torch.float32)
+        pha_spectrum = torch.as_tensor(sample["pha_spectrum"], dtype=torch.float32)
+        spectrum = torch.stack([amp_spectrum, pha_spectrum], dim=0)
+        sample = {"spectrum": spectrum, "label": sample["video_label"]}
+        return sample
 
     def __len__(self):
         return len(self.sample_ls)
@@ -63,3 +63,27 @@ def statistic_data_loader(cfg, mode):
     return data_loader
 
 
+@DATA_LOADER_REGISTRY.register()
+def spectrum_data_loader(cfg, mode):
+    assert mode in ["train", "valid", "test", "full_test"], \
+        f"{mode} should be one of 'train', 'valid' or 'test'"
+
+    SHUFFLE = True  # when at test time don't shuffle will get a slightly better result
+
+    data_cfg = cfg.DATA
+    if mode == "train":
+        dataset = SpectrumData(data_cfg.TRAIN_IMG_DATA)
+    elif mode == "valid":
+        dataset = SpectrumData(data_cfg.VALID_IMG_DATA)
+        SHUFFLE = False
+    else:
+        dataset = SpectrumData(data_cfg.TEST_IMG_DATA)
+        SHUFFLE = False
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        num_workers=loader_cfg.NUM_WORKERS,
+        shuffle=SHUFFLE
+    )
+    return data_loader

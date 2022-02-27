@@ -6,11 +6,11 @@ import numpy as np
 from scipy import signal
 
 
-def gen_statistic_data(data_path, save_to):
+def gen_statistic_data(data_path, save_to, method=None):
     data = torch.load(data_path)
     statistic_data_ls = []
     for sample in data["video_frames_pred"]:
-        statistic_data_ls.append(assemble_pred_statistic(sample))
+        statistic_data_ls.append(method(sample))
     statistic_data = {"video_statistic": statistic_data_ls, "video_label": data["video_label"]}
     torch.save(statistic_data, save_to)
     print()
@@ -43,8 +43,7 @@ def assemble_pred_statistic(data):
     return statistic_representation
 
 
-def assemble_pred_spectrum(data, new_rate=100, top_n=80):
-    # tem = np.random.randn(1, 5)
+def resample_pred_spectrum(data, new_rate=100, top_n=80):
     pred_fft = np.fft.fft2(data)
     pred_fft = pred_fft[:, :50]
     resample_pred_fft = signal.resample(pred_fft, new_rate, axis=1)
@@ -53,13 +52,25 @@ def assemble_pred_spectrum(data, new_rate=100, top_n=80):
     return amp, pha
 
 
-def gen_spectrum_data(data_path, save_to):
+def select_pred_spectrum(data, top_n=80):
+    # for one trait there 100 prediction from 100 frames
+    # data: (1, 100)
+    pred_fft = np.fft.fft2(data)
+    lenght = int(len(pred_fft[0]) / 2)
+    if top_n > lenght:
+        top_n = lenght
+    amp = np.abs(pred_fft)[:, :top_n]
+    pha = np.angle(pred_fft)[:, :top_n]
+    return amp, pha
+
+
+def gen_spectrum_data(data_path, save_to, method):
     data = torch.load(data_path)
     spec_data_ls = []
     for pred, label in tqdm(zip(data["video_frames_pred"], data["video_label"])):
         amp_spectrum, pha_spectrum = [], []
         for one_channel in pred.T:
-            amp, pha = assemble_pred_spectrum(one_channel.numpy()[None, :])
+            amp, pha = method(one_channel.numpy()[None, :])
             amp_spectrum.append(amp)
             pha_spectrum.append(pha)
         spectrum_data = {
@@ -71,18 +82,23 @@ def gen_spectrum_data(data_path, save_to):
     torch.save(spec_data_ls, save_to)
 
 
-def gen_dataset(dir, func):
+def gen_dataset(dir, func, method):
     files = [file for file in glob.glob(f"{dir}/*.pkl") if "pred_" in os.path.basename(file)]
     for file in files:
         if "spectrum" in str(func):
             name = os.path.split(file)[-1].replace("pred_", "spectrum_").replace("output", "data")
         elif "statistic" in str(func):
             name = os.path.split(file)[-1].replace("pred_", "statistic_").replace("output", "data")
+        else:
+            raise ValueError(
+                "func used in this interface should be 'statistic' or 'spectrum' method"
+            )
+
         save_to = os.path.join(os.path.dirname(file), name)
-        func(data_path=file, save_to=save_to)
+        func(data_path=file, save_to=save_to, method=method)
 
 
 if __name__ == "__main__":
     os.chdir("..")
 
-    gen_dataset("datasets/stage_two/hrnet_pred_output", func=gen_statistic_data)
+    gen_dataset("datasets/stage_two/hrnet_pred_output", func=gen_spectrum_data, method=select_pred_spectrum)

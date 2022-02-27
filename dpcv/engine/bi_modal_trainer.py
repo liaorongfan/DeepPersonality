@@ -509,3 +509,10 @@ class StatisticTrainer(BiModalTrainer):
 
     def data_fmt(self, data):
         return (data["statistic"].to(self.device),), data["label"].to(self.device)
+
+
+@TRAINER_REGISTRY.register()
+class SpectrumTrainer(BiModalTrainer):
+
+    def data_fmt(self, data):
+        return (data["spectrum"].to(self.device),), data["label"].to(self.device)

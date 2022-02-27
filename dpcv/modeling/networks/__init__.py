@@ -15,5 +15,6 @@ from .slow_fast import slow_fast_model
 from .TSN2D import tpn_model
 from .video_action_transformer import vat_model
 from .statistic_model import statistic_mlp
+from .spectrum_model import spectrum_conv_model
 
 

@@ -1,0 +1,21 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/stage_two/hrnet_pred_output/spectrum_train_data.pkl"
+  VALID_IMG_DATA: "datasets/stage_two/hrnet_pred_output/spectrum_valid_data.pkl"
+  TEST_IMG_DATA: "datasets/stage_two/hrnet_pred_output/spectrum_test_data.pkl"
+DATA_LOADER:
+  NAME: "spectrum_data_loader"
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "spectrum_conv_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.005
+  MILESTONE: [500, 800]
+TRAIN:
+  TRAINER: "SpectrumTrainer"
+  MAX_EPOCH: 100
+  OUTPUT_DIR: "results_second_stage/spectrum/09_hrnet_statistic"

@@ -1,34 +1,65 @@
+import torch.cuda
 import torch.nn as nn
 from .build import NETWORK_REGISTRY
+from dpcv import device
 
 
 @NETWORK_REGISTRY.register()
 class SpectrumConv1D(nn.Module):
 
-    def __init__(self):
+    def __init__(self, channel=50, hidden_units=[64, 256, 1024]):
         super(SpectrumConv1D, self).__init__()
-        self.conv1 = nn.Conv1d(in_channels=1, out_channels=64, kernel_size=(1, 7))
-        self.relu1 = nn.ReLU()
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=(1, 5))
-        self.relu2 = nn.ReLU()
-        self.conv3 = nn.Conv1d(in_channels=128, out_channels=64, kernel_size=(1, 3))
-        self.relu3 = nn.ReLU()
-        self.conv4 = nn.Conv1d(in_channels=64,  out_channels=1, kernel_size=(1, 1))
-        self.adp = nn.AdaptiveAvgPool1d(1)
-        self.fcn = nn.Linear(80, 5)
+
+        self.conv_in = nn.Sequential(
+            nn.Conv1d(
+                in_channels=2, out_channels=hidden_units[0], kernel_size=(1, 7), padding=(0, 3)
+            ),
+            # nn.BatchNorm1d(hidden_units[0]),
+            nn.ReLU(),
+        )
+        self.conv_up_scale = nn.Sequential(
+            nn.Conv1d(
+                in_channels=hidden_units[0], out_channels=hidden_units[1],
+                kernel_size=(1, 5), padding=(0, 2),
+            ),
+            nn.ReLU(),
+
+            nn.Conv1d(
+                in_channels=hidden_units[1], out_channels=hidden_units[2],
+                kernel_size=(1, 3), padding=(0, 1),
+            ),
+            nn.ReLU()
+        )
+        self.conv_down_scale = nn.Sequential(
+            nn.Conv1d(
+                in_channels=hidden_units[2], out_channels=hidden_units[1],
+                kernel_size=(1, 3), padding=(0, 1),
+            ),
+            nn.ReLU(),
+        )
+
+        self.conv_out = nn.Sequential(
+            nn.Conv1d(
+                in_channels=hidden_units[1],  out_channels=1, kernel_size=(1, 1)
+            ),
+            nn.ReLU(),
+            nn.Conv1d(
+                in_channels=1, out_channels=1, kernel_size=(1, channel)
+            ),
+        )
 
     def forward(self, x):
-        x = x[..., None]
-        x = x.permute(0, 3, 2, 1)
-        x = self.conv1(x)
-        x = self.relu1(x)
-        x = self.conv2(x)
-        x = self.relu2(x)
-        x = self.conv3(x)
-        x = self.relu3(x)
-        x = self.conv4(x)
-        x = x.squeeze(1)
-        x = self.adp(x)
-        x = x.squeeze()
-        x = self.fcn(x)
+        x = self.conv_in(x)           # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
+        x = self.conv_up_scale(x)     # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
+        x = self.conv_down_scale(x)   # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
+        x = self.conv_out(x)          # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
+        x = x.squeeze(1)              # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
+        x = x.squeeze()               # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
         return x
+
+
+@NETWORK_REGISTRY.register()
+def spectrum_conv_model(cfg):
+    # return SpectrumConv1D().to(device=torch.device("gpu" if torch.cuda.is_available() else "cpu"))
+    sample_channel = 50
+    return SpectrumConv1D(sample_channel).to(device=device)

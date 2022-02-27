@@ -132,7 +132,7 @@ class ExpRunner:
             )
 
         self.logger.info("acc: {} mean: {}".format(ocean_acc, ocean_acc_avg))
-        # self.latex_info(ocean_acc, ocean_acc_avg)  # a helper for latex table
+        self.latex_info(ocean_acc, ocean_acc_avg)  # a helper for latex table
 
         if cfg.COMPUTE_PCC:
             pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label)
