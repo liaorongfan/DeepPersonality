@@ -1,0 +1,22 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/stage_two/senet_frame_pred_output/spectrum_train_data_full.pkl"
+  VALID_IMG_DATA: "datasets/stage_two/senet_frame_pred_output/spectrum_valid_data_full.pkl"
+  TEST_IMG_DATA: "datasets/stage_two/senet_frame_pred_output/spectrum_test_data_full.pkl"
+DATA_LOADER:
+  NAME: "spectrum_data_loader"
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "spectrum_conv_model"
+  SPECTRUM_CHANNEL: 100
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  MILESTONE: [70,]
+TRAIN:
+  TRAINER: "SpectrumTrainer"
+  MAX_EPOCH: 50
+  OUTPUT_DIR: "results_second_stage/spectrum/08_senet_spectrum_full"

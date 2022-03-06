@@ -1,0 +1,26 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data"
+  VALID_IMG_DATA: "image_data/valid_data"
+  TEST_IMG_DATA: "image_data/test_data"
+DATA_LOADER:
+  NAME: "true_personality_dataloader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "se_resnet50_true_personality"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [4000, 4500]
+TRAIN:
+  TRAINER: "ImageModalTrainer"
+  MAX_EPOCH: 5000
+  LOG_INTERVAL: 2
+  VALID_INTERVAL: 20
+  OUTPUT_DIR: "results_true_personality/unified_frame_images/01_senet"

@@ -19,6 +19,8 @@ def build_dataloader(cfg):
             "train": dataloader(cfg, mode="train"),
             "valid": dataloader(cfg, mode="valid"),
             "test": dataloader(cfg, mode="test"),
-            "full_test": dataloader(cfg, mode="full_test")
+            # "full_test": dataloader(cfg, mode="full_test")
         }
+        if cfg.TEST.FULL_TEST:
+            data_loader_dicts["full_test"] = dataloader(cfg, mode="full_test")
     return data_loader_dicts

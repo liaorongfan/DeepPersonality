@@ -53,6 +53,7 @@ __C.MODEL = CfgNode()
 __C.MODEL.NAME = "se_resnet50"
 __C.MODEL.PRETRAIN = False
 __C.MODEL.NUM_CLASS = 5
+__C.MODEL.SPECTRUM_CHANNEL = 50
 
 # ------------------------------------------ step 4 : loss config node -------------------------------------------------
 __C.LOSS = CfgNode()
@@ -79,6 +80,7 @@ __C.TRAIN.MAX_EPOCH = 300
 __C.TRAIN.PRE_TRAINED_MODEL = None
 __C.TRAIN.RESUME = ""
 __C.TRAIN.LOG_INTERVAL = 20
+__C.TRAIN.VALID_INTERVAL = 1
 __C.TRAIN.OUTPUT_DIR = "results"
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
 __C.TEST = CfgNode()

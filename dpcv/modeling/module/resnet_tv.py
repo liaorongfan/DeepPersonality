@@ -102,8 +102,12 @@ class ResNet(nn.Module):
     """
     Note: that class is not a formal resnet but with a sigmoid function for the last fc layer
     """
-    def __init__(self, block, layers, num_classes=1000, init_weights=True, zero_init_residual=False):
+    def __init__(
+            self, block, layers, num_classes=1000,
+            init_weights=True, zero_init_residual=False, sigmoid_output=True
+    ):
         super(ResNet, self).__init__()
+        self.sigmoid_output = sigmoid_output
         self.inplanes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -171,7 +175,8 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
-        x = torch.sigmoid(x)
+        if self.sigmoid_output:
+            x = torch.sigmoid(x)
         return x
 
 

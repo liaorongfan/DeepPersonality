@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 from dpcv.tools.common import parse_args
 from dpcv.config.default_config_opt import cfg, cfg_from_file, cfg_from_list
 from dpcv.experiment.exp_runner import ExpRunner

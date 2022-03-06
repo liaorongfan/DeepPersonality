@@ -1,7 +1,7 @@
 DATA:
-  TRAIN_IMG_DATA: "datasets/stage_two/peremon_pred_output/statistic_train_data.pkl"
-  VALID_IMG_DATA: "datasets/stage_two/peremon_pred_output/statistic_valid_data.pkl"
-  TEST_IMG_DATA: "datasets/stage_two/peremon_pred_output/statistic_test_data.pkl"
+  TRAIN_IMG_DATA: "datasets/stage_two/persemon_pred_output/statistic_train_data.pkl"
+  VALID_IMG_DATA: "datasets/stage_two/persemon_pred_output/statistic_valid_data.pkl"
+  TEST_IMG_DATA: "datasets/stage_two/persemon_pred_output/statistic_test_data.pkl"
 DATA_LOADER:
   NAME: "statistic_data_loader"
   TRAIN_BATCH_SIZE: 64
@@ -17,5 +17,5 @@ SOLVER:
   MILESTONE: [1000, 2000]
 TRAIN:
   TRAINER: "StatisticTrainer"
-  MAX_EPOCH: 3000
+  MAX_EPOCH: 100
   OUTPUT_DIR: "results_second_stage/statistic/05_persemon_statistic"

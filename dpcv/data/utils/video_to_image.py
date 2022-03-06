@@ -2,6 +2,7 @@ import cv2
 import os
 import zipfile
 from tqdm import tqdm
+from pathlib import Path
 
 
 def process():
@@ -18,10 +19,15 @@ def frame_sample(video, save_dir):
     """
     cap = cv2.VideoCapture(video)
 
-    file_name = (os.path.basename(video).split('.mp4'))[0]
+    # file_name = (os.path.basename(video).split('.mp4'))[0]
+    file_name = Path(video).stem
     try:
-        if not os.path.exists(save_dir + file_name):
-            os.makedirs(save_dir + file_name)
+        # if not os.path.exists(save_dir + file_name):
+        #     os.makedirs(save_dir + file_name)
+
+        save_path = Path(save_dir).joinpath(file_name)
+        if not save_path.exists():
+            save_path.mkdir()
     except OSError:
         print('Error: Creating directory of data')
 
@@ -50,6 +56,54 @@ def frame_sample(video, save_dir):
             break
 
     # print(f"{video} precessed")
+
+
+def crop_to_square(img):
+    h, w, _ = img.shape
+    c_x, c_y = int(w / 2), int(h / 2)
+    img = img[:, c_x - c_y: c_x + c_y]
+    return img
+
+
+def frame_extract(video_path, save_dir, resize=(456, 256), transform=None):
+    """
+    Creating folder to save all frames from the video
+    """
+    cap = cv2.VideoCapture(video_path)
+
+    # file_name = (os.path.basename(video).split('.mp4'))[0]
+    file_name = Path(video_path).stem
+    # try:
+    # if not os.path.exists(save_dir + file_name):
+    #     os.makedirs(save_dir + file_name)
+
+    save_path = Path(save_dir).joinpath(file_name)
+    if not save_path.exists():
+        save_path.mkdir()
+    # except OSError:
+    #     print('Error: Creating directory of data')
+
+    length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    count = 0
+    # Running a loop to each frame and saving it in the created folder
+    while cap.isOpened():
+        count += 1
+        if length == count:
+            break
+        ret, frame = cap.read()
+        if frame is None:
+            continue
+        if transform is not None:
+            frame = transform(frame)
+
+        # Resizing it to w, h = resize to save the disk space and fit into the model
+        frame = cv2.resize(frame, resize, interpolation=cv2.INTER_CUBIC)
+        # Saves image of the current frame to a jpg file
+        name = f"{str(save_path)}/frame_{str(count)}.jpg"
+        cv2.imwrite(name, frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
 
 def video2img_train(zipfile_train, save_to="image_data/train_data"):
@@ -194,9 +248,27 @@ def video2img_test(zipfile_test, saved_to="image_data/test_data"):
 
 
 if __name__ == "__main__":
+    from tqdm import tqdm
     # video2img_train("./chalearn/train/")
     # print("current work directory:", os.getcwd())
     # video2img_val("/home/rongfan/11-personality_traits/DeepPersonality/datasets/raw_data_tmp/validate/")
     # video2img_test("/home/rongfan/11-personality_traits/DeepPersonality/datasets/raw_data_tmp/test/")
-    video2img_train(
-        "/home/ssd500/personality_data/raw_data_tmp/train/", "/home/ssd500/personality_data/image_data/train_data")
+    # video2img_train(
+    #     "/home/ssd500/personality_data/raw_data_tmp/train/", "/home/ssd500/personality_data/image_data/train_data"
+    # )
+    # F:\chalearn21\val\recordings\talk_recordings_val\001080
+
+    # video_path = "F:\\chalearn21\\val\\recordings\\talk_recordings_val\\001080\\FC2_T.mp4"
+    # save_dir = "F:\\chalearn21\\val\\recordings\\talk_recordings_val\\001080"
+    # frame_extract(video_path, save_dir, resize=(256, 256), transform=crop_to_square)
+    path = Path("/home/ssd500/charlearn2021/test/talk_test")
+    i = 0
+    video_pts = list(path.rglob("*.mp4"))
+    for video in tqdm(video_pts):
+        i += 1
+        parent_dir = Path(video).parent
+        # if "001080" in str(video):
+        #     continue
+        print(f"execute {video} ...")
+        frame_extract(video_path=str(video), save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
+    print(f"processed {i} videos")

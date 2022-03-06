@@ -1,0 +1,22 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/stage_two/bimodal_resnet18_pred_output/spectrum_train_data_full.pkl"
+  VALID_IMG_DATA: "datasets/stage_two/bimodal_resnet18_pred_output/spectrum_valid_data_full.pkl"
+  TEST_IMG_DATA: "datasets/stage_two/bimodal_resnet18_pred_output/spectrum_test_data_full.pkl"
+DATA_LOADER:
+  NAME: "spectrum_data_loader"
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 2
+MODEL:
+  NAME: "spectrum_conv_model"
+  SPECTRUM_CHANNEL: 100
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.01
+  MILESTONE: [20,]
+TRAIN:
+  TRAINER: "SpectrumTrainer"
+  MAX_EPOCH: 30
+  OUTPUT_DIR: "results_second_stage/spectrum/03_bimodal_resnet18_spectrom_full"

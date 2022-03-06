@@ -1,4 +1,4 @@
-from .se_net import se_resnet50
+from .se_net import se_resnet50, se_resnet50_true_personality
 from .hr_net_cls import hr_net_model
 from .swin_transformer import get_swin_transformer_model
 from .dan import get_aud_linear_regressor
@@ -16,5 +16,6 @@ from .TSN2D import tpn_model
 from .video_action_transformer import vat_model
 from .statistic_model import statistic_mlp
 from .spectrum_model import spectrum_conv_model
+from .spectrum_model import spectrum_conv_model2
 
 

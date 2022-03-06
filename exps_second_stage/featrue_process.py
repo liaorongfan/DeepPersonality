@@ -52,15 +52,19 @@ def resample_pred_spectrum(data, new_rate=100, top_n=80):
     return amp, pha
 
 
-def select_pred_spectrum(data, top_n=80):
+def select_pred_spectrum(data, top_n=80, select=True):
     # for one trait there 100 prediction from 100 frames
     # data: (1, 100)
     pred_fft = np.fft.fft2(data)
-    lenght = int(len(pred_fft[0]) / 2)
-    if top_n > lenght:
-        top_n = lenght
-    amp = np.abs(pred_fft)[:, :top_n]
-    pha = np.angle(pred_fft)[:, :top_n]
+    if select:
+        length = int(len(pred_fft[0]) / 2)
+        if top_n > length:
+            top_n = length
+        amp = np.abs(pred_fft)[:, :top_n]
+        pha = np.angle(pred_fft)[:, :top_n]
+    else:
+        amp = np.abs(pred_fft)
+        pha = np.angle(pred_fft)
     return amp, pha
 
 
@@ -100,9 +104,10 @@ def gen_dataset(dir, func, method):
 
 if __name__ == "__main__":
     os.chdir("..")
-
-    gen_dataset(
-        "datasets/stage_two/persemon_pred_output",
-        func=gen_spectrum_data,
-        method=select_pred_spectrum,
-    )
+    dirs = glob.glob("datasets/stage_two/*_pred_output")
+    for dir in dirs:
+        gen_dataset(
+            dir,  # "datasets/stage_two/persemon_pred_output",
+            func=gen_spectrum_data,
+            method=select_pred_spectrum,
+        )

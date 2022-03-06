@@ -17,5 +17,5 @@ SOLVER:
   MILESTONE: [1000, 2000]
 TRAIN:
   TRAINER: "StatisticTrainer"
-  MAX_EPOCH: 3000
+  MAX_EPOCH: 100
   OUTPUT_DIR: "results_second_stage/statistic/08_senet_statistic"

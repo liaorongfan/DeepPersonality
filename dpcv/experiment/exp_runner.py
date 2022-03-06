@@ -79,7 +79,8 @@ class ExpRunner:
         # cfg = self.cfg.TRAIN
         for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
             self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
-            self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, epoch)
+            if epoch % cfg.VALID_INTERVAL == 0:
+                self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, epoch)
             self.scheduler.step()
 
             if self.collector.model_save:

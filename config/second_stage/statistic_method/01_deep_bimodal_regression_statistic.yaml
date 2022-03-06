@@ -13,9 +13,9 @@ LOSS:
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.1
+  LR_INIT: 0.01
   MILESTONE: [2000, 2500]
 TRAIN:
   TRAINER: "StatisticTrainer"
-  MAX_EPOCH: 3000
+  MAX_EPOCH: 100
   OUTPUT_DIR: "results_second_stage/statistic/01_deep_bimodal_statistic"
