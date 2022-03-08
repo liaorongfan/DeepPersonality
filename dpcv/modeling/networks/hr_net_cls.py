@@ -275,9 +275,9 @@ blocks_dict = {
 
 class HighResolutionNet(nn.Module):
 
-    def __init__(self, cfg, init_weights=True, **kwargs):
+    def __init__(self, cfg, init_weights=True, normalize_output=True, **kwargs):
         super(HighResolutionNet, self).__init__()
-
+        self.normalize_output = normalize_output
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64, momentum=BN_MOMENTUM)
         self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1, bias=False)
@@ -507,7 +507,8 @@ class HighResolutionNet(nn.Module):
             y = F.avg_pool2d(y, kernel_size=y.size()[2:]).view(y.size(0), -1)
 
         y = self.classifier(y)
-        y = torch.sigmoid(y)
+        if self.normalize_output:
+            y = torch.sigmoid(y)
 
         return y
 
@@ -543,6 +544,14 @@ def get_hr_net_model(cfg=None, **kwargs):
 def hr_net_model(cfg=None, **kwargs):
     config = hr_net_cfg
     model = HighResolutionNet(config, **kwargs)
+    model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return model
+
+
+@NETWORK_REGISTRY.register()
+def hr_net_true_personality(cfg=None, **kwargs):
+    config = hr_net_cfg
+    model = HighResolutionNet(config, normalize_output=False, **kwargs)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 

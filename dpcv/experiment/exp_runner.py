@@ -124,14 +124,15 @@ class ExpRunner:
             self.model = load_model(self.model, weight_file)
 
         if not self.cfg.TEST.FULL_TEST:
-            ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.test(
+            ocean_acc_avg, ocean_acc, dataset_output, dataset_label, mse = self.trainer.test(
                 self.data_loader["test"], self.model
             )
+            self.logger.info("acc: {} mean: {}".format(mse[0], mse[1]))
+            self.latex_info(mse[0], mse[1])
         else:
             ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(
                 self.data_loader["full_test"], self.model
             )
-
         self.logger.info("acc: {} mean: {}".format(ocean_acc, ocean_acc_avg))
         self.latex_info(ocean_acc, ocean_acc_avg)  # a helper for latex table
 
