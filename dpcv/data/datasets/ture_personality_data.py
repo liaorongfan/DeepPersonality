@@ -27,16 +27,15 @@ class Chalearn21FrameData(Dataset):
         self.img_dirs = []
         for dire in self.sessions:
             self.img_dirs.extend([f"{dire}/FC1_T", f"{dire}/FC2_T"])
+        self.all_images = self.assemble_images()
         self.trans = trans
 
     def __len__(self):
-        return len(self.img_dirs)
+        return len(self.all_images)
 
     def __getitem__(self, idx):
-        img_dir = self.img_dirs[idx]
-        img_file = self.sample_img(img_dir)
+        img_file = self.all_images[idx]
         img = Image.open(img_file)
-        # img = np.array(Image.open(img_file))
         label = self.parse_label(img_file)
 
         if self.trans:
@@ -62,13 +61,23 @@ class Chalearn21FrameData(Dataset):
 
         return session_id, parts_personality
 
-    def sample_img(self, img_dir, even_downsample=2000):
+    def sample_img(self, img_dir):
         imgs = glob.glob(opt.join(self.data_dir, img_dir, "*.jpg"))
         imgs = sorted(imgs, key=lambda x: int(Path(x).stem[6:]))
         # evenly sample to self.sample_size frames
         separate = np.linspace(0, len(imgs), self.sample_size, endpoint=False, dtype=np.int16)
-        index = random.choice(separate)
-        return imgs[index]
+        # index = random.choice(separate)
+        selected_imgs = [imgs[idx] for idx in separate]
+        # that will cost too much memory on disk
+        # label = self.parse_label(selected_imgs[1])
+        # labels = [label] * len(selected_imgs)
+        return selected_imgs  # , labels
+
+    def assemble_images(self):
+        all_images = []
+        for img_dir in self.img_dirs:
+            all_images.extend(self.sample_img(img_dir))
+        return all_images
 
 
 @DATA_LOADER_REGISTRY.register()
@@ -94,16 +103,15 @@ def true_personality_dataloader(cfg, mode):
     return data_loader
 
 
-
 if __name__ == "__main__":
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
-    # train_dataset = Chalearn21FrameData(
-    #     data_root="datasets/chalearn2021",
-    #     data_split="train",
-    #     task="talk",
-    # )
-    # print(len(train_dataset))
-    # print(train_dataset[1])
+    train_dataset = Chalearn21FrameData(
+        data_root="datasets/chalearn2021",
+        data_split="train",
+        task="talk",
+    )
+    print(len(train_dataset))
+    print(train_dataset[1])
 
     test_dataset = Chalearn21FrameData(
         data_root="datasets/chalearn2021",

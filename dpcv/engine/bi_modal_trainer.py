@@ -54,7 +54,9 @@ class BiModalTrainer(object):
                 outputs = model(*inputs)
                 loss = loss_f(outputs.cpu(), labels.cpu())
                 loss_batch_list.append(loss.item())
-                ocean_acc_batch = (1 - torch.abs(outputs.cpu().detach() - labels.cpu().detach())).mean(dim=0)
+                ocean_acc_batch = (
+                    1 - torch.abs(outputs.cpu().detach() - labels.cpu().detach())
+                ).mean(dim=0).clip(min=0)
                 ocean_acc_epoch.append(ocean_acc_batch)
                 acc_batch_avg = ocean_acc_batch.mean()
                 acc_batch_list.append(acc_batch_avg)
@@ -93,7 +95,7 @@ class BiModalTrainer(object):
                 labels = labels.cpu().detach()
                 output_list.append(outputs)
                 label_list.append(labels)
-                ocean_acc_batch = (1 - torch.abs(outputs - labels)).mean(dim=0)
+                ocean_acc_batch = (1 - torch.abs(outputs - labels)).mean(dim=0).clip(min=0)
                 ocean_acc.append(ocean_acc_batch)
             ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
             ocean_acc_avg = ocean_acc.mean()
