@@ -6,10 +6,11 @@ from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.transforms.transform import set_transform_op
 from dpcv.data.transforms.build import build_transform_spatial
-from .build import DATA_LOADER_REGISTRY
+# from .build import DATA_LOADER_REGISTRY
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop,  TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.common import VideoLoader
+from dpcv.data.datasets.ture_personality_data import Chalearn21FrameData
 
 
 class VideoFrameSegmentData(VideoData):
@@ -95,6 +96,71 @@ class FullTestVideoSegmentData(VideoFrameSegmentData):
         return image_segment_obj_ls
 
 
+class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
+    """ Dataloader for 3d models, (3d_resnet, slow-fast, tpn, vat)
+
+    """
+    def __init__(self, data_root, data_split, task, video_loader, spa_trans=None, tem_trans=None):
+        super().__init__(data_root, data_split, task, even_downsample=2000, trans=None, segment=True)
+        self.loader = video_loader
+        self.spa_trans = spa_trans
+        self.tem_trans = tem_trans
+
+    def __getitem__(self, index):
+        img = self.get_image_data(index)
+        label = self.get_image_label(index)
+        return {"image": img, "label": torch.as_tensor(label)}
+
+    def __len__(self):
+        return len(self.img_dir_ls)
+
+    def get_image_data(self, index):
+        img_dir = self.img_dir_ls[index]
+        imgs = self.frame_sample(img_dir)
+        return imgs
+
+    def get_image_label(self, index):
+        img_dir = self.img_dir_ls[index]
+        session, part = img_dir.split("/")
+        participant_id = self.session_id[str(int(session))][part]
+        participant_trait = self.parts_personality[participant_id]
+        participant_trait = np.array([float(v) for v in participant_trait.values()])
+        return participant_trait
+
+    def frame_sample(self, img_dir):
+        img_dir = os.path.join(self.data_dir, img_dir)
+        if "face" in img_dir:
+            frame_indices = self.list_face_frames(img_dir)
+        else:
+            frame_indices = self.list_frames(img_dir)
+
+        if self.tem_trans is not None:
+            frame_indices = self.tem_trans(frame_indices)
+        imgs = self._loading(img_dir, frame_indices)
+        return imgs
+
+    def _loading(self, path, frame_indices):
+        clip = self.loader(path, frame_indices)
+        if self.spa_trans is not None:
+            clip = [self.spa_trans(img) for img in clip]
+        clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
+        return clip
+
+    @staticmethod
+    def list_frames(img_dir):
+        img_path_ls = glob.glob(f"{img_dir}/*.jpg")
+        img_path_ls = sorted(img_path_ls, key=lambda x: int(Path(x).stem[6:]))
+        frame_indices = [int(Path(path).stem[6:]) for path in img_path_ls]
+        return frame_indices
+
+    @staticmethod
+    def list_face_frames(img_dir):
+        img_path_ls = glob.glob(f"{img_dir}/*.jpg")
+        img_path_ls = sorted(img_path_ls, key=lambda x: int(Path(x).stem[5:]))
+        frame_indices = [int(Path(path).stem[5:]) for path in img_path_ls]
+        return frame_indices
+
+
 def make_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test"]), "'mode' should be 'train' , 'valid' or 'trainval'"
@@ -148,7 +214,7 @@ def make_data_loader(cfg, mode="train"):
     return data_loader
 
 
-@DATA_LOADER_REGISTRY.register()
+# @DATA_LOADER_REGISTRY.register()
 def spatial_temporal_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
@@ -225,11 +291,35 @@ def spatial_temporal_data_loader(cfg, mode="train"):
     return data_loader
 
 
+# @DATA_LOADER_REGISTRY.register()
+def true_personality_spatial_temporal_data_loader(cfg, mode="train"):
+    spatial_transform = build_transform_spatial(cfg)
+    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
+    temporal_transform = TemporalCompose(temporal_transform)
+
+    data_cfg = cfg.DATA
+    if "face" in data_cfg.TRAIN_IMG_DATA:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"face_{x}.jpg")
+    else:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
+
+    train_dataset = TruePersonalityVideoFrameSegmentData(
+        data_root="datasets/chalearn2021",
+        data_split="train",
+        task="talk",
+        video_loader=video_loader,
+        spa_trans=spatial_transform,
+        tem_trans=temporal_transform,
+    )
+    return train_dataset
+
+
 if __name__ == "__main__":
     import os
-    from dpcv.config.interpret_dan_cfg import cfg
+    from dpcv.config.default_config_opt import cfg
 
-    os.chdir("../../")
+    os.chdir("../../../")
+    print(os.getcwd())
 
     # interpret_data = InterpretData(
     #     data_root="datasets",
@@ -239,9 +329,13 @@ if __name__ == "__main__":
     # )
     # print(interpret_data[18])
 
-    data_loader = make_data_loader(cfg, mode="valid")
-    for i, item in enumerate(data_loader):
-        print(item["image"].shape, item["label"].shape)
+    # data_loader = make_data_loader(cfg, mode="valid")
+    # for i, item in enumerate(data_loader):
+    #     print(item["image"].shape, item["label"].shape)
+    #
+    #     if i > 5:
+    #         break
 
-        if i > 5:
-            break
+    train_dataset = true_personality_spatial_temporal_data_loader(cfg)
+    print(len(train_dataset))
+    print(train_dataset[90])

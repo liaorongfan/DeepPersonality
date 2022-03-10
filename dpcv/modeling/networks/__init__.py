@@ -1,6 +1,6 @@
 from .se_net import se_resnet50, se_resnet50_true_personality
 from .hr_net_cls import hr_net_model
-from .swin_transformer import get_swin_transformer_model
+from .swin_transformer import get_swin_transformer_model  # , swin_transformer_true_personality
 from .dan import get_aud_linear_regressor
 from dpcv.modeling.networks import (
     bi_modal_lstm,

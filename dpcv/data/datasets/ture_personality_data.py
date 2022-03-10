@@ -15,7 +15,7 @@ from .build import DATA_LOADER_REGISTRY
 
 class Chalearn21FrameData(Dataset):
 
-    def __init__(self, data_root, data_split, task, even_downsample=2000, trans=None):
+    def __init__(self, data_root, data_split, task, even_downsample=2000, trans=None, segment=False):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
         self.session_id, self.parts_personality = self.load_annotation(task, data_split)
@@ -24,10 +24,11 @@ class Chalearn21FrameData(Dataset):
         self.data_dir = opt.join(data_root, data_split, f"{task}_{data_split}")
         self.sessions = os.listdir(self.data_dir)
         self.sample_size = even_downsample
-        self.img_dirs = []
+        self.img_dir_ls = []
         for dire in self.sessions:
-            self.img_dirs.extend([f"{dire}/FC1_T", f"{dire}/FC2_T"])
-        self.all_images = self.assemble_images()
+            self.img_dir_ls.extend([f"{dire}/FC1_T", f"{dire}/FC2_T"])
+        if not segment:
+            self.all_images = self.assemble_images()
         self.trans = trans
 
     def __len__(self):
@@ -36,14 +37,14 @@ class Chalearn21FrameData(Dataset):
     def __getitem__(self, idx):
         img_file = self.all_images[idx]
         img = Image.open(img_file)
-        label = self.parse_label(img_file)
+        label = self.get_ocean_label(img_file)
 
         if self.trans:
             img = self.trans(img)
 
         return {"image": img, "label": torch.as_tensor(label, dtype=torch.float32)}
 
-    def parse_label(self, img_file):
+    def get_ocean_label(self, img_file):
         *_, session, part, frame = img_file.split("/")
         participant_id = self.session_id[str(int(session))][part]
         participant_trait = self.parts_personality[participant_id]
@@ -75,7 +76,7 @@ class Chalearn21FrameData(Dataset):
 
     def assemble_images(self):
         all_images = []
-        for img_dir in self.img_dirs:
+        for img_dir in self.img_dir_ls:
             all_images.extend(self.sample_img(img_dir))
         return all_images
 
