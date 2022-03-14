@@ -127,7 +127,7 @@ class ExpRunner:
             ocean_acc_avg, ocean_acc, dataset_output, dataset_label, mse = self.trainer.test(
                 self.data_loader["test"], self.model
             )
-            self.logger.info("acc: {} mean: {}".format(mse[0], mse[1]))
+            self.logger.info("mse: {} mean: {}".format(mse[0], mse[1]))
             self.latex_info(mse[0], mse[1])
         else:
             ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(

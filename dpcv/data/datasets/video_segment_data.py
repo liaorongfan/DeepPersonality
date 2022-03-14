@@ -2,11 +2,12 @@ import torch
 from torch.utils.data import DataLoader
 import glob
 import numpy as np
+import os
 from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.transforms.transform import set_transform_op
 from dpcv.data.transforms.build import build_transform_spatial
-# from .build import DATA_LOADER_REGISTRY
+from .build import DATA_LOADER_REGISTRY
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop,  TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.common import VideoLoader
@@ -109,7 +110,7 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
     def __getitem__(self, index):
         img = self.get_image_data(index)
         label = self.get_image_label(index)
-        return {"image": img, "label": torch.as_tensor(label)}
+        return {"image": img, "label": torch.as_tensor(label, dtype=torch.float32)}
 
     def __len__(self):
         return len(self.img_dir_ls)
@@ -214,7 +215,7 @@ def make_data_loader(cfg, mode="train"):
     return data_loader
 
 
-# @DATA_LOADER_REGISTRY.register()
+@DATA_LOADER_REGISTRY.register()
 def spatial_temporal_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
@@ -291,10 +292,10 @@ def spatial_temporal_data_loader(cfg, mode="train"):
     return data_loader
 
 
-# @DATA_LOADER_REGISTRY.register()
+@DATA_LOADER_REGISTRY.register()
 def true_personality_spatial_temporal_data_loader(cfg, mode="train"):
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
+    temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA
@@ -303,15 +304,24 @@ def true_personality_spatial_temporal_data_loader(cfg, mode="train"):
     else:
         video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
 
-    train_dataset = TruePersonalityVideoFrameSegmentData(
+    data_set = TruePersonalityVideoFrameSegmentData(
         data_root="datasets/chalearn2021",
-        data_split="train",
+        data_split=mode,
         task="talk",
         video_loader=video_loader,
         spa_trans=spatial_transform,
         tem_trans=temporal_transform,
     )
-    return train_dataset
+
+    shuffle = True if mode == "train" else False
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset=data_set,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=loader_cfg.NUM_WORKERS,
+    )
+    return data_loader
 
 
 if __name__ == "__main__":

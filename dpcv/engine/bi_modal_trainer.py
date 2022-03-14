@@ -324,8 +324,10 @@ class TPNTrainer(BiModalTrainer):
 
     def test(self, data_loader, model):
         model.eval()
+        mse = torch.nn.MSELoss(reduction="none")
         with torch.no_grad():
             ocean_acc = []
+            ocean_mse = []
             label_list = []
             output_list = []
             for data in tqdm(data_loader):
@@ -336,19 +338,25 @@ class TPNTrainer(BiModalTrainer):
                 labels = labels.cpu().detach()
                 output_list.append(outputs)
                 label_list.append(labels)
+                ocean_mse_batch = mse(outputs, labels).mean(dim=0)
                 ocean_acc_batch = (1 - torch.abs(outputs - labels)).mean(dim=0)
+                ocean_mse.append(ocean_mse_batch)
                 ocean_acc.append(ocean_acc_batch)
+            ocean_mse = torch.stack(ocean_mse, dim=0).mean(dim=0).numpy()
             ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
+            ocean_mse_avg = ocean_mse.mean()
             ocean_acc_avg = ocean_acc.mean()
+
             dataset_output = torch.cat(output_list, dim=0).numpy()
             dataset_label = torch.cat(label_list, dim=0).numpy()
-
+        ocean_mse_avg_rand = np.round(ocean_mse_avg.astype("float64"), 4)
         ocean_acc_avg_rand = np.round(ocean_acc_avg.astype("float64"), 4)
         keys = ["O", "C", "E", "A", "N"]
-        ocean_acc_dict = {}
+        ocean_mse_dict, ocean_acc_dict = {}, {}
         for i, k in enumerate(keys):
+            ocean_mse_dict[k] = np.round(ocean_mse[i], 4)
             ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
-        return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label
+        return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label, (ocean_mse_dict, ocean_mse_avg_rand)
 
     def full_test(self, data_loader, model):
         model.eval()

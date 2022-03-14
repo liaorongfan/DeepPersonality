@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader
 from dpcv.data.transforms.transform import set_vat_transform_op
 from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
 from dpcv.data.datasets.tpn_data import TPNData as VATData
+from dpcv.data.datasets.tpn_data import TPNTruePerData as VATTruePerData
 from dpcv.data.datasets.tpn_data import FullTestTPNData as FullTestVATData
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
@@ -133,6 +134,40 @@ def vat_data_loader(cfg, mode="train"):
         dataset=data_set,
         batch_size=loader_cfg.TRAIN_BATCH_SIZE,
         shuffle=loader_cfg.SHUFFLE,
+        num_workers=loader_cfg.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def true_per_vat_data_loader(cfg, mode="train"):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid' or 'trainval'"
+    spatial_transform = build_transform_spatial(cfg)
+    temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
+    temporal_transform = TemporalCompose(temporal_transform)
+
+    data_cfg = cfg.DATA
+    if "face" in data_cfg.TRAIN_IMG_DATA:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"face_{x}.jpg")
+    else:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
+
+    data_set = VATTruePerData(
+        data_root="datasets/chalearn2021",
+        data_split=mode,
+        task="talk",
+        video_loader=video_loader,
+        spa_trans=spatial_transform,
+        tem_trans=temporal_transform,
+    )
+
+    shuffle = True if mode == "train" else False
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset=data_set,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
         num_workers=loader_cfg.NUM_WORKERS,
     )
     return data_loader
