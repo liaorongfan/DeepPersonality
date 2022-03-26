@@ -31,7 +31,7 @@ class FaceImageExtractor:
         args:
             video_name:(str) name of video file end with ".mp4"
         """
-        self.video_name = os.path.basename(video_name)[:-4]
+        self.video_name = f"{os.path.basename(video_name)[:-4]}_face"
 
         self.save_dir = os.path.join(self.data_root, self.video_name)
         if not os.path.exists(self.save_dir):
@@ -112,26 +112,43 @@ class FaceImageExtractor:
         cv2.destroyAllWindows()
 
 
-def run_on_videos(video_dir):
+def run_on_videos(
+    video_dir,
+    data_root,
+    detector_path="/home/rongfan/05-personality_traits/DeepPersonality/pre_trained_weights/",
+):
     image_extractor = FaceImageExtractor(
-        data_root="/home/rongfan/11-personality_traits/DeepPersonality/datasets/image_data/train_data_face_66-70",
-        detector_path="/home/rongfan/11-personality_traits/DeepPersonality/checkpoints/"
+        data_root=data_root,
+        detector_path=detector_path,
     )
+    dirs = [name for name in os.listdir(data_root) if "face" in name]
+    if len(dirs) == 2:
+        return
     input_video_ls = glob.glob(f"{video_dir}/*.mp4")
     # input_video = "/home/rongfan/11-personality_traits/apa_paper/FaceDBGenerator_V2/Facedetector/_QXI4n_FRN4.003.mp4"
     for input_video in input_video_ls:
+        print(f"processing {input_video} ...")
         image_extractor.load_video(input_video)
         # image_extractor.reduce_frame_rate(4)
         image_extractor.process_frames()
 
 
 if __name__ == "__main__":
-    vid_dirs = [
-        "/home/rongfan/11-personality_traits/DeepPersonality/datasets/unzipped_data/training80_66",
-        "/home/rongfan/11-personality_traits/DeepPersonality/datasets/unzipped_data/training80_67",
-        "/home/rongfan/11-personality_traits/DeepPersonality/datasets/unzipped_data/training80_68",
-        "/home/rongfan/11-personality_traits/DeepPersonality/datasets/unzipped_data/training80_69",
-        "/home/rongfan/11-personality_traits/DeepPersonality/datasets/unzipped_data/training80_70",
-    ]
-    for dir in vid_dirs:
-        run_on_videos(dir)
+    from multiprocessing import Pool
+
+    video_root = "/home/rongfan/05-personality_traits/DeepPersonality/datasets/chalearn2021/valid/talk_valid"
+    data_root_ls = os.listdir(video_root)
+    data_root_ls_pt = [os.path.join(video_root, d) for d in data_root_ls]
+    p = Pool(6)
+    for d in data_root_ls_pt:
+        p.apply_async(run_on_videos, args=(d, d))
+        # run_on_videos(
+        #     video_dir=d,
+        #     data_root=d,
+        #     detector_path=,
+        # )
+    print('Waiting for all subprocesses done...')
+    p.close()
+    p.join()
+    print('All subprocesses done.')
+

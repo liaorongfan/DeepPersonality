@@ -162,7 +162,7 @@ class FaceDetection:
         ret = True
         self.rects = self.detector(img, 1)
         if len(self.rects) == 0:
-            print("ERROR: no faces found!")
+            # print("ERROR: no faces found!")
             ret = False
         return ret
 
