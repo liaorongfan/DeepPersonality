@@ -12,6 +12,8 @@ from dpcv.data.datasets.pers_emo_data import AllFramePersEmoNData
 def feature_extract(cfg_file, model_weight, data_loader, output_dir):
 
     cfg_from_file(cfg_file)
+    cfg.MODEL.RETURN_FEATURE = True
+
     runner = ExpRunner(cfg)
     runner.model = load_model(runner.model, model_weight)
     # ocean_acc_avg, ocean_acc, dataset_output, dataset_label = runner.trainer.full_test(
@@ -23,10 +25,8 @@ def feature_extract(cfg_file, model_weight, data_loader, output_dir):
         dataloader = data_loader(cfg, mode=mode)
         dataset_output = runner.data_extract(dataloader)
 
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        save_to_file = os.path.join(output_dir, f"pred_{mode}_output.pkl")
-
+        os.makedirs(output_dir, exist_ok=True)
+        save_to_file = os.path.join(output_dir, f"feature_{mode}_output.pkl")
         torch.save(dataset_output, save_to_file)
 
 
@@ -175,5 +175,5 @@ if __name__ == "__main__":
         cfg_file="config/unified_frame_images/05_persemon.yaml",
         model_weight="results/unified_frame_images/05_peremon/12-23_00-07/checkpoint_160.pkl",
         data_loader=setup_persemon_dataloader,
-        output_dir="datasets/stage_two/persemon_pred_output",
+        output_dir="datasets/stage_two/persemon_feature_output",
     )

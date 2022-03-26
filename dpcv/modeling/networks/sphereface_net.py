@@ -95,8 +95,9 @@ class SphereFEM(nn.Module):
 
 
 class PersEmoN(nn.Module):
-    def __init__(self, feature_extractor, init_weights=True):
+    def __init__(self, feature_extractor, init_weights=True, return_feature=False):
         super(PersEmoN, self).__init__()
+        self.return_feature = return_feature
         self.efm = feature_extractor
         self.pam = nn.Linear(512, 5)
         self.eam = nn.Linear(512, 2)
@@ -122,6 +123,9 @@ class PersEmoN(nn.Module):
         x_ep = self.ram(e_score)
         e_score = torch.tanh(e_score)
 
+        if self.return_feature:
+            return p_score, p_coherence, e_score, e_coherence, x_ep, x_p
+
         return p_score, p_coherence, e_score, e_coherence, x_ep
 
 
@@ -133,7 +137,7 @@ def get_pers_emo_model():
 
 @NETWORK_REGISTRY.register()
 def pers_emo_model(cfg=None):
-    multi_modal_model = PersEmoN(SphereFEM())
+    multi_modal_model = PersEmoN(SphereFEM(), return_feature=cfg.MODEL.RETURN_FEATURE)
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
 

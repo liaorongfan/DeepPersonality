@@ -54,6 +54,7 @@ __C.MODEL.NAME = "se_resnet50"
 __C.MODEL.PRETRAIN = False
 __C.MODEL.NUM_CLASS = 5
 __C.MODEL.SPECTRUM_CHANNEL = 50
+__C.MODEL.RETURN_FEATURE = False
 
 # ------------------------------------------ step 4 : loss config node -------------------------------------------------
 __C.LOSS = CfgNode()

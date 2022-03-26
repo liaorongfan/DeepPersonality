@@ -4,6 +4,7 @@ from tqdm import tqdm
 import glob
 import numpy as np
 from scipy import signal
+import pickle
 
 
 def gen_statistic_data(data_path, save_to, method=None):
@@ -65,13 +66,13 @@ def select_pred_spectrum(data, top_n=80, select=True):
     else:
         amp = np.abs(pred_fft)
         pha = np.angle(pred_fft)
-    return amp, pha
+    return amp.astype("float32"), pha.astype("float32")
 
 
 def gen_spectrum_data(data_path, save_to, method):
     data = torch.load(data_path)
     spec_data_ls = []
-    for pred, label in tqdm(zip(data["video_frames_pred"], data["video_label"])):
+    for pred, label in tqdm(zip(data["video_frame_feat"], data["video_label"])):
         amp_spectrum, pha_spectrum = [], []
         for one_channel in pred.T:
             amp, pha = method(one_channel.numpy()[None, :])
@@ -86,13 +87,15 @@ def gen_spectrum_data(data_path, save_to, method):
     torch.save(spec_data_ls, save_to)
 
 
-def gen_dataset(dir, func, method):
-    files = [file for file in glob.glob(f"{dir}/*.pkl") if "pred_" in os.path.basename(file)]
+def gen_dataset(dir, func, method, pre_fix="pred_"):
+    files = [file for file in glob.glob(f"{dir}/*.pkl") if pre_fix in os.path.basename(file)]
     for file in files:
+        if "test" in file or "valid" in file:
+            continue
         if "spectrum" in str(func):
-            name = os.path.split(file)[-1].replace("pred_", "spectrum_").replace("output", "data")
+            name = os.path.split(file)[-1].replace(pre_fix, "spectrum_").replace("output", "data")
         elif "statistic" in str(func):
-            name = os.path.split(file)[-1].replace("pred_", "statistic_").replace("output", "data")
+            name = os.path.split(file)[-1].replace(pre_fix, "statistic_").replace("output", "data")
         else:
             raise ValueError(
                 "func used in this interface should be 'statistic' or 'spectrum' method"
@@ -104,10 +107,11 @@ def gen_dataset(dir, func, method):
 
 if __name__ == "__main__":
     os.chdir("..")
-    dirs = glob.glob("datasets/stage_two/*_pred_output")
+    dirs = glob.glob("datasets/stage_two/*_feature_output")
     for dir in dirs:
         gen_dataset(
             dir,  # "datasets/stage_two/persemon_pred_output",
             func=gen_spectrum_data,
             method=select_pred_spectrum,
+            pre_fix="feature_"
         )

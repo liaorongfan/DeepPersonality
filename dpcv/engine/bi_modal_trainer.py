@@ -503,14 +503,15 @@ class PersEmoTrainer(BiModalTrainer):
 
     def data_extract(self, data_set, model):
         model.eval()
-        out_ls, label_ls = [], []
+        out_ls, feature_ls, label_ls = [], [], []
         with torch.no_grad():
             for data in tqdm(data_set):
                 inputs, label = self.full_test_data_fmt(data)
-                out, *_ = model(*inputs)
+                out, *_, feat = model(*inputs)
                 out_ls.append(out.cpu())
+                feature_ls.append(feat.cpu())
                 label_ls.append(label.cpu())
-        return {"video_frames_pred": out_ls, "video_label": label_ls}
+        return {"video_frames_pred": out_ls, "video_frames_feat": feature_ls, "video_label": label_ls}
 
 
 @TRAINER_REGISTRY.register()
