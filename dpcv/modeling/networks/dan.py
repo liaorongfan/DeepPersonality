@@ -15,7 +15,7 @@ backbone = {
 
 class DAN(nn.Module):
 
-    def __init__(self, features, num_classes=5, init_weights=True):
+    def __init__(self, features, num_classes=5, init_weights=True, return_feature=False):
         super(DAN, self).__init__()
         self.features = features
         self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
@@ -24,7 +24,7 @@ class DAN(nn.Module):
         self.leaky_relu = nn.LeakyReLU(inplace=True)
         self.dropout = nn.Dropout(0.5)
         self.linear_2 = nn.Linear(1024, num_classes)
-
+        self.return_feature = return_feature
         if init_weights:
             # self._initialize_weights()
             initialize_weights(self)
@@ -38,10 +38,12 @@ class DAN(nn.Module):
         x = torch.cat([x1, x2], dim=1)
         x = x.view(x.size(0), -1)
         x = self.linear_1(x)
-        x = self.leaky_relu(x)
-        x = self.dropout(x)  # add dropout to enhance generalization ability
+        feat = self.leaky_relu(x)
+        x = self.dropout(feat)  # add dropout to enhance generalization ability
         x = self.linear_2(x)  # add another linear lay and activation function to enhance nonlinear mapping
         x = torch.sigmoid(x)
+        if self.return_feature:
+            return x, feat
         return x
 
     def _initialize_weights(self):
@@ -104,6 +106,7 @@ def get_aud_linear_regressor(cfg=None):
 def dan_model(cfg):
 
     kwargs = {'init_weights': True}
+    kwargs["return_feature"] = cfg.MODEL.RETURN_FEATURE
     if cfg.MODEL.PRETRAIN:
         kwargs["init_weights"] = False
 

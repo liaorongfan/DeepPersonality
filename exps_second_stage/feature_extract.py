@@ -172,8 +172,15 @@ if __name__ == "__main__":
     os.chdir("..")
 
     feature_extract(
-        cfg_file="config/unified_frame_images/05_persemon.yaml",
-        model_weight="results/unified_frame_images/05_peremon/12-23_00-07/checkpoint_160.pkl",
-        data_loader=setup_persemon_dataloader,
-        output_dir="datasets/stage_two/persemon_feature_output",
+        cfg_file="config/unified_frame_images/01_deep_bimodal_regression.yaml",
+        model_weight="results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/stage_two/deep_bimodal_reg_feat_output",
     )
+    # persemon feature extract
+    # feature_extract(
+    #     cfg_file="config/unified_frame_images/05_persemon.yaml",
+    #     model_weight="results/unified_frame_images/05_peremon/12-23_00-07/checkpoint_160.pkl",
+    #     data_loader=setup_persemon_dataloader,
+    #     output_dir="datasets/stage_two/persemon_feature_output",
+    # )
