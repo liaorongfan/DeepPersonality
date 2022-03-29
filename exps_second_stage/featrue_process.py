@@ -72,7 +72,8 @@ def select_pred_spectrum(data, top_n=80, select=True):
 def gen_spectrum_data(data_path, save_to, method):
     data = torch.load(data_path)
     spec_data_ls = []
-    for pred, label in tqdm(zip(data["video_frame_feat"], data["video_label"])):
+    for pred, label in tqdm(zip(data["video_frames_feat"], data["video_label"])):
+        pred, label = pred.cpu(), label.cpu()
         amp_spectrum, pha_spectrum = [], []
         for one_channel in pred.T:
             amp, pha = method(one_channel.numpy()[None, :])
@@ -84,14 +85,26 @@ def gen_spectrum_data(data_path, save_to, method):
             "video_label": label.numpy()
         }
         spec_data_ls.append(spectrum_data)
-    torch.save(spec_data_ls, save_to)
+
+    if len(spec_data_ls) > 2000:
+        # separate data in case of out-of-memory issue
+        torch.save(spec_data_ls[:1500], save_to.replace(".pkl", "_1.pkl"))
+        print("saved [1/4]...")
+        torch.save(spec_data_ls[1500: 3000], save_to.replace(".pkl", "_2.pkl"))
+        print("saved [2/4]...")
+        torch.save(spec_data_ls[3000: 4500], save_to.replace(".pkl", "_3.pkl"))
+        print("saved [3/4]...")
+        torch.save(spec_data_ls[4500:], save_to.replace(".pkl", "_4.pkl"))
+        print("saved [4/4] \n  DONE.")
+    else:
+        torch.save(spec_data_ls, save_to)
 
 
 def gen_dataset(dir, func, method, pre_fix="pred_"):
     files = [file for file in glob.glob(f"{dir}/*.pkl") if pre_fix in os.path.basename(file)]
     for file in files:
-        if "test" in file or "valid" in file:
-            continue
+        # if "valid" in file or "test" in file:
+        #     continue
         if "spectrum" in str(func):
             name = os.path.split(file)[-1].replace(pre_fix, "spectrum_").replace("output", "data")
         elif "statistic" in str(func):
@@ -107,11 +120,17 @@ def gen_dataset(dir, func, method, pre_fix="pred_"):
 
 if __name__ == "__main__":
     os.chdir("..")
-    dirs = glob.glob("datasets/stage_two/*_feature_output")
-    for dir in dirs:
-        gen_dataset(
-            dir,  # "datasets/stage_two/persemon_pred_output",
-            func=gen_spectrum_data,
-            method=select_pred_spectrum,
-            pre_fix="feature_"
-        )
+    # dirs = glob.glob("datasets/stage_two/*_feature_output")
+    # for dir in dirs:
+    #     gen_dataset(
+    #         dir,  # "datasets/stage_two/persemon_pred_output",
+    #         func=gen_spectrum_data,
+    #         method=select_pred_spectrum,
+    #         pre_fix="feature_"
+    #     )
+    gen_dataset(
+        "datasets/stage_two/deep_bimodal_reg_feat_output",
+        func=gen_spectrum_data,
+        method=select_pred_spectrum,
+        pre_fix="feature_"
+    )

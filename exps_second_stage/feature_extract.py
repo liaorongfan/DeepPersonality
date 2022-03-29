@@ -22,6 +22,7 @@ def feature_extract(cfg_file, model_weight, data_loader, output_dir):
     # print(ocean_acc_avg, ocean_acc)
 
     for mode in ["train", "valid", "test"]:
+        # note if cuda out of memory, run each mode separately
         dataloader = data_loader(cfg, mode=mode)
         dataset_output = runner.data_extract(dataloader)
 
@@ -172,11 +173,20 @@ if __name__ == "__main__":
     os.chdir("..")
 
     feature_extract(
-        cfg_file="config/unified_frame_images/01_deep_bimodal_regression.yaml",
-        model_weight="results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl",
-        data_loader=setup_dataloader,
-        output_dir="datasets/stage_two/deep_bimodal_reg_feat_output",
+        cfg_file="config/unified_frame_images/03_bimodal_resnet18.yaml",
+        model_weight="results/unified_frame_images/03_bimodal_resnet/12-19_23-35/checkpoint_297.pkl",
+        data_loader=setup_bimodal_resnet_dataloader,
+        output_dir="datasets/stage_two/bimodal_resnet18_feat_output",
     )
+
+    # deep_bimodal_regression feature extract
+    # feature_extract(
+    #     cfg_file="config/unified_frame_images/01_deep_bimodal_regression.yaml",
+    #     model_weight="results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/stage_two/deep_bimodal_reg_feat_output",
+    # )
+
     # persemon feature extract
     # feature_extract(
     #     cfg_file="config/unified_frame_images/05_persemon.yaml",

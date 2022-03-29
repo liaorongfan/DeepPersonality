@@ -200,7 +200,6 @@ class SpectrumFeatConv1D(nn.Module):
         return x
 
 
-
 @NETWORK_REGISTRY.register()
 def spectrum_conv_model(cfg):
     # return SpectrumConv1D().to(device=torch.device("gpu" if torch.cuda.is_available() else "cpu"))
@@ -219,4 +218,4 @@ def spectrum_conv_model2(cfg):
 def spectrum_Feat_conv_model(cfg):
     # return SpectrumConv1D().to(device=torch.device("gpu" if torch.cuda.is_available() else "cpu"))
     # sample_channel = 100
-    return SpectrumFeatConv1D(cfg.MODEL.SPECTRUM_CHANNEL).to(device=device)
+    return SpectrumFeatConv1D(signal_num=cfg.MODEL.SPECTRUM_CHANNEL).to(device=device)

@@ -2,12 +2,19 @@ import torch
 from torch.utils.data import Dataset
 from .build import DATA_LOADER_REGISTRY
 from torch.utils.data import DataLoader
+import glob
 
 
 class SpectrumData(Dataset):
 
     def __init__(self, data_path):
-        self.sample_ls = torch.load(data_path)
+        try:
+            self.sample_ls = torch.load(data_path)
+        except FileNotFoundError:
+            data_segments = sorted(glob.glob(data_path.replace(".pkl", "*.pkl")))
+            self.sample_ls = []
+            for seg in data_segments:
+                self.sample_ls.extend(torch.load(seg))
 
     def __getitem__(self, idx):
         sample = self.sample_ls[idx]
