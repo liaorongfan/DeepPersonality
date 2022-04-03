@@ -5,21 +5,20 @@ DATA:
 DATA_LOADER:
   NAME: "second_stage_data"
   SECOND_STAGE:
-    METHOD: "spectrum"
-    TYPE: "feat"
-  TRAIN_BATCH_SIZE: 2
+    METHOD: "statistic"
+    TYPE: "pred"
+  TRAIN_BATCH_SIZE: 64
   NUM_WORKERS: 0
 MODEL:
-  NAME: "spectrum_Feat_conv_model"
-  SPECTRUM_CHANNEL: 1024
+  NAME: "statistic_mlp"
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.001
-  MILESTONE: [40,]
+  LR_INIT: 0.01
+  MILESTONE: [100]
 TRAIN:
-  TRAINER: "SpectrumTrainer"
-  MAX_EPOCH: 50
-  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/01_deep_bimodal_spectrum"
+  TRAINER: "StatisticTrainer"
+  MAX_EPOCH: 200
+  OUTPUT_DIR: "results_second_stage/statistic/01_deep_bimodal_statistic"

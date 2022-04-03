@@ -3,8 +3,8 @@ from dpcv.checkpoint.save import load_model
 from dpcv.config.default_config_opt import cfg, cfg_from_file
 from dpcv.experiment.exp_runner import ExpRunner
 from dpcv.data.transforms.build import build_transform_spatial
-from dpcv.data.datasets.video_frame_data import AllSampleFrameData
-from dpcv.data.datasets.audio_visual_data import ALLSampleAudioVisualData
+from dpcv.data.datasets.video_frame_data import AllSampleFrameData2
+from dpcv.data.datasets.audio_visual_data import ALLSampleAudioVisualData2
 from dpcv.data.datasets.cr_data import AllFrameCRNetData
 from dpcv.data.datasets.pers_emo_data import AllFramePersEmoNData
 
@@ -24,11 +24,12 @@ def feature_extract(cfg_file, model_weight, data_loader, output_dir):
     for mode in ["train", "valid", "test"]:
         # note if cuda out of memory, run each mode separately
         dataloader = data_loader(cfg, mode=mode)
-        dataset_output = runner.data_extract(dataloader)
+        output_sub_dir = os.path.join(output_dir, mode)
+        runner.data_extract(dataloader, output_sub_dir)
 
-        os.makedirs(output_dir, exist_ok=True)
-        save_to_file = os.path.join(output_dir, f"feature_{mode}_output.pkl")
-        torch.save(dataset_output, save_to_file)
+        # os.makedirs(output_dir, exist_ok=True)
+        # save_to_file = os.path.join(output_dir, f"feature_{mode}_output.pkl")
+        # torch.save(dataset_output, save_to_file)
 
 
 def setup_dataloader(cfg, mode):
@@ -37,21 +38,21 @@ def setup_dataloader(cfg, mode):
 
     transform = build_transform_spatial(cfg)
     if mode == "test":
-        data_set = AllSampleFrameData(
+        data_set = AllSampleFrameData2(
             cfg.DATA.ROOT,
             cfg.DATA.TEST_IMG_DATA,
             cfg.DATA.TEST_LABEL_DATA,
             transform,
         )
     elif mode == "train":
-        data_set = AllSampleFrameData(
+        data_set = AllSampleFrameData2(
             cfg.DATA.ROOT,
             cfg.DATA.TRAIN_IMG_DATA,
             cfg.DATA.TRAIN_LABEL_DATA,
             transform,
         )
     elif mode == "valid":
-        data_set = AllSampleFrameData(
+        data_set = AllSampleFrameData2(
             cfg.DATA.ROOT,
             cfg.DATA.VALID_IMG_DATA,
             cfg.DATA.VALID_LABEL_DATA,
@@ -67,7 +68,7 @@ def setup_bimodal_resnet_dataloader(cfg, mode):
 
     transform = build_transform_spatial(cfg)
     if mode == "test":
-        data_set = ALLSampleAudioVisualData(
+        data_set = ALLSampleAudioVisualData2(
             cfg.DATA.ROOT,
             cfg.DATA.TEST_IMG_DATA,
             cfg.DATA.TEST_AUD_DATA,
@@ -75,7 +76,7 @@ def setup_bimodal_resnet_dataloader(cfg, mode):
             transform,
         )
     elif mode == "valid":
-        data_set = ALLSampleAudioVisualData(
+        data_set = ALLSampleAudioVisualData2(
             cfg.DATA.ROOT,
             cfg.DATA.VALID_IMG_DATA,
             cfg.DATA.VALID_AUD_DATA,
@@ -83,7 +84,7 @@ def setup_bimodal_resnet_dataloader(cfg, mode):
             transform,
         )
     elif mode == "train":
-        data_set = ALLSampleAudioVisualData(
+        data_set = ALLSampleAudioVisualData2(
             cfg.DATA.ROOT,
             cfg.DATA.TRAIN_IMG_DATA,
             cfg.DATA.TRAIN_AUD_DATA,
@@ -172,20 +173,20 @@ if __name__ == "__main__":
     import os
     os.chdir("..")
 
-    feature_extract(
-        cfg_file="config/unified_frame_images/03_bimodal_resnet18.yaml",
-        model_weight="results/unified_frame_images/03_bimodal_resnet/12-19_23-35/checkpoint_297.pkl",
-        data_loader=setup_bimodal_resnet_dataloader,
-        output_dir="datasets/stage_two/bimodal_resnet18_feat_output",
-    )
+    # feature_extract(
+    #     cfg_file="config/unified_frame_images/03_bimodal_resnet18.yaml",
+    #     model_weight="results/unified_frame_images/03_bimodal_resnet/12-19_23-35/checkpoint_297.pkl",
+    #     data_loader=setup_bimodal_resnet_dataloader,
+    #     output_dir="datasets/stage_two/bimodal_resnet18_feat_output",
+    # )
 
     # deep_bimodal_regression feature extract
-    # feature_extract(
-    #     cfg_file="config/unified_frame_images/01_deep_bimodal_regression.yaml",
-    #     model_weight="results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl",
-    #     data_loader=setup_dataloader,
-    #     output_dir="datasets/stage_two/deep_bimodal_reg_feat_output",
-    # )
+    feature_extract(
+        cfg_file="config/unified_frame_images/01_deep_bimodal_regression.yaml",
+        model_weight="results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/deep_bimodal_reg_extract",
+    )
 
     # persemon feature extract
     # feature_extract(

@@ -171,8 +171,8 @@ class ExpRunner:
         string = json.dumps(self.cfg, sort_keys=True, indent=4, separators=(',', ':'))
         self.logger.info(string)
 
-    def data_extract(self, dataloader):
+    def data_extract(self, dataloader, output_dir):
 
-        return self.trainer.data_extract(dataloader, self.model)
+        return self.trainer.data_extract(dataloader, output_dir, self.model)
 
 

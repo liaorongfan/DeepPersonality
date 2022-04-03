@@ -129,7 +129,7 @@ if __name__ == "__main__":
     #         pre_fix="feature_"
     #     )
     gen_dataset(
-        "datasets/stage_two/deep_bimodal_reg_feat_output",
+        "datasets/stage_two/deep_bimodal_reg_extract",
         func=gen_spectrum_data,
         method=select_pred_spectrum,
         pre_fix="feature_"

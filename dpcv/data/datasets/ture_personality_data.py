@@ -15,18 +15,27 @@ from .build import DATA_LOADER_REGISTRY
 
 class Chalearn21FrameData(Dataset):
 
-    def __init__(self, data_root, data_split, task, even_downsample=2000, trans=None, segment=False):
+    def __init__(self, data_root, data_split, task, data_type="frame", even_downsample=2000, trans=None, segment=False):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
         self.session_id, self.parts_personality = self.load_annotation(task, data_split)
         self.data_split = data_split
         self.task = task
+        self.type = data_type
         self.data_dir = opt.join(data_root, data_split, f"{task}_{data_split}")
         self.sessions = os.listdir(self.data_dir)
         self.sample_size = even_downsample
         self.img_dir_ls = []
-        for dire in self.sessions:
-            self.img_dir_ls.extend([f"{dire}/FC1_T", f"{dire}/FC2_T"])
+
+        if data_type == "frame":
+            for dire in self.sessions:
+                self.img_dir_ls.extend([f"{dire}/FC1_T", f"{dire}/FC2_T"])
+        elif data_type == "face":
+            for dire in self.sessions:
+                self.img_dir_ls.extend([f"{dire}/FC1_T_face", f"{dire}/FC2_T_face"])
+        else:
+            raise TypeError(f"type should be 'face' or 'frame', but got {type}")
+
         if not segment:
             self.all_images = self.assemble_images()
         self.trans = trans
@@ -46,6 +55,8 @@ class Chalearn21FrameData(Dataset):
 
     def get_ocean_label(self, img_file):
         *_, session, part, frame = img_file.split("/")
+        if self.type == "face":
+            part = part.replace("_face", "")
         participant_id = self.session_id[str(int(session))][part]
         participant_trait = self.parts_personality[participant_id]
         participant_trait = np.array([float(v) for v in participant_trait.values()])
@@ -64,7 +75,11 @@ class Chalearn21FrameData(Dataset):
 
     def sample_img(self, img_dir):
         imgs = glob.glob(opt.join(self.data_dir, img_dir, "*.jpg"))
-        imgs = sorted(imgs, key=lambda x: int(Path(x).stem[6:]))
+        if self.type == "frame":
+            imgs = sorted(imgs, key=lambda x: int(Path(x).stem[6:]))
+        elif self.type == "face":
+            imgs = sorted(imgs, key=lambda x: int(Path(x).stem[5:]))
+
         # evenly sample to self.sample_size frames
         separate = np.linspace(0, len(imgs), self.sample_size, endpoint=False, dtype=np.int16)
         # index = random.choice(separate)
@@ -93,6 +108,7 @@ def true_personality_dataloader(cfg, mode):
         data_root="datasets/chalearn2021",
         data_split=mode,
         task="talk",
+        data_type=cfg.DATA.TYPE,
         trans=transform,
     )
     data_loader = DataLoader(

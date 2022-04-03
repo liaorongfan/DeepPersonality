@@ -63,6 +63,26 @@ class AllSampleFrameData(VideoData):
         return img_obj_ls
 
 
+class AllSampleFrameData2(VideoData):
+    def __init__(self, data_root, img_dir, label_file, trans=None):
+        super().__init__(data_root, img_dir, label_file)
+        self.trans = trans
+
+    def __getitem__(self, idx):
+        img_obj_ls = self.get_sample_frames(idx)
+        label = self.get_ocean_label(idx)
+        if self.trans is not None:
+            img_obj_ls = [self.trans(img) for img in img_obj_ls]
+        return {"all_images": img_obj_ls, "label": torch.as_tensor(label)}
+
+    def get_sample_frames(self, idx):
+        img_dir = self.img_dir_ls[idx]
+        # Note randomly ordered after glob search
+        img_path_ls = sorted(glob.glob(f"{img_dir}/*.jpg"))
+        img_obj_ls = [Image.open(img_path) for img_path in img_path_ls]
+        return img_obj_ls
+
+
 def make_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]),\
         "'mode' should be 'train' , 'valid' 'trainval' 'test', 'full_test' "

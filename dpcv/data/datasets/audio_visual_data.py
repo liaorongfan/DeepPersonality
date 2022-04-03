@@ -89,6 +89,31 @@ class ALLSampleAudioVisualData(AudioVisualData):
         return img_obj_ls
 
 
+class ALLSampleAudioVisualData2(AudioVisualData):
+
+    def __getitem__(self, idx):
+        label = self.get_ocean_label(idx)
+        imgs = self.get_image_data(idx)
+        wav = self.get_wave_data(idx)
+
+        if self.transform:
+            imgs = [self.transform(img) for img in imgs]
+
+        wav = torch.as_tensor(wav, dtype=imgs[0].dtype)
+        label = torch.as_tensor(label, dtype=imgs[0].dtype)
+
+        sample = {"image": imgs, "audio": wav, "label": label}
+        return sample
+
+    def get_image_data(self, idx):
+        img_dir_path = self.img_dir_ls[idx]
+        img_path_ls = sorted(glob.glob(f"{img_dir_path}/*.jpg"))
+        # sample_frames = np.linspace(0, len(img_path_ls), self.sample_size, endpoint=False, dtype=np.int16)
+        # img_path_ls_sampled = [img_path_ls[ind] for ind in sample_frames]
+        img_obj_ls = [Image.open(path) for path in img_path_ls]
+        return img_obj_ls
+
+
 def make_data_loader(cfg, mode):
     trans = set_audio_visual_transform()
     if mode == "train":

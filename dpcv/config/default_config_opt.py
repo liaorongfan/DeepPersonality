@@ -18,6 +18,7 @@ step 7 : set test metric
 # ------------------------------------------- step 1 : dataset config node ---------------------------------------------
 __C.DATA = CfgNode()
 __C.DATA.ROOT = "datasets"
+__C.DATA.TYPE = "frame"
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
 __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
@@ -47,6 +48,10 @@ __C.DATA_LOADER.VALID_BATCH_SIZE = 32
 __C.DATA_LOADER.NUM_WORKERS = 4
 __C.DATA_LOADER.SHUFFLE = True
 __C.DATA_LOADER.DROP_LAST = True
+
+__C.DATA_LOADER.SECOND_STAGE = CfgNode()
+__C.DATA_LOADER.SECOND_STAGE.METHOD = ""
+__C.DATA_LOADER.SECOND_STAGE.TYPE = ""
 
 # ------------------------------------------ step 3 : model config node ------------------------------------------------
 __C.MODEL = CfgNode()

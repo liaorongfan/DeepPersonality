@@ -6,7 +6,7 @@ from dpcv import device
 
 class SpectrumConv1D(nn.Module):
 
-    def __init__(self, channel=50, hidden_units=[64, 256, 1024]):
+    def __init__(self, channel=80, hidden_units=[64, 256, 1024]):
         super(SpectrumConv1D, self).__init__()
 
         self.conv_in = nn.Sequential(
@@ -141,7 +141,7 @@ class SpectrumConv1D2(nn.Module):
 
 class SpectrumFeatConv1D(nn.Module):
 
-    def __init__(self, channel=50, signal_num=512, hidden_units=[64, 256, 1024]):
+    def __init__(self, channel=80, signal_num=512, hidden_units=[64, 256, 1024]):
         super(SpectrumFeatConv1D, self).__init__()
 
         self.conv_in = nn.Sequential(

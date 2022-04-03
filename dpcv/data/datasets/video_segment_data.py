@@ -101,8 +101,8 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
     """ Dataloader for 3d models, (3d_resnet, slow-fast, tpn, vat)
 
     """
-    def __init__(self, data_root, data_split, task, video_loader, spa_trans=None, tem_trans=None):
-        super().__init__(data_root, data_split, task, even_downsample=2000, trans=None, segment=True)
+    def __init__(self, data_root, data_split, task, data_type, video_loader, spa_trans=None, tem_trans=None):
+        super().__init__(data_root, data_split, task, data_type, even_downsample=2000, trans=None, segment=True)
         self.loader = video_loader
         self.spa_trans = spa_trans
         self.tem_trans = tem_trans
@@ -123,6 +123,8 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
     def get_image_label(self, index):
         img_dir = self.img_dir_ls[index]
         session, part = img_dir.split("/")
+        if self.type == "face":
+            part = part.replace("_face", "")
         participant_id = self.session_id[str(int(session))][part]
         participant_trait = self.parts_personality[participant_id]
         participant_trait = np.array([float(v) for v in participant_trait.values()])
@@ -295,11 +297,13 @@ def spatial_temporal_data_loader(cfg, mode="train"):
 @DATA_LOADER_REGISTRY.register()
 def true_personality_spatial_temporal_data_loader(cfg, mode="train"):
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
+    temporal_transform = [TemporalRandomCrop(32)]
+    # temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA
-    if "face" in data_cfg.TRAIN_IMG_DATA:
+
+    if data_cfg.TYPE == "face":
         video_loader = VideoLoader(image_name_formatter=lambda x: f"face_{x}.jpg")
     else:
         video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
@@ -308,6 +312,7 @@ def true_personality_spatial_temporal_data_loader(cfg, mode="train"):
         data_root="datasets/chalearn2021",
         data_split=mode,
         task="talk",
+        data_type=data_cfg.TYPE,
         video_loader=video_loader,
         spa_trans=spatial_transform,
         tem_trans=temporal_transform,
@@ -348,4 +353,3 @@ if __name__ == "__main__":
 
     train_dataset = true_personality_spatial_temporal_data_loader(cfg)
     print(len(train_dataset))
-    print(train_dataset[90])

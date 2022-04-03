@@ -144,11 +144,12 @@ def true_per_vat_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
+    temporal_transform = [TemporalRandomCrop(16)]
+    # temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
     temporal_transform = TemporalCompose(temporal_transform)
 
     data_cfg = cfg.DATA
-    if "face" in data_cfg.TRAIN_IMG_DATA:
+    if data_cfg.TYPE == "face":
         video_loader = VideoLoader(image_name_formatter=lambda x: f"face_{x}.jpg")
     else:
         video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
@@ -157,6 +158,7 @@ def true_per_vat_data_loader(cfg, mode="train"):
         data_root="datasets/chalearn2021",
         data_split=mode,
         task="talk",
+        data_type=data_cfg.TYPE,
         video_loader=video_loader,
         spa_trans=spatial_transform,
         tem_trans=temporal_transform,
