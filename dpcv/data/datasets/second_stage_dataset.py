@@ -18,7 +18,7 @@ class SecondStageData(Dataset):
         self.data_type = f"video_frames_{data_type}"
         self.process_method = method
         data_root, data_split = os.path.split(data_dir)
-        self.signal_num = 512
+        # self.signal_num = 512
         self.save_to = os.path.join(data_root, f"{self.data_type}_{self.process_method}_{data_split}.pkl")
         self.data_preprocess(data_dir)  # save processed data to disk first
         self.data_ls = self.load_data()
@@ -47,6 +47,7 @@ class SecondStageData(Dataset):
         data_ls = []
         sample_pth_ls = sorted(glob.glob(f"{data_dir}/*.pkl"))
         sample_num = len(sample_pth_ls)
+        seg_id = 0
         for i, sample_pth in enumerate(tqdm(sample_pth_ls)):
             sample = torch.load(sample_pth)
             data, label = sample[self.data_type], sample["video_label"]
@@ -63,21 +64,23 @@ class SecondStageData(Dataset):
 
             sample_train = {"id": i, "data": data, "label": label}
             data_ls.append(sample_train)
-            signal_num = data_ls[0]["data"].shape[1]
-            if signal_num >= 1024:
-                if self.signal_num != signal_num:
-                    self.signal_num = signal_num
-                # for large feature save 1000 item every time in case of memory issue
-                last_seg = ceil(len(sample_pth_ls) / 1000)
-                if len(data_ls) == 1000:
-                    seg_num = ceil(i / 1000)
-                    torch.save(data_ls[:1000], self.save_to.replace(".pkl", f"_{ceil(i / 1000)}.pkl"))
-                    data_ls = data_ls[1000:]
-                elif i == sample_num - 1:
-                    torch.save(data_ls, self.save_to.replace(".pkl", f"_{ceil(i / 1000)}.pkl"))
+            # signal_num = data_ls[0]["data"].shape[1]
+            # if signal_num >= 1024:
+            # if self.signal_num != signal_num:
+            #     self.signal_num = signal_num
+            # for large feature save 1000 item every time in case of memory issue
+            # last_seg = ceil(len(sample_pth_ls) / 1000)
+            data_seg = 400
+            if len(data_ls) == data_seg:
+                seg_id += 1
+                torch.save(data_ls[:data_seg], self.save_to.replace(".pkl", f"_{seg_id}.pkl"))
+                data_ls = data_ls[data_seg:]
+            elif i == sample_num - 1:
+                seg_id += 1
+                torch.save(data_ls, self.save_to.replace(".pkl", f"_{seg_id}.pkl"))
 
-        if self.signal_num < 1024:
-            torch.save(data_ls, self.save_to)
+        # if self.signal_num < 1024:
+        #     torch.save(data_ls, self.save_to)
 
     def __getitem__(self, idx):
         training_sample = self.data_ls[idx]
@@ -193,7 +196,7 @@ class StatisticData(Dataset):
         return len(self.sample_dict["video_label"])
 
 
-@DATA_LOADER_REGISTRY.register()
+# @DATA_LOADER_REGISTRY.register()
 def statistic_data_loader(cfg, mode):
     assert mode in ["train", "valid", "test", "full_test"], \
         f"{mode} should be one of 'train', 'valid' or 'test'"
@@ -219,7 +222,7 @@ def statistic_data_loader(cfg, mode):
     return data_loader
 
 
-@DATA_LOADER_REGISTRY.register()
+# @DATA_LOADER_REGISTRY.register()
 def spectrum_data_loader(cfg, mode):
     assert mode in ["train", "valid", "test", "full_test"], \
         f"{mode} should be one of 'train', 'valid' or 'test'"
@@ -245,7 +248,7 @@ def spectrum_data_loader(cfg, mode):
     return data_loader
 
 
-@DATA_LOADER_REGISTRY.register()
+# @DATA_LOADER_REGISTRY.register()
 def second_stage_data(cfg, mode):
     assert mode in ["train", "valid", "test", "full_test"], \
         f"{mode} should be one of 'train', 'valid' or 'test'"
@@ -289,7 +292,7 @@ if __name__ == "__main__":
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
 
     dataset = SecondStageData(
-        data_dir="datasets/second_stage/deep_bimodal_reg_extract/train",
+        data_dir="datasets/second_stage/senet_extract/train",
         data_type="feat",
         method="spectrum",
     )

@@ -150,11 +150,18 @@ class BiModalTrainer(object):
                 # mini_batch = 64
                 out_ls, feat_ls = [], []
                 for i in range(math.ceil(len(inputs[0]) / 64)):
-                    mini_batch = inputs[0][(i * 64): (i + 1) * 64]
+                    mini_batch_1 = inputs[0][(i * 64): (i + 1) * 64]
+                    mini_batch = (mini_batch_1,)
+                    try:
+                        mini_batch_2 = inputs[1][(i * 64): (i + 1) * 64]
+                        mini_batch = (mini_batch_1, mini_batch_2)
+                    except IndexError:
+                        pass
 
-                    out, feat = model(mini_batch)
+                    # mini_batch = (mini_batch_1, mini_batch_2)
+                    out, feat = model(*mini_batch)
                     out_ls.append(out.cpu())
-                    feat_ls.append(feat)
+                    feat_ls.append(feat.cpu())
                 out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
                 video_extract = {
                     "video_frames_pred": out_pred,
@@ -515,17 +522,30 @@ class PersEmoTrainer(BiModalTrainer):
         per_labels, emo_labels = data["per_label"], data["emo_label"]
         return (per_inputs, emo_inputs), per_labels[0]
 
-    def data_extract(self, data_set, model):
+    def data_extract(self, data_set, output_dir, model):
+        os.makedirs(output_dir, exist_ok=True)
         model.eval()
-        out_ls, feature_ls, label_ls = [], [], []
         with torch.no_grad():
-            for data in tqdm(data_set):
+            for idx, data in enumerate(tqdm(data_set)):
                 inputs, label = self.full_test_data_fmt(data)
-                out, *_, feat = model(*inputs)
-                out_ls.append(out.cpu())
-                feature_ls.append(feat.cpu())
-                label_ls.append(label.cpu())
-        return {"video_frames_pred": out_ls, "video_frames_feat": feature_ls, "video_label": label_ls}
+                mini_batch = 64
+                out_ls, feat_ls = [], []
+                for i in range(math.ceil(len(inputs[0]) / mini_batch)):
+                    mini_batch_1 = inputs[0][(i * mini_batch): (i + 1) * mini_batch]
+                    mini_batch_2 = inputs[1][i * 3: (i * 3 + mini_batch)]  # jump 3 images every time
+                    mini_batch_input = (mini_batch_1, mini_batch_2)
+                    out, *_, feat = model(*mini_batch_input)
+                    out_ls.append(out.cpu())
+                    feat_ls.append(feat.cpu())
+
+                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
+                video_extract = {
+                    "video_frames_pred": out_pred,
+                    "video_frames_feat": out_feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
 
 
 @TRAINER_REGISTRY.register()

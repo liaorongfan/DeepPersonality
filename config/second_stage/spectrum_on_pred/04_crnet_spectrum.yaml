@@ -1,19 +1,23 @@
 DATA:
-  TRAIN_IMG_DATA: "datasets/stage_two/crnet_pred_output/spectrum_train_data.pkl"
-  VALID_IMG_DATA: "datasets/stage_two/crnet_pred_output/spectrum_valid_data.pkl"
-  TEST_IMG_DATA: "datasets/stage_two/crnet_pred_output/spectrum_test_data.pkl"
+  TRAIN_IMG_DATA: "datasets/second_stage/cr_net_extract/train"
+  VALID_IMG_DATA: "datasets/second_stage/cr_net_extract/valid"
+  TEST_IMG_DATA: "datasets/second_stage/cr_net_extract/test"
 DATA_LOADER:
-  NAME: "spectrum_data_loader"
+  NAME: "second_stage_data"
+  SECOND_STAGE:
+    METHOD: "spectrum"
+    TYPE: "pred"
   TRAIN_BATCH_SIZE: 64
   NUM_WORKERS: 0
 MODEL:
   NAME: "spectrum_conv_model"
+  SPECTRUM_CHANNEL: 80
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.008
+  LR_INIT: 0.01
   MILESTONE: [20,]
 TRAIN:
   TRAINER: "SpectrumTrainer"

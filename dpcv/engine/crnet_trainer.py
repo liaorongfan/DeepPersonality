@@ -2,6 +2,8 @@ import torch
 from tqdm import tqdm
 from dpcv.engine.bi_modal_trainer import BiModalTrainer
 import numpy as np
+import math
+import os
 from .build import TRAINER_REGISTRY
 
 
@@ -327,7 +329,7 @@ class CRNetTrainer2(BiModalTrainer):
     def full_test_data_fmt(self, data):
         glo_imgs = torch.stack(data["glo_img"], 0).to(self.device)
         loc_imgs = torch.stack(data["loc_img"], 0).to(self.device)
-        wav_aud = data["wav_aud"].repeat(100, 1, 1, 1).to(self.device)
+        wav_aud = data["wav_aud"].repeat(len(glo_imgs), 1, 1, 1).to(self.device)
 
         inputs = glo_imgs, loc_imgs, wav_aud
         label = data["reg_label"]
@@ -342,17 +344,33 @@ class CRNetTrainer2(BiModalTrainer):
         loss = loss_1 + loss_2 + loss_3 + loss_4
         return loss
 
-    def data_extract(self, data_set, model):
+    def data_extract(self, data_set, output_dir, model):
+        os.makedirs(output_dir, exist_ok=True)
         model.eval()
         model.set_train_regressor()
-        out_ls, label_ls = [], []
         with torch.no_grad():
-            for data in tqdm(data_set):
+            for idx, data in enumerate(tqdm(data_set)):
                 inputs, label = self.full_test_data_fmt(data)
-                _, out = model(*inputs)
-                out_ls.append(out.cpu())
-                label_ls.append(label.cpu())
-        return {"video_frames_pred": out_ls, "video_label": label_ls}
+                mini_batch_size = 16
+                out_ls, feat_ls = [], []
+                for i in range(math.ceil(len(inputs[0]) / mini_batch_size)):
+                    mini_batch_i_1 = inputs[0][(i * mini_batch_size): (i + 1) * mini_batch_size]
+                    mini_batch_i_2 = inputs[1][(i * mini_batch_size): (i + 1) * mini_batch_size]
+                    mini_batch_i_3 = inputs[2][(i * mini_batch_size): (i + 1) * mini_batch_size]
+                    mini_batch_i = (mini_batch_i_1, mini_batch_i_2, mini_batch_i_3)
+                    _, out, feat = model(*mini_batch_i)
+                    out_ls.append(out.cpu())
+                    feat_ls.append(feat.cpu())
+                # out.shape = (64, 5) feat.shape = (64, 5, 512)
+                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0).mean(dim=1)
+                video_extract = {
+                    "video_frames_pred": out_pred,
+                    "video_frames_feat": out_feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
 
 
 @TRAINER_REGISTRY.register()

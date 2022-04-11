@@ -77,9 +77,10 @@ class CRNet(nn.Module):
 
 
 class CRNet2(nn.Module):
-    def __init__(self, init_weights=True):
+    def __init__(self, init_weights=True, return_feat=False):
         super(CRNet2, self).__init__()
         self.train_guider_epo = 30
+        self.return_feat = return_feat
         self.train_regressor = False
 
         self.global_img_branch = AudioVisualResNet(
@@ -146,7 +147,8 @@ class CRNet2(nn.Module):
         out_reg = guided_glo_reg + guided_loc_reg + guided_wav_reg
         out = self.out_map(out_reg)
         out = out.view(out.size(0), -1)
-
+        if self.return_feat:
+            return cls_guide, out, out_reg
         return cls_guide, out
 
 
@@ -200,7 +202,7 @@ def get_crnet_model(only_train_guider=True):
 
 @NETWORK_REGISTRY.register()
 def crnet_model(cfg=None):
-    cr_net = CRNet2()
+    cr_net = CRNet2(return_feat=cfg.MODEL.RETURN_FEATURE)
     return cr_net.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 

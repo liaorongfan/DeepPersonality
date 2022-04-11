@@ -105,7 +105,7 @@ class AllFramePersEmoNData(PersEmoNData):
     def gather_personality_data(self, index):
         img_dir = self.img_dir_ls[index]
         img_ls, label_ls = self.per_img_sample(img_dir)
-        assert len(img_ls) == 100, f"image sample from{img_dir} is not enough"
+        # assert len(img_ls) == 100, f"image sample from{img_dir} is not enough"
         # print(len(img_ls))
         return img_ls, label_ls
 
@@ -119,6 +119,18 @@ class AllFramePersEmoNData(PersEmoNData):
 
     def __len__(self):
         return len(self.img_dir_ls)
+
+
+class AllFramePersEmoNData2(AllFramePersEmoNData):
+
+    def per_img_sample(self, img_dir):
+        imgs = sorted(glob.glob(f"{img_dir}/*.jpg"))
+        # selected_idx = np.linspace(0, len(imgs), 100, endpoint=False, dtype=np.int16)
+        # selected_img_ls = [imgs[idx] for idx in selected_idx]
+        selected_img_obj = [Image.open(img) for img in imgs]
+        selected_img_lab = [self.get_per_label(img_dir)] * len(imgs)
+        return selected_img_obj, selected_img_lab
+
 
 
 def make_data_loader(cfg, mode=None):

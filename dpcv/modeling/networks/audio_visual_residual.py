@@ -9,8 +9,9 @@ from .build import NETWORK_REGISTRY
 
 class AudioVisualResNet18(nn.Module):
 
-    def __init__(self, init_weights=True):
+    def __init__(self, init_weights=True, return_feat=False):
         super(AudioVisualResNet18, self).__init__()
+        self.return_feat = return_feat
         self.audio_branch = AudioVisualResNet(
             in_channels=1, init_stage=AudInitStage,
             block=BiModalBasicBlock, conv=[aud_conv1x9, aud_conv1x1],
@@ -35,11 +36,13 @@ class AudioVisualResNet18(nn.Module):
         aud_x = aud_x.view(aud_x.size(0), -1)
         vis_x = vis_x.view(vis_x.size(0), -1)
 
-        x = torch.cat([aud_x, vis_x], dim=-1)
-        x = self.linear(x)
+        feat = torch.cat([aud_x, vis_x], dim=-1)
+        x = self.linear(feat)
         x = torch.sigmoid(x)
         # x = torch.tanh(x)
         # x = (x + 1) / 2  # scale tanh output to [0, 1]
+        if self.return_feat:
+            return x, feat
         return x
 
 
@@ -65,7 +68,7 @@ class AudioResNet18(nn.Module):
 
 @NETWORK_REGISTRY.register()
 def audiovisual_resnet(cfg=None):
-    multi_modal_model = AudioVisualResNet18()
+    multi_modal_model = AudioVisualResNet18(return_feat=cfg.MODEL.RETURN_FEATURE)
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
 

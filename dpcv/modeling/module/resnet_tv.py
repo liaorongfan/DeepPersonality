@@ -104,9 +104,11 @@ class ResNet(nn.Module):
     """
     def __init__(
             self, block, layers, num_classes=1000,
-            init_weights=True, zero_init_residual=False, sigmoid_output=True
+            init_weights=True, zero_init_residual=False, sigmoid_output=True,
+            return_feat=False,
     ):
         super(ResNet, self).__init__()
+        self.return_feat = return_feat
         self.sigmoid_output = sigmoid_output
         self.inplanes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -173,10 +175,12 @@ class ResNet(nn.Module):
         x = self.layer4(x)
 
         x = self.avgpool(x)
-        x = x.view(x.size(0), -1)
-        x = self.fc(x)
+        feat = x.view(x.size(0), -1)
+        x = self.fc(feat)
         if self.sigmoid_output:
             x = torch.sigmoid(x)
+        if self.return_feat:
+            return x, feat
         return x
 
 

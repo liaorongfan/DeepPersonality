@@ -18,7 +18,7 @@ def se_resnet50(cfg, num_classes=1000, pretrained=False):
     """
     num_classes = cfg.MODEL.NUM_CLASS if cfg.MODEL.NUM_CLASS is not None else num_classes
 
-    model = ResNet(SEBottleneck, [3, 4, 6, 3], num_classes=num_classes)
+    model = ResNet(SEBottleneck, [3, 4, 6, 3], num_classes=num_classes, return_feat=cfg.MODEL.RETURN_FEATURE)
     model.avgpool = nn.AdaptiveAvgPool2d(1)
     if cfg.MODEL.PRETRAIN:
         # model.load_state_dict(load_state_dict_from_url(

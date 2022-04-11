@@ -146,7 +146,8 @@ class AllFrameCRNetData(CRNetData):
         loc_imgs = sorted(loc_imgs, key=lambda x: int(Path(x).stem[5:]))
 
         loc_img_ls, glo_img_ls = [], []
-        separate = np.linspace(0, len(loc_imgs), self.sample_size, endpoint=False, dtype=np.int16)
+        # separate = np.linspace(0, len(loc_imgs), self.sample_size, endpoint=False, dtype=np.int16)
+        separate = list(range(len(loc_imgs)))
         for img_index in separate:
             try:
                 loc_img_pt = loc_imgs[img_index]

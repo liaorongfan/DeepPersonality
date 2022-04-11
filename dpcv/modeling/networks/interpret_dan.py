@@ -8,20 +8,23 @@ from dpcv.modeling.module.weight_init_helper import initialize_weights
 
 class InterpretDAN(nn.Module):
 
-    def __init__(self, features, num_classes=5, init_weights=True):
+    def __init__(self, features, num_classes=5, init_weights=True, return_feat=False):
         super(InterpretDAN, self).__init__()
         self.features = features
         self.glo_ave_pooling = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512, num_classes)
         if init_weights:
             initialize_weights(self)
+        self.return_feat = return_feat
 
     def forward(self, x):
         x = self.features(x)
         x = self.glo_ave_pooling(x)
-        x = x.flatten(1)
-        x = self.fc(x)
+        feat = x.flatten(1)
+        x = self.fc(feat)
         x = torch.sigmoid(x)  # since the regression range always fall in (0, 1)
+        if self.return_feat:
+            return x, feat
         return x
 
 
@@ -52,7 +55,8 @@ def get_interpret_dan_model(cfg, pretrained=False, **kwargs):
 
 @NETWORK_REGISTRY.register()
 def interpret_dan_model(cfg):
-    interpret_dan = InterpretDAN(make_layers(backbone['VGG16'], batch_norm=True))
+    interpret_dan = InterpretDAN(
+        make_layers(backbone['VGG16'], batch_norm=True), return_feat=cfg.MODEL.RETURN_FEATURE)
     interpret_dan.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return interpret_dan
 
