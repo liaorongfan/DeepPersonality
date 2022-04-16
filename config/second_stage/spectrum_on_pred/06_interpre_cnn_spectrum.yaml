@@ -1,13 +1,17 @@
 DATA:
-  TRAIN_IMG_DATA: "datasets/stage_two/interpret-cnn_frame_pred_output/spectrum_train_data.pkl"
-  VALID_IMG_DATA: "datasets/stage_two/interpret-cnn_frame_pred_output/spectrum_valid_data.pkl"
-  TEST_IMG_DATA: "datasets/stage_two/interpret-cnn_frame_pred_output/spectrum_test_data.pkl"
+  TRAIN_IMG_DATA: "datasets/second_stage/interpret_cnn_extract/train"
+  VALID_IMG_DATA: "datasets/second_stage/interpret_cnn_extract/valid"
+  TEST_IMG_DATA: "datasets/second_stage/interpret_cnn_extract/test"
 DATA_LOADER:
-  NAME: "spectrum_data_loader"
+  NAME: "second_stage_data"
+  SECOND_STAGE:
+    METHOD: "spectrum"
+    TYPE: "pred"
   TRAIN_BATCH_SIZE: 64
   NUM_WORKERS: 0
 MODEL:
   NAME: "spectrum_conv_model"
+  SPECTRUM_CHANNEL: 80
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -17,5 +21,5 @@ SOLVER:
   MILESTONE: [80,]
 TRAIN:
   TRAINER: "SpectrumTrainer"
-  MAX_EPOCH: 100
-  OUTPUT_DIR: "results_second_stage/spectrum/06_interpret_cnn_spectrum"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results_second_stage/spectrum_pred/06_interpret_cnn_spectrum"

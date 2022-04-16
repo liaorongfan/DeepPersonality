@@ -222,7 +222,7 @@ def statistic_data_loader(cfg, mode):
     return data_loader
 
 
-# @DATA_LOADER_REGISTRY.register()
+@DATA_LOADER_REGISTRY.register()
 def spectrum_data_loader(cfg, mode):
     assert mode in ["train", "valid", "test", "full_test"], \
         f"{mode} should be one of 'train', 'valid' or 'test'"
@@ -248,7 +248,7 @@ def spectrum_data_loader(cfg, mode):
     return data_loader
 
 
-# @DATA_LOADER_REGISTRY.register()
+@DATA_LOADER_REGISTRY.register()
 def second_stage_data(cfg, mode):
     assert mode in ["train", "valid", "test", "full_test"], \
         f"{mode} should be one of 'train', 'valid' or 'test'"
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
 
     dataset = SecondStageData(
-        data_dir="datasets/second_stage/senet_extract/train",
+        data_dir="datasets/second_stage/hrnet_extract/test",
         data_type="feat",
         method="spectrum",
     )

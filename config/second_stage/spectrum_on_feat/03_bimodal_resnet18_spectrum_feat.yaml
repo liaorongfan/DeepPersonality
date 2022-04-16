@@ -22,4 +22,4 @@ SOLVER:
 TRAIN:
   TRAINER: "SpectrumTrainer"
   MAX_EPOCH: 30
-  OUTPUT_DIR: "results_second_stage/spectrum/03_bimodal_resnet18_spectrum"
+  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/03_bimodal_resnet18_spectrum"

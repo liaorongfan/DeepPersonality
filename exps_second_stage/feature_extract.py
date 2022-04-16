@@ -169,13 +169,22 @@ if __name__ == "__main__":
     import os
     os.chdir("..")
 
+    # # interpret_cnn feature extract
+    # feature_extract(
+    #     cfg_file="config/unified_frame_images/10_swin_transformer.yaml",
+    #     model_weight="results/unified_frame_images/10_swin_transformer/12-13_21-28/checkpoint_110.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/swin_transformer_extract",
+    # )
+
     # interpret_cnn feature extract
     feature_extract(
-        cfg_file="config/second_stage/statistic_on_pred/09_hrnet_statistic.yaml",
-        model_weight="results/unified_frame_images/10_swin_transformer/12-13_21-28/checkpoint_110.pkl",
+        cfg_file="config/unified_frame_images/09_hrnet.yaml",
+        model_weight="results/unified_frame_images/09_hrnet/checkpoint_hrnet_acc_905.pkl",
         data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/swin_transformer_extract",
+        output_dir="datasets/second_stage/hrnet_extract",
     )
+
 
     # # interpret_cnn feature extract
     # feature_extract(

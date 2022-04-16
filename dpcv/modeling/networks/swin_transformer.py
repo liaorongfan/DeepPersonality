@@ -536,6 +536,7 @@ class SwinTransformer(nn.Module):
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
                  norm_layer=nn.LayerNorm, ape=False, patch_norm=True,
                  use_checkpoint=False, init_weights=True, normalize_output=True,
+                 return_feat=False,
                  **kwargs):
         super().__init__()
         self.normalize_output = normalize_output
@@ -546,6 +547,7 @@ class SwinTransformer(nn.Module):
         self.patch_norm = patch_norm
         self.num_features = int(embed_dim * 2 ** (self.num_layers - 1))
         self.mlp_ratio = mlp_ratio
+        self.return_feat = return_feat
 
         # split image into non-overlapping patches
         self.patch_embed = PatchEmbed(
@@ -623,10 +625,12 @@ class SwinTransformer(nn.Module):
         return x
 
     def forward(self, x):
-        x = self.forward_features(x)
-        x = self.head(x)
+        feat = self.forward_features(x)
+        x = self.head(feat)
         if self.normalize_output:
             x = torch.sigmoid(x)
+        if self.return_feat:
+            return x, feat
         return x
 
     def flops(self):
@@ -681,7 +685,8 @@ def swin_transformer_model(cfg=None):
         drop_path_rate=config.MODEL.DROP_PATH_RATE,
         ape=config.MODEL.SWIN.APE,
         patch_norm=config.MODEL.SWIN.PATCH_NORM,
-        use_checkpoint=config.TRAIN.USE_CHECKPOINT
+        use_checkpoint=config.TRAIN.USE_CHECKPOINT,
+        return_feat=cfg.MODEL.RETURN_FEATURE,
     )
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 

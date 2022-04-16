@@ -1,9 +1,12 @@
 DATA:
-  TRAIN_IMG_DATA: "datasets/stage_two/senet_frame_pred_output/statistic_train_data.pkl"
-  VALID_IMG_DATA: "datasets/stage_two/senet_frame_pred_output/statistic_valid_data.pkl"
-  TEST_IMG_DATA: "datasets/stage_two/senet_frame_pred_output/statistic_test_data.pkl"
+  TRAIN_IMG_DATA: "datasets/second_stage/senet_extract/train"
+  VALID_IMG_DATA: "datasets/second_stage/senet_extract/valid"
+  TEST_IMG_DATA: "datasets/second_stage/senet_extract/test"
 DATA_LOADER:
-  NAME: "statistic_data_loader"
+  NAME: "second_stage_data"
+  SECOND_STAGE:
+    METHOD: "statistic"
+    TYPE: "pred"
   TRAIN_BATCH_SIZE: 64
   NUM_WORKERS: 0
 MODEL:
