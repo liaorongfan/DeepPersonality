@@ -7,19 +7,20 @@ DATA_LOADER:
   SECOND_STAGE:
     METHOD: "spectrum"
     TYPE: "feat"
-  TRAIN_BATCH_SIZE: 4
+  TRAIN_BATCH_SIZE: 16
   NUM_WORKERS: 0
 MODEL:
-  NAME: "spectrum_Feat_conv_model"
+  NAME: "spectrum_feat_resnet18"
   SPECTRUM_CHANNEL: 512
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.001
+  LR_INIT: 0.01
   MILESTONE: [20,]
 TRAIN:
   TRAINER: "SpectrumTrainer"
   MAX_EPOCH: 30
+  LOG_INTERVAL: 10
   OUTPUT_DIR: "results_second_stage/spectrum_on_feat/04_crnet_spectrum"
