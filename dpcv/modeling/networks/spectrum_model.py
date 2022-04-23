@@ -330,7 +330,7 @@ class FeatResNet(nn.Module):
 
 class FeatResNet18(nn.Module):
 
-    def __init__(self, channels=[32, 64, 128, 256], signal_num=512):
+    def __init__(self, channels=[64, 128, 256, 512], signal_num=512):
         super(FeatResNet18, self).__init__()
         self.main_branch = FeatResNet(
             in_channels=2, init_stage=InitStage,

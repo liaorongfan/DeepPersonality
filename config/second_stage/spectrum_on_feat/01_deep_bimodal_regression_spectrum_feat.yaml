@@ -10,7 +10,7 @@ DATA_LOADER:
   TRAIN_BATCH_SIZE: 2
   NUM_WORKERS: 0
 MODEL:
-  NAME: "spectrum_Feat_conv_model"
+  NAME: "spectrum_feat_resnet18"
   SPECTRUM_CHANNEL: 1024
 LOSS:
   NAME: "mean_square_error"
