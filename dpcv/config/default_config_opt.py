@@ -19,6 +19,8 @@ step 7 : set test metric
 __C.DATA = CfgNode()
 __C.DATA.ROOT = "datasets"
 __C.DATA.TYPE = "frame"
+__C.DATA.SESSION = "talk"
+
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
 __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"

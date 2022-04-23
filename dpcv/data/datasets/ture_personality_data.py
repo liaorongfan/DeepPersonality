@@ -26,13 +26,13 @@ class Chalearn21FrameData(Dataset):
         self.sessions = os.listdir(self.data_dir)
         self.sample_size = even_downsample
         self.img_dir_ls = []
-
+        self.task_mark = self.get_task_mark(task)
         if data_type == "frame":
             for dire in self.sessions:
-                self.img_dir_ls.extend([f"{dire}/FC1_T", f"{dire}/FC2_T"])
+                self.img_dir_ls.extend([f"{dire}/FC1_{self.task_mark}", f"{dire}/FC2_{self.task_mark}"])
         elif data_type == "face":
             for dire in self.sessions:
-                self.img_dir_ls.extend([f"{dire}/FC1_T_face", f"{dire}/FC2_T_face"])
+                self.img_dir_ls.extend([f"{dire}/FC1_{self.task_mark}_face", f"{dire}/FC2_{self.task_mark}_face"])
         else:
             raise TypeError(f"type should be 'face' or 'frame', but got {type}")
 
@@ -57,6 +57,7 @@ class Chalearn21FrameData(Dataset):
         *_, session, part, frame = img_file.split("/")
         if self.type == "face":
             part = part.replace("_face", "")
+        part = part.replace(self.task_mark, "T")
         participant_id = self.session_id[str(int(session))][part]
         participant_trait = self.parts_personality[participant_id]
         participant_trait = np.array([float(v) for v in participant_trait.values()])
@@ -95,6 +96,13 @@ class Chalearn21FrameData(Dataset):
             all_images.extend(self.sample_img(img_dir))
         return all_images
 
+    @staticmethod
+    def get_task_mark(task):
+        if task == "talk":
+            return "T"
+        elif task == "animal":
+            return "A"
+
 
 @DATA_LOADER_REGISTRY.register()
 def true_personality_dataloader(cfg, mode):
@@ -105,9 +113,9 @@ def true_personality_dataloader(cfg, mode):
 
     transform = build_transform_spatial(cfg)
     dataset = Chalearn21FrameData(
-        data_root="datasets/chalearn2021",
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
         data_split=mode,
-        task="talk",
+        task=cfg.DATA.SESSION,  # "talk"
         data_type=cfg.DATA.TYPE,
         trans=transform,
     )

@@ -94,7 +94,12 @@ class FaceImageExtractor:
                 if ret:
                     if self.face_detector.find_face(frame):
                         frame_crop = self.face_detector.run(frame)
-                        cv2.imwrite(f"{self.save_dir}/face_{cnt}.jpg", frame_crop)
+                        save_to = f"{self.save_dir}/face_{cnt}.jpg"
+                        if os.path.exists(save_to):
+                            # print("image_exist...")
+                            continue
+                            
+                        cv2.imwrite(save_to, frame_crop)
 
                 if cnt >= frame_count:
                     break
@@ -122,8 +127,8 @@ def run_on_videos(
         detector_path=detector_path,
     )
     dirs = [name for name in os.listdir(data_root) if "face" in name]
-    if len(dirs) == 2:
-        return
+    # if len(dirs) == 2:
+    #     return
     input_video_ls = glob.glob(f"{video_dir}/*.mp4")
     # input_video = "/home/rongfan/11-personality_traits/apa_paper/FaceDBGenerator_V2/Facedetector/_QXI4n_FRN4.003.mp4"
     for input_video in input_video_ls:
@@ -139,7 +144,7 @@ if __name__ == "__main__":
     video_root = "/home/rongfan/05-personality_traits/DeepPersonality/datasets/chalearn2021/valid/talk_valid"
     data_root_ls = os.listdir(video_root)
     data_root_ls_pt = [os.path.join(video_root, d) for d in data_root_ls]
-    p = Pool(6)
+    p = Pool(16)
     for d in data_root_ls_pt:
         p.apply_async(run_on_videos, args=(d, d))
         # run_on_videos(

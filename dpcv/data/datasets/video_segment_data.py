@@ -125,6 +125,7 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
         session, part = img_dir.split("/")
         if self.type == "face":
             part = part.replace("_face", "")
+        part = part.replace(self.task_mark, "T")
         participant_id = self.session_id[str(int(session))][part]
         participant_trait = self.parts_personality[participant_id]
         participant_trait = np.array([float(v) for v in participant_trait.values()])
@@ -311,7 +312,7 @@ def true_personality_spatial_temporal_data_loader(cfg, mode="train"):
     data_set = TruePersonalityVideoFrameSegmentData(
         data_root="datasets/chalearn2021",
         data_split=mode,
-        task="talk",
+        task=cfg.DATA.SESSION,
         data_type=data_cfg.TYPE,
         video_loader=video_loader,
         spa_trans=spatial_transform,

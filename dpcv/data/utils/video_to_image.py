@@ -100,8 +100,11 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None):
         frame = cv2.resize(frame, resize, interpolation=cv2.INTER_CUBIC)
         # Saves image of the current frame to a jpg file
         name = f"{str(save_path)}/frame_{str(count)}.jpg"
+        if os.path.exists(name):
+            continue
         cv2.imwrite(name, frame)
-
+        if count % 200 == 0:
+            print(f"video:{str(video_path)} saved image {count}")
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
@@ -248,6 +251,7 @@ def video2img_test(zipfile_test, saved_to="image_data/test_data"):
 
 
 if __name__ == "__main__":
+    from multiprocessing import Pool
     from tqdm import tqdm
     # video2img_train("./chalearn/train/")
     # print("current work directory:", os.getcwd())
@@ -261,14 +265,24 @@ if __name__ == "__main__":
     # video_path = "F:\\chalearn21\\val\\recordings\\talk_recordings_val\\001080\\FC2_T.mp4"
     # save_dir = "F:\\chalearn21\\val\\recordings\\talk_recordings_val\\001080"
     # frame_extract(video_path, save_dir, resize=(256, 256), transform=crop_to_square)
-    path = Path("/home/ssd500/charlearn2021/test/talk_test")
+    def long_time_task(video, parent_dir):
+        print(f"execute {video} ...")
+        return frame_extract(video_path=video, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
+
+    #p = Pool(24)
+    path = Path("/root/personality/datasets/chalearn2021/train/ghost_train")
     i = 0
     video_pts = list(path.rglob("*.mp4"))
     for video in tqdm(video_pts):
         i += 1
+        video_path = str(video)
         parent_dir = Path(video).parent
         # if "001080" in str(video):
         #     continue
-        print(f"execute {video} ...")
-        frame_extract(video_path=str(video), save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
-    print(f"processed {i} videos")
+        frame_extract(video_path=video_path, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
+        # p.apply_async(long_time_task, args=(video_path, parent_dir))
+    # print('Waiting for all subprocesses done...')
+    # p.close()
+    # p.join()
+    # print('All subprocesses done.')
+    # print(f"processed {i} videos")
