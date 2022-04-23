@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from dpcv.modeling.networks.dan import make_layers, backbone
-from .build import NETWORK_REGISTRY
+from dpcv.modeling.networks.build import NETWORK_REGISTRY
 from dpcv.modeling.module.weight_init_helper import initialize_weights
 # import torch.utils.model_zoo as model_zoo
 
@@ -17,10 +17,10 @@ class InterpretDAN(nn.Module):
             initialize_weights(self)
         self.return_feat = return_feat
 
-    def forward(self, x):
-        x = self.features(x)
-        x = self.glo_ave_pooling(x)
-        feat = x.flatten(1)
+    def forward(self, x):  # x (2, 3, 244, 244)
+        x = self.features(x)         # x (2, 512, 7, 7)
+        x = self.glo_ave_pooling(x)  # x (2, 512, 1, 1)
+        feat = x.flatten(1)  # feat (2, 512)
         x = self.fc(feat)
         x = torch.sigmoid(x)  # since the regression range always fall in (0, 1)
         if self.return_feat:
@@ -64,7 +64,7 @@ def interpret_dan_model(cfg):
 if __name__ == "__main__":
     import os
     os.chdir("../../")
-    model = get_interpret_dan_model(pretrained=True)
+    model = interpret_dan = InterpretDAN(make_layers(backbone['VGG16'], batch_norm=True)).cuda()
     x = torch.randn(2, 3, 244, 244).cuda()
     y = model(x)
     print(y, y.shape)

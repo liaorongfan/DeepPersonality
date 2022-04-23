@@ -37,8 +37,8 @@ class SecondStageData(Dataset):
         return data_ls
 
     def data_preprocess(self, data_dir):
-        if os.path.exists(self.save_to) or os.path.exists(self.save_to.replace(".pkl", "_1.pkl")):
-            return
+        # if os.path.exists(self.save_to) or os.path.exists(self.save_to.replace(".pkl", "_1.pkl")):
+        #     return
 
         print(
             f"preprocessing data [{data_dir}] \n"
@@ -50,12 +50,12 @@ class SecondStageData(Dataset):
         seg_id = 0
         for i, sample_pth in enumerate(tqdm(sample_pth_ls)):
             sample = torch.load(sample_pth)
-            data, label = sample[self.data_type], sample["video_label"]
+            data, label = sample[self.data_type], sample["video_label"]  # data: (382, 2048) label: (5,)
 
             if self.process_method == "statistic":
                 data = self.statistic_process(data)
             elif self.process_method == "spectrum":
-                data, valid = self.spectrum_process(data)
+                data, valid = self.spectrum_process(data)  # data: (382, 2048) label: (5,)
                 if not valid:
                     print(f"{sample_pth} not valid with data shape {data.shape}")
                     continue
@@ -117,18 +117,18 @@ class SecondStageData(Dataset):
 
         return statistic_representation
 
-    def spectrum_process(self, data):
+    def spectrum_process(self, data):   # data: (382, 2048)
         amp_spectrum, pha_spectrum = [], []
-        traits_representation = data.T.cpu()
+        traits_representation = data.T.cpu()  # traits_represen: (2048, 382)
         for trait_i in traits_representation:
-            amp, pha, valid = self.select_pred_spectrum(trait_i.numpy()[None, :])
+            amp, pha, valid = self.select_pred_spectrum(trait_i.numpy()[None, :])  # trait_i (1, 382)
             amp_spectrum.append(amp)
             pha_spectrum.append(pha)
         spectrum_data = {
-            "amp_spectrum": np.concatenate(amp_spectrum, axis=0),
-            "pha_spectrum": np.concatenate(pha_spectrum, axis=0),
+            "amp_spectrum": np.concatenate(amp_spectrum, axis=0),  # (2048, 80)
+            "pha_spectrum": np.concatenate(pha_spectrum, axis=0),  # (2048, 80)
         }
-        spectrum_data = np.stack(
+        spectrum_data = np.stack(                                  # (2, 2048, 80)
             [spectrum_data["amp_spectrum"],
              spectrum_data["pha_spectrum"]],
             axis=0,
@@ -138,16 +138,16 @@ class SecondStageData(Dataset):
     @staticmethod
     def select_pred_spectrum(data, top_n=80, select=True):
         # for one trait there n prediction from n frames
-        # data: (1, n)
+        # data: (1, n)  eg:（1， 382）
         valid = True
-        pred_fft = np.fft.fft2(data)
+        pred_fft = np.fft.fft2(data)  # pred_fft (1, 382)  complex num
         length = int(len(pred_fft[0]) / 2)
-        amp, pha = np.abs(pred_fft),  np.angle(pred_fft)
+        amp, pha = np.abs(pred_fft),  np.angle(pred_fft)  # amp:(1, 382) pha:(1, 382)
         # include symmetry point
         if top_n < length:
             amp[:, top_n - 1] = amp[:, length]
             pha[:, top_n - 1] = pha[:, length]
-        amp_feat, pha_feat = amp[:, :top_n], pha[:, :top_n]
+        amp_feat, pha_feat = amp[:, :top_n], pha[:, :top_n]  # amp_feat:(1: 80) , pha_feat:(1: 80)
         if len(amp_feat[0]) != top_n:
             valid = False
 
@@ -196,7 +196,7 @@ class StatisticData(Dataset):
         return len(self.sample_dict["video_label"])
 
 
-# @DATA_LOADER_REGISTRY.register()
+@DATA_LOADER_REGISTRY.register()
 def statistic_data_loader(cfg, mode):
     assert mode in ["train", "valid", "test", "full_test"], \
         f"{mode} should be one of 'train', 'valid' or 'test'"
