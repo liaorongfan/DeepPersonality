@@ -7,18 +7,18 @@ DATA_LOADER:
   SECOND_STAGE:
     METHOD: "spectrum"
     TYPE: "feat"
-  TRAIN_BATCH_SIZE: 2
-  NUM_WORKERS: 0
+  TRAIN_BATCH_SIZE: 8
+  NUM_WORKERS: 8
 MODEL:
-  NAME: "spectrum_Feat_conv_model"
+  NAME: "spectrum_feat_resnet18"
   SPECTRUM_CHANNEL: 512
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.0001
-  MILESTONE: [80,]
+  LR_INIT: 0.01
+  MILESTONE: [5,10]
 TRAIN:
   TRAINER: "SpectrumTrainer"
   MAX_EPOCH: 15

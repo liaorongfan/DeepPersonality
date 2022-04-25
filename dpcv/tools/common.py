@@ -64,6 +64,7 @@ def parse_args():
         help="saved model path to last training epoch",
     )
     parser.add_argument(
+        "-m",
         '--max_epoch',
         type=int,
         default=None,

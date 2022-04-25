@@ -7,7 +7,7 @@ DATA_LOADER:
   SECOND_STAGE:
     METHOD: "spectrum"
     TYPE: "feat"
-  TRAIN_BATCH_SIZE: 16
+  TRAIN_BATCH_SIZE: 4
   NUM_WORKERS: 4
 MODEL:
   NAME: "spectrum_feat_resnet18"
@@ -21,6 +21,6 @@ SOLVER:
   MILESTONE: [20,]
 TRAIN:
   TRAINER: "SpectrumTrainer"
-  MAX_EPOCH: 30
-  LOG_INTERVAL: 10
+  MAX_EPOCH: 8
+  LOG_INTERVAL: 100
   OUTPUT_DIR: "results_second_stage/spectrum_on_feat/04_crnet_spectrum"

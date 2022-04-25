@@ -11,7 +11,7 @@ from math import ceil
 
 class SecondStageData(Dataset):
 
-    def __init__(self, data_dir, data_type="pred", method="statistic"):
+    def __init__(self, data_dir, data_type="pred", method="statistic", used_frame=400, top_n_sample=180):
         assert data_type in ["pred", "feat"]
         assert method in ["statistic", "spectrum"]
 
@@ -20,6 +20,8 @@ class SecondStageData(Dataset):
         data_root, data_split = os.path.split(data_dir)
         # self.signal_num = 512
         self.save_to = os.path.join(data_root, f"{self.data_type}_{self.process_method}_{data_split}.pkl")
+        self.used_frame = used_frame
+        self.top_n_sample = top_n_sample
         self.data_preprocess(data_dir)  # save processed data to disk first
         self.data_ls = self.load_data()
 
@@ -37,8 +39,8 @@ class SecondStageData(Dataset):
         return data_ls
 
     def data_preprocess(self, data_dir):
-        # if os.path.exists(self.save_to) or os.path.exists(self.save_to.replace(".pkl", "_1.pkl")):
-        #     return
+        if os.path.exists(self.save_to) or os.path.exists(self.save_to.replace(".pkl", "_1.pkl")):
+            return
 
         print(
             f"preprocessing data [{data_dir}] \n"
@@ -70,7 +72,7 @@ class SecondStageData(Dataset):
             #     self.signal_num = signal_num
             # for large feature save 1000 item every time in case of memory issue
             # last_seg = ceil(len(sample_pth_ls) / 1000)
-            data_seg = 400
+            data_seg = 500
             if len(data_ls) == data_seg:
                 seg_id += 1
                 torch.save(data_ls[:data_seg], self.save_to.replace(".pkl", f"_{seg_id}.pkl"))
@@ -135,20 +137,22 @@ class SecondStageData(Dataset):
         )
         return spectrum_data, valid
 
-    @staticmethod
-    def select_pred_spectrum(data, top_n=80, select=True):
+    def select_pred_spectrum(self, data):
         # for one trait there n prediction from n frames
         # data: (1, n)  eg:（1， 382）
         valid = True
+        data = data[:, :self.used_frame]
         pred_fft = np.fft.fft2(data)  # pred_fft (1, 382)  complex num
         length = int(len(pred_fft[0]) / 2)
         amp, pha = np.abs(pred_fft),  np.angle(pred_fft)  # amp:(1, 382) pha:(1, 382)
         # include symmetry point
-        if top_n < length:
-            amp[:, top_n - 1] = amp[:, length]
-            pha[:, top_n - 1] = pha[:, length]
-        amp_feat, pha_feat = amp[:, :top_n], pha[:, :top_n]  # amp_feat:(1: 80) , pha_feat:(1: 80)
-        if len(amp_feat[0]) != top_n:
+        if self.top_n_sample < length:
+            amp[:, self.top_n_sample - 1] = amp[:, length]
+            pha[:, self.top_n_sample - 1] = pha[:, length]
+
+        amp_feat = amp[:, :self.top_n_sample]  # amp_feat:(1: 80) , pha_feat:(1: 80)
+        pha_feat = pha[:, :self.top_n_sample]
+        if len(amp_feat[0]) != self.top_n_sample:
             valid = False
 
         return amp_feat.astype("float32"), pha_feat.astype("float32"), valid

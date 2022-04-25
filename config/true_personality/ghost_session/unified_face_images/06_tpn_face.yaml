@@ -1,0 +1,26 @@
+DATA:
+  TYPE: "face"
+  TRAIN_IMG_DATA: "image_data/train_data"
+  VALID_IMG_DATA: "image_data/valid_data"
+  TEST_IMG_DATA: "image_data/test_data"
+DATA_LOADER:
+  NAME: "tpn_true_per_data_loader"
+  TRANSFORM: "set_tpn_transform_op"
+  TRAIN_BATCH_SIZE: 4
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "tpn_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [15, 18]
+TRAIN:
+  TRAINER: "TPNTrainer"
+  MAX_EPOCH: 100
+  LOG_INTERVAL: 10
+  OUTPUT_DIR: "results_true_personality/unified_face_images/06_tpn"
