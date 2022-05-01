@@ -21,4 +21,5 @@ TRAIN:
   TRAINER: "ImageModalTrainer"
   MAX_EPOCH: 100
   LOG_INTERVAL: 10
+  VALID_INTERVAL: 10
   OUTPUT_DIR: "results_true_personality/unified_frame_images_ghost/07_vat"

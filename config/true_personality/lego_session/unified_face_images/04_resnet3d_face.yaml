@@ -1,6 +1,6 @@
 DATA:
   ROOT: "datasets/chalearn2021"
-  SESSION: "ghost"
+  SESSION: "lego"
   TYPE: "face"
 DATA_LOADER:
   NAME: "true_personality_spatial_temporal_data_loader"
@@ -23,4 +23,4 @@ TRAIN:
   MAX_EPOCH: 100
   LOG_INTERVAL: 10
   VALID_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/unified_face_images_ghost/04_resnet3d"
+  OUTPUT_DIR: "results_true_personality/unified_face_images_lego/04_resnet3d"

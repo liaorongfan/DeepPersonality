@@ -1,6 +1,6 @@
 DATA:
   ROOT: "datasets/chalearn2021"
-  SESSION: "ghost"
+  SESSION: "lego"
   TYPE: "face"
 DATA_LOADER:
   NAME: "tpn_true_per_data_loader"
@@ -23,4 +23,4 @@ TRAIN:
   MAX_EPOCH: 100
   LOG_INTERVAL: 10
   VALID_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/unified_face_images_ghost/06_tpn"
+  OUTPUT_DIR: "results_true_personality/unified_face_images_lego/06_tpn"
