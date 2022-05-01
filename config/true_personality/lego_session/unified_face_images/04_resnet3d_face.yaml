@@ -3,12 +3,12 @@ DATA:
   SESSION: "ghost"
   TYPE: "face"
 DATA_LOADER:
-  NAME: "tpn_true_per_data_loader"
-  TRANSFORM: "set_tpn_transform_op"
-  TRAIN_BATCH_SIZE: 2
+  NAME: "true_personality_spatial_temporal_data_loader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 4
   NUM_WORKERS: 8
 MODEL:
-  NAME: "tpn_model"
+  NAME: "resnet50_3d_model"
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -19,8 +19,8 @@ SOLVER:
   MOMENTUM: 0.9
   MILESTONE: [20, 80]
 TRAIN:
-  TRAINER: "TPNTrainer"
+  TRAINER: "ImageModalTrainer"
   MAX_EPOCH: 100
   LOG_INTERVAL: 10
   VALID_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/unified_face_images_ghost/06_tpn"
+  OUTPUT_DIR: "results_true_personality/unified_face_images_ghost/04_resnet3d"

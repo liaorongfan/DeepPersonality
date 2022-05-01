@@ -102,6 +102,14 @@ class Chalearn21FrameData(Dataset):
             return "T"
         elif task == "animal":
             return "A"
+        elif task == "ghost":
+            return "G"
+        elif task == "lego":
+            return "L"
+        else:
+            raise ValueError(
+                f" task should be in one [talk, animal, ghost, lego]"
+            )
 
 
 @DATA_LOADER_REGISTRY.register()
