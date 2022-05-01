@@ -4,6 +4,7 @@ import numpy as np
 import math
 import os
 from .build import TRAINER_REGISTRY
+from torch.utils.tensorboard import SummaryWriter
 
 
 @TRAINER_REGISTRY.register()
@@ -14,10 +15,14 @@ class BiModalTrainer(object):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.clt = collector
         self.logger = logger
+        self.tb_writer = SummaryWriter(cfg.OUTPUT_DIR)
 
     def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
+        lr = optimizer.param_groups[0]['lr']
+        self.logger.info(f"Training: learning rate:{lr}")
+        self.tb_writer.add_scalar("lr", lr, epoch_idx)
+
         model.train()
-        self.logger.info(f"Training: learning rate:{optimizer.param_groups[0]['lr']}")
         loss_list = []
         acc_avg_list = []
         for i, data in enumerate(data_loader):
@@ -25,6 +30,7 @@ class BiModalTrainer(object):
             outputs = model(*inputs)
             optimizer.zero_grad()
             loss = loss_f(outputs.cpu(), labels.cpu())
+            self.tb_writer.add_scalar("loss", loss.item(), i)
             loss.backward()
             optimizer.step()
 
@@ -64,7 +70,7 @@ class BiModalTrainer(object):
                 acc_batch_list.append(acc_batch_avg)
             ocean_acc = torch.stack(ocean_acc_epoch, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
             ocean_acc_avg = ocean_acc.mean()
-
+            self.tb_writer.add_scalar("valid_acc", ocean_acc_avg, epoch_idx)
         self.clt.record_valid_loss(loss_batch_list)
         self.clt.record_valid_acc(acc_batch_list)  # acc over batches
         self.clt.record_valid_ocean_acc(ocean_acc)

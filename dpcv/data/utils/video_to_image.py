@@ -269,8 +269,8 @@ if __name__ == "__main__":
         print(f"execute {video} ...")
         return frame_extract(video_path=video, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
 
-    #p = Pool(24)
-    path = Path("/root/personality/datasets/chalearn2021/train/ghost_train")
+    p = Pool(32)
+    path = Path("/root/personality/datasets/chalearn2021/train/lego_train")
     i = 0
     video_pts = list(path.rglob("*.mp4"))
     for video in tqdm(video_pts):
@@ -279,10 +279,10 @@ if __name__ == "__main__":
         parent_dir = Path(video).parent
         # if "001080" in str(video):
         #     continue
-        frame_extract(video_path=video_path, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
-        # p.apply_async(long_time_task, args=(video_path, parent_dir))
-    # print('Waiting for all subprocesses done...')
-    # p.close()
-    # p.join()
-    # print('All subprocesses done.')
-    # print(f"processed {i} videos")
+        # frame_extract(video_path=video_path, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
+        p.apply_async(long_time_task, args=(video_path, parent_dir))
+    print('Waiting for all subprocesses done...')
+    p.close()
+    p.join()
+    print('All subprocesses done.')
+    print(f"processed {i} videos")

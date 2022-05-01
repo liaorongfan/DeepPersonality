@@ -23,7 +23,9 @@ class FaceImageExtractor:
         self.duration = 0
         self.step = 0
 
-        self.face_detector = FaceDetection(detector_path + "shape_predictor_68_face_landmarks.dat")
+        self.face_detector = FaceDetection(
+            os.path.join(detector_path, "shape_predictor_68_face_landmarks.dat")
+        )
 
     def load_video(self, video_name):
         """extract face images form a video and the video name will be the name of a directory to save face images
@@ -126,7 +128,7 @@ def run_on_videos(
         data_root=data_root,
         detector_path=detector_path,
     )
-    dirs = [name for name in os.listdir(data_root) if "face" in name]
+    # dirs = [name for name in os.listdir(data_root) if "face" in name]
     # if len(dirs) == 2:
     #     return
     input_video_ls = glob.glob(f"{video_dir}/*.mp4")

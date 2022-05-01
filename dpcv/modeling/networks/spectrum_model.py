@@ -204,9 +204,9 @@ class SpectrumFeatConv1D(nn.Module):
 def conv1x9(in_planes, out_planes, stride=1):
     """1x9 convolution with padding"""
     if stride == 1:
-        return nn.Conv2d(in_planes, out_planes, kernel_size=(1, 9), stride=1, padding=(0, 4), bias=False)
+        return nn.Conv2d(in_planes, out_planes, kernel_size=(1, 25), stride=1, padding=(0, 12), bias=False)
     elif stride == 2:
-        return nn.Conv2d(in_planes, out_planes, kernel_size=(1, 9), stride=(1, 2*stride), padding=(0, 4), bias=False)
+        return nn.Conv2d(in_planes, out_planes, kernel_size=(1, 25), stride=(1, 2*stride), padding=(0, 12), bias=False)
     else:
         raise ValueError("wrong stride value")
 
@@ -225,14 +225,14 @@ class InitStage(nn.Module):
     def __init__(self, in_channels=2, out_channels=64):
         super(InitStage, self).__init__()
         self.conv1 = nn.Conv2d(
-            in_channels, out_channels, kernel_size=(1, 25), stride=(1, 1), padding=(0, 12), bias=False)
-        self.bn1 = nn.BatchNorm2d(out_channels)
+            in_channels, out_channels, kernel_size=(1, 49), stride=(1, 1), padding=(0, 24), bias=False)
+        # self.bn1 = nn.BatchNorm2d(out_channels)
         self.relu = nn.ReLU(inplace=True)
         # self.maxpool = nn.MaxPool2d(kernel_size=(1, 9), stride=(1, 4), padding=(0, 4))
 
     def forward(self, inputs):
         x = self.conv1(inputs)
-        x = self.bn1(x)
+        # x = self.bn1(x)
         x = self.relu(x)
         # x = self.maxpool(x)
         return x
@@ -374,7 +374,7 @@ def spectrum_conv_model2(cfg):
 def spectrum_Feat_conv_model(cfg):
     # return SpectrumConv1D().to(device=torch.device("gpu" if torch.cuda.is_available() else "cpu"))
     # sample_channel = 100
-    return SpectrumFeatConv1D(signal_num=cfg.MODEL.SPECTRUM_CHANNEL).to(device=device)
+    return SpectrumFeatConv1D(channel=cfg.MODEL.SPECTRUM_CHANNEL).to(device=device)
 
 
 @NETWORK_REGISTRY.register()
