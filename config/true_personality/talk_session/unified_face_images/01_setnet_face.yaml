@@ -1,8 +1,6 @@
 DATA:
+  ROOT: "datasets/chalearn2021"
   TYPE: "face"
-  TRAIN_IMG_DATA: "image_data/train_data"
-  VALID_IMG_DATA: "image_data/valid_data"
-  TEST_IMG_DATA: "image_data/test_data"
 DATA_LOADER:
   NAME: "true_personality_dataloader"
   TRANSFORM: "standard_frame_transform"
@@ -18,9 +16,9 @@ SOLVER:
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [15, 18]
+  MILESTONE: [3, 4]
 TRAIN:
   TRAINER: "ImageModalTrainer"
-  MAX_EPOCH: 20
+  MAX_EPOCH: 5
   LOG_INTERVAL: 50
-  OUTPUT_DIR: "results_true_personality/unified_frame_images/01_senet"
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/01_senet"
