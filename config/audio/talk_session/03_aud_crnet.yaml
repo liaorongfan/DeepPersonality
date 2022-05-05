@@ -1,0 +1,21 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "talk"
+DATA_LOADER:
+  NAME: "true_personality_crnet_audio_dataloader"
+  TRAIN_BATCH_SIZE: 2
+MODEL:
+  NAME: "get_crnet_aud_model"
+LOSS:
+  NAME: "crnet_loss_func"
+SOLVER:
+  NAME: "crnet_solver"
+  SCHEDULER: "crnet_multi_step_scale"
+  LR_INIT: 0.002
+  WEIGHT_DECAY: 0.005
+  MOMENTUM: 0.9
+  MILESTONE: [80, 90]
+TRAIN:
+  TRAINER: "CRNetAudTrainer"
+  MAX_EPOCH: 100
+  OUTPUT_DIR: "results_true_personality/audio_talk/03_aud_crnet"

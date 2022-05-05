@@ -113,15 +113,15 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
         return {"image": img, "label": torch.as_tensor(label, dtype=torch.float32)}
 
     def __len__(self):
-        return len(self.img_dir_ls)
+        return len(self.data_ls)
 
     def get_image_data(self, index):
-        img_dir = self.img_dir_ls[index]
+        img_dir = self.data_ls[index]
         imgs = self.frame_sample(img_dir)
         return imgs
 
     def get_image_label(self, index):
-        img_dir = self.img_dir_ls[index]
+        img_dir = self.data_ls[index]
         session, part = img_dir.split("/")
         if self.type == "face":
             part = part.replace("_face", "")

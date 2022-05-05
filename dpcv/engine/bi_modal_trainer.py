@@ -5,6 +5,7 @@ import math
 import os
 from .build import TRAINER_REGISTRY
 from torch.utils.tensorboard import SummaryWriter
+import time
 
 
 @TRAINER_REGISTRY.register()
@@ -26,6 +27,9 @@ class BiModalTrainer(object):
         loss_list = []
         acc_avg_list = []
         for i, data in enumerate(data_loader):
+            epo_iter_num = len(data_loader)
+            iter_start_time = time.time()
+
             inputs, labels = self.data_fmt(data)
             outputs = model(*inputs)
             optimizer.zero_grad()
@@ -34,17 +38,28 @@ class BiModalTrainer(object):
             loss.backward()
             optimizer.step()
 
+            iter_end_time = time.time()
+            iter_time = iter_end_time - iter_start_time
+
             loss_list.append(loss.item())
             acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean().clip(min=0)
             acc_avg = acc_avg.detach().numpy()
             acc_avg_list.append(acc_avg)
-            # print loss info for an interval
+
+            # print loss and training info for an interval
             if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1:
+                remain_iter = epo_iter_num - i
+                remain_epo = self.cfg.MAX_EPOCH - epoch_idx
+                eta = (epo_iter_num * iter_time) * remain_epo + (remain_iter * iter_time)
+                eta = int(eta)
+                eta_string = f"{eta // 3600}h:{eta % 3600 // 60}m:{eta % 60}s"
                 self.logger.info(
-                    "Train: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.4f}".format(
-                        epoch_idx + 1, self.cfg.MAX_EPOCH,
-                        i + 1, len(data_loader),
-                        float(loss.item()), float(acc_avg)
+                    "Train: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] LOSS: {:.4f} ACC:{:.4f} ETA:{} ".format(
+                        epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo
+                        i + 1, epo_iter_num,                     # Iter  
+                        iter_time,                      # IterTime
+                        float(loss.item()), float(acc_avg),  # LOSS ACC ETA
+                        eta_string,    
                     )
                 )
 
@@ -117,6 +132,7 @@ class BiModalTrainer(object):
             dataset_label = torch.cat(label_list, dim=0).numpy()
         ocean_mse_mean_rand = np.round(ocean_mse_mean, 4)
         ocean_acc_avg_rand = np.round(ocean_acc_avg.astype("float64"), 4)
+        self.tb_writer.add_scalar("test_acc", ocean_acc_avg_rand)
         keys = ["O", "C", "E", "A", "N"]
         ocean_mse_dict, ocean_acc_dict = {}, {}
         for i, k in enumerate(keys):

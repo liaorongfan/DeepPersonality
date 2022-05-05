@@ -78,9 +78,9 @@ def make_layers(cfg, batch_norm=False):
 
 class AudLinearRegressor(nn.Module):
 
-    def __init__(self):
+    def __init__(self, input_units=79534):
         super(AudLinearRegressor, self).__init__()
-        self.linear = nn.Linear(79534, 5)
+        self.linear = nn.Linear(input_units, 5)
         self._init_weight()
 
     def _init_weight(self):
@@ -92,12 +92,20 @@ class AudLinearRegressor(nn.Module):
     def forward(self, x):
         x = self.linear(x)
         x = torch.sigmoid(x)
+        x = x.squeeze(1).squeeze(1)
         return x
 
 
 @NETWORK_REGISTRY.register()
 def get_aud_linear_regressor(cfg=None):
     model = AudLinearRegressor()
+    model.to(device=(torch.device("cuda" if torch.cuda.is_available() else "cpu")))
+    return model
+
+
+@NETWORK_REGISTRY.register()
+def get_true_personality_aud_linear_regressor(cfg=None):
+    model = AudLinearRegressor(input_units=244832)
     model.to(device=(torch.device("cuda" if torch.cuda.is_available() else "cpu")))
     return model
 

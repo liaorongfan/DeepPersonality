@@ -1,6 +1,6 @@
 import torch.cuda
 import torch.nn as nn
-from .build import NETWORK_REGISTRY
+from dpcv.modeling.networks.build import NETWORK_REGISTRY
 from dpcv import device
 from dpcv.modeling.module.weight_init_helper import initialize_weights
 
@@ -65,78 +65,176 @@ class SpectrumConv1D(nn.Module):
 
 class SpectrumConv1D2(nn.Module):
 
-    def __init__(self, channel=50, hidden_units=[64, 256, 1024, 2048]):
+    def __init__(self, signal_num=512, spectron_len=80, hidden_units=[512, 1024, 2048, 512], init_weight=False):
         super(SpectrumConv1D2, self).__init__()
+        # init_input
+        self.init_input_conv2d = nn.Conv2d(in_channels=2, out_channels=hidden_units[0], kernel_size=(512, 1), stride=1)
+        self.conv1d_in = nn.Sequential(
+            nn.Conv1d(
+                in_channels=signal_num, out_channels=hidden_units[0],
+                kernel_size=7, padding=3, stride=1,
+            ),
+            nn.BatchNorm1d(hidden_units[0]),
+            nn.LeakyReLU(),
+        )  # （bs, 512, 180)
+        # stage 1
+        self.conv1d_up2_s2_1 = nn.Sequential(
+            nn.Conv1d(
+                in_channels=hidden_units[0], out_channels=hidden_units[1],
+                kernel_size=5, padding=2, stride=2,
+            ),
+            nn.BatchNorm1d(hidden_units[1]),
+            nn.LeakyReLU(),
+        )  # (bs, 1024, 180）
 
-        self.conv_in = nn.Sequential(
+        self.shortcut_1 = nn.Sequential(
             nn.Conv1d(
-                in_channels=2, out_channels=hidden_units[0], kernel_size=(1, 7), padding=(0, 3)
+                in_channels=hidden_units[0], out_channels=hidden_units[1],
+                kernel_size=3, stride=2, padding=1,
             ),
-            nn.ReLU(),
-            nn.Conv1d(
-                in_channels=hidden_units[0], out_channels=hidden_units[1], kernel_size=(1, 5), padding=(0, 2)
-            ),
-            nn.ReLU(),
+            # nn.BatchNorm1d(hidden_units[1]),
+            nn.LeakyReLU(),
         )
-
-        self.conv_up_scale = nn.Sequential(
+        # stage 2
+        self.con1d_stage = nn.Sequential(
             nn.Conv1d(
                 in_channels=hidden_units[1], out_channels=hidden_units[1],
-                kernel_size=(1, 3), padding=(0, 1),
+                kernel_size=3, padding=1, stride=1,
             ),
-            nn.ReLU(),
+            nn.BatchNorm1d(hidden_units[1]),
+            nn.LeakyReLU(),
+        )
+        # stage 3
+        self.conv1d_up2_s2_2 = nn.Sequential(
+            nn.Conv1d(
+                in_channels=hidden_units[1], out_channels=hidden_units[1],
+                kernel_size=3, padding=1, stride=1,
+            ),
+            nn.BatchNorm1d(hidden_units[1]),
+            nn.LeakyReLU(),
+
+            nn.Conv1d(
+                in_channels=hidden_units[1], out_channels=hidden_units[1],
+                kernel_size=3, padding=1, stride=1,
+            ),
+            nn.BatchNorm1d(hidden_units[1]),
+            nn.LeakyReLU(),
 
             nn.Conv1d(
                 in_channels=hidden_units[1], out_channels=hidden_units[2],
-                kernel_size=(1, 3), padding=(0, 1),
+                kernel_size=3, padding=1, stride=2,
             ),
-            nn.ReLU()
+            nn.BatchNorm1d(hidden_units[2]),
+            nn.LeakyReLU(),
+        )  # (bs, 2048, 90)
+
+        self.shortcut_2 = nn.Sequential(
+            nn.Conv1d(
+                in_channels=hidden_units[1], out_channels=hidden_units[2],
+                kernel_size=3, stride=2, padding=1,
+            ),
+            nn.LeakyReLU(),
         )
-        self.conv_stage = nn.Sequential(
+        # stage 4
+        self.conv1d_s2 = nn.Sequential(
             nn.Conv1d(
                 in_channels=hidden_units[2], out_channels=hidden_units[2],
-                kernel_size=(1, 3), padding=(0, 1),
+                kernel_size=3, padding=1, stride=1,
             ),
-            nn.ReLU(),
+            nn.BatchNorm1d(hidden_units[2]),
+            nn.LeakyReLU(),
+
             nn.Conv1d(
                 in_channels=hidden_units[2], out_channels=hidden_units[2],
-                kernel_size=(1, 3), padding=(0, 1),
+                kernel_size=3, padding=1, stride=2,
             ),
-            nn.ReLU(),
-        )
-        self.conv_down_scale = nn.Sequential(
-            nn.Conv1d(
-                in_channels=hidden_units[2], out_channels=hidden_units[1],
-                kernel_size=(1, 3), padding=(0, 1),
-            ),
-            nn.ReLU(),
+            nn.BatchNorm1d(hidden_units[2]),
+            nn.LeakyReLU(),
+        )  # (bs, 2048, 45)
+        # self.shortcut_3 = nn.Sequential(
+        #     nn.Conv1d(
+        #         in_channels=hidden_units[2], out_channels=hidden_units[2],
+        #         kernel_size=3, stride=2, padding=1,
+        #     ),
+        #     # nn.BatchNorm1d(hidden_units[2]),
+        #     nn.LeakyReLU(),
+        # )
+        # self.shortcut_4 = nn.Sequential(
+        #     nn.Conv1d(
+        #         in_channels=hidden_units[1], out_channels=hidden_units[2],
+        #         kernel_size=5, stride=4, padding=1,
+        #     ),
+        #     # nn.BatchNorm1d(hidden_units[2]),
+        #     nn.LeakyReLU(),
+        # )
+        # regressor
+        self.avgpool = nn.AdaptiveAvgPool1d(1)  # (bs, 2048)
+
+        self.regressor = nn.Sequential(
+            # nn.Linear(hidden_units[2], hidden_units[2]),
+            # nn.LeakyReLU(),
+            # nn.Dropout(),
+            nn.Linear(hidden_units[2], hidden_units[3]),  # (bs, 512)
+            nn.LeakyReLU(),
+            nn.Dropout(),
+            nn.Linear(hidden_units[3], 5),  # (bs, 512)                   
         )
 
-        self.conv_out = nn.Sequential(
-            nn.Conv1d(
-                in_channels=hidden_units[1],  out_channels=1, kernel_size=(1, 1)
-            ),
-            nn.ReLU(),
-            nn.Conv1d(
-                in_channels=1, out_channels=1, kernel_size=(1, channel)
-            ),
-        )
+        if init_weight:
+            print("init weights")
+            for m in self.modules():
+                if isinstance(m, nn.Sequential):
+                    for m_i in m.modules():
+                        if isinstance(m_i, nn.Conv1d):
+                            nn.init.kaiming_normal_(m_i.weight)
+                        elif isinstance(m_i, nn.BatchNorm1d):
+                            nn.init.constant_(m_i.weight, 1)
+                            nn.init.constant_(m_i.bias, 0)
+
+                elif isinstance(m, nn.Conv1d):
+                    nn.init.kaiming_normal_(m.weight)
+                elif isinstance(m, nn.BatchNorm1d):
+                    nn.init.constant_(m.weight, 1)
+                    nn.init.constant_(m.bias, 0)
+
+                elif isinstance(m, nn.Linear):
+                    nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        x = self.conv_in(x)           # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
-        # feature_in = x
-        x = self.conv_up_scale(x)
-        # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
-        # identical = x
-        x = self.conv_stage(x)
-        # x += identical
+        # init input
+        # x_mean = x.mean(dim=1).squeeze(dim=1)  # (bs, 512, 180)
+        # x_in_1 = self.conv1d_in(x_mean)             # (bs, 512, 180)
+        # x_in_1 += x_mean
 
-        x = self.conv_down_scale(x)   # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
-        # x += feature_in
-
-        x = self.conv_out(x)          # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
-        x = x.squeeze(1)              # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
-        x = x.squeeze()               # (bs, 2, 5, 50) --> (bs, 64, 5, 50)
+        x_in_2 = self.init_input_conv2d(x).squeeze(dim=2)
+        # x = x_in_1 + x_in_2
+        x = x_in_2
+        # stage 1: 
+        x_1 = x
+        x = self.conv1d_up2_s2_1(x)       # (bs, 1024, 180）  
+        x_shortcut_1 = self.shortcut_1(x_1)
+        x += x_shortcut_1
+        # stage 2:
+        # x_2 = x
+        x = self.con1d_stage(x)
+        # x += x_2
+        # stage 3:
+        x_3 = x
+        x = self.conv1d_up2_s2_2(x)       # (bs, 2048, 90)
+        x_shortcut = self.shortcut_2(x_3)
+        x += x_shortcut
+        # stage 4:
+        # x_4 = x
+        x = self.conv1d_s2(x)             # (bs, 2048, 45)
+        # x_shortcut_3 = self.shortcut_3(x_4)
+        # x_shortcut_4 = self.shortcut_4(x_2)
+        # x = (x + x_shortcut_3 + x_shortcut_4) / 3
+        # x += x_shortcut_3
+        # regressor
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)           # (bs, 2048)
+        x = self.regressor(x)             # (bs, 5)
+        # x = torch.sigmoid(x)
         return x
 
 
@@ -367,7 +465,7 @@ def spectrum_conv_model(cfg):
 def spectrum_conv_model2(cfg):
     # return SpectrumConv1D().to(device=torch.device("gpu" if torch.cuda.is_available() else "cpu"))
     # sample_channel = 100
-    return SpectrumConv1D2(cfg.MODEL.SPECTRUM_CHANNEL).to(device=device)
+    return SpectrumConv1D2(signal_num=cfg.MODEL.SPECTRUM_CHANNEL).to(device=device)
 
 
 @NETWORK_REGISTRY.register()
@@ -383,10 +481,22 @@ def spectrum_feat_resnet18(cfg=None):
 
 
 if __name__ == "__main__":
-    x = torch.randn((2, 2, 512, 80)).cuda()
-    model = spectrum_feat_resnet18()
-    y = model(x)
-    print(y)
-    # conv1 = nn.Conv1d(16, 33, 3, stride=2)
-    # input = torch.randn(20, 16, 50)
-    # output = conv1(input)
+    # x = torch.randn((1, 2, 512, 80)).cuda()
+    # model = spectrum_feat_resnet18()
+    # y = model(x)
+    # print(y)
+    # inputs = torch.randn(20, 16, 50)
+    # m = nn.Conv1d(16, 2, 3, stride=1)
+    # output = m(inputs)
+    # print(output.shape)
+    # target output size of 5
+    # m = nn.AdaptiveAvgPool1d(1)
+    # input = torch.randn(1, 64, 8)
+    # output = m(input)
+    # print(output.shape)
+    net = SpectrumConv1D2()
+    x = torch.randn((1, 2, 512, 180))
+    y = net(x)
+    print(y.shape)
+    import torchvision.models as models
+    net = models.GoogLeNet

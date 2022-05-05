@@ -10,7 +10,7 @@ import random
 from pathlib import Path
 from PIL import Image
 from dpcv.data.transforms.build import build_transform_spatial
-from .build import DATA_LOADER_REGISTRY
+from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
 
 
 class Chalearn21FrameData(Dataset):
@@ -112,6 +112,74 @@ class Chalearn21FrameData(Dataset):
             )
 
 
+class Chlearn21AudioData(Chalearn21FrameData):
+    def __init__(self, data_root, data_split, task, sample_len=244832):
+        super().__init__(data_root, data_split, task, segment=True)
+        self.sample_len = sample_len
+
+    def __len__(self):
+        return len(self.img_dir_ls)
+
+    def __getitem__(self, idx):
+        img_dir = self.img_dir_ls[idx]
+        aud_data = self.sample_audio_data(img_dir)
+        aud_label = self.get_ocean_label(img_dir)
+        sample = {
+            "aud_data": torch.as_tensor(aud_data, dtype=torch.float32),
+            "aud_label": torch.as_tensor(aud_label, dtype=torch.float32),
+        }
+        return sample
+
+    def sample_audio_data(self, img_dir):
+        aud_file = opt.join(self.data_dir, f"{img_dir}.npy")
+        aud_data = np.load(aud_file)
+        data_len = aud_data.shape[-1]
+        start = np.random.randint(data_len - self.sample_len)
+        end = start + self.sample_len
+        return aud_data[:, :, start: end]
+
+    def get_ocean_label(self, img_dir):
+        *_, session, part = img_dir.split("/")
+        part = part.replace(self.task_mark, "T")
+        participant_id = self.session_id[str(int(session))][part]
+        participant_trait = self.parts_personality[participant_id]
+        participant_trait = np.array([float(v) for v in participant_trait.values()])
+        return participant_trait
+
+
+class CRNetAudioTruePersonality(Chlearn21AudioData):
+
+    def __init__(self, data_root, data_split, task, sample_len=244832):
+        super().__init__(data_root, data_split, task, sample_len)
+
+    def __getitem__(self, idx):
+        img_dir = self.img_dir_ls[idx]
+        aud_data = self.sample_audio_data(img_dir)
+        aud_label = self.get_ocean_label(img_dir)
+        label_cls = self.cls_encode(aud_label)
+        return {
+            "aud_data": torch.as_tensor(aud_data, dtype=torch.float32),
+            "aud_label": torch.as_tensor(aud_label, dtype=torch.float32),
+            "aud_label_cls": torch.as_tensor(label_cls, dtype=torch.float32),
+        }
+
+    @staticmethod
+    def cls_encode(score):
+        index = []
+        for v in score:
+            if v < -1:
+                index.append(0)
+            elif -1 <= v < 0:
+                index.append(1)
+            elif 0 <= v < 1:
+                index.append(2)
+            else:
+                index.append(3)
+        one_hot_cls = np.eye(4)[index]
+        return one_hot_cls
+
+
+
 @DATA_LOADER_REGISTRY.register()
 def true_personality_dataloader(cfg, mode):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
@@ -136,29 +204,80 @@ def true_personality_dataloader(cfg, mode):
     return data_loader
 
 
+@DATA_LOADER_REGISTRY.register()
+def true_personality_audio_dataloader(cfg, mode):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+
+    dataset = Chlearn21AudioData(
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+        data_split=mode,
+        task=cfg.DATA.SESSION,  # "talk"
+    )
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def true_personality_crnet_audio_dataloader(cfg, mode):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 1
+    dataset = CRNetAudioTruePersonality(
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+        data_split=mode,
+        task=cfg.DATA.SESSION,  # "talk"
+    )
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=num_worker,
+    )
+    return data_loader
+
+
 if __name__ == "__main__":
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
-    train_dataset = Chalearn21FrameData(
+    # train_dataset = Chalearn21FrameData(
+    #     data_root="datasets/chalearn2021",
+    #     data_split="train",
+    #     task="talk",
+    # )
+    # print(len(train_dataset))
+    # print(train_dataset[1])
+    #
+    # test_dataset = Chalearn21FrameData(
+    #     data_root="datasets/chalearn2021",
+    #     data_split="test",
+    #     task="talk",
+    # )
+    # print(len(test_dataset))
+    # print(test_dataset[1])
+    #
+    # val_dataset = Chalearn21FrameData(
+    #     data_root="datasets/chalearn2021",
+    #     data_split="val",
+    #     task="talk",
+    # )
+    # print(len(val_dataset))
+    # print(val_dataset[1])
+    train_dataset = Chlearn21AudioData(
         data_root="datasets/chalearn2021",
         data_split="train",
         task="talk",
     )
+
     print(len(train_dataset))
     print(train_dataset[1])
 
-    test_dataset = Chalearn21FrameData(
-        data_root="datasets/chalearn2021",
-        data_split="test",
-        task="talk",
-    )
-    print(len(test_dataset))
-    print(test_dataset[1])
-
-    val_dataset = Chalearn21FrameData(
-        data_root="datasets/chalearn2021",
-        data_split="val",
-        task="talk",
-    )
-    print(len(val_dataset))
-    print(val_dataset[1])
 

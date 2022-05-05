@@ -10,3 +10,8 @@ def mean_square_error():
 @LOSS_FUNC_REGISTRY.register()
 def l1_loss():
     return nn.L1Loss()
+
+
+@LOSS_FUNC_REGISTRY.register()
+def smooth_l1_loss():
+    return nn.SmoothL1Loss()

@@ -11,7 +11,7 @@ from math import ceil
 
 class SecondStageData(Dataset):
 
-    def __init__(self, data_dir, data_type="pred", method="statistic", used_frame=400, top_n_sample=180):
+    def __init__(self, data_dir, data_type="pred", method="statistic", used_frame=400, top_n_sample=80):
         assert data_type in ["pred", "feat"]
         assert method in ["statistic", "spectrum"]
 

@@ -210,7 +210,7 @@ def crnet_model(cfg=None):
 def get_crnet_aud_model(cfg):
     cr_net_aud = CRNetAud()
     return cr_net_aud.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-1
+
 
 if __name__ == "__main__":
     import torch
