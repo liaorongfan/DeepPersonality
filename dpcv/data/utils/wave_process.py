@@ -39,6 +39,7 @@ class WaveProcessor(VideoData):
 
     def librosa_extract(self, wav_file_path, video_name):
         try:
+            # sample rate 16000 Hz
             wav_ft = librosa.load(wav_file_path, 16000)[0][None, None, :]  # output_shape = (1, 1, 244832)
             # wav_ft = librosa.load(wav_path, 3279)[0][None, None, :]  # output_shape = (1, 1, 50176)
 

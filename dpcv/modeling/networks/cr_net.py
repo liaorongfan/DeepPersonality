@@ -117,13 +117,13 @@ class CRNet2(nn.Module):
         self.train_regressor = True
 
     def forward(self, global_img, local_img, audio_wav):
-        glo_feature = self.global_img_branch(global_img)
-        loc_feature = self.local_img_branch(local_img)
-        aud_feature = self.audio_branch(audio_wav)
+        glo_feature = self.global_img_branch(global_img)  # (bs, 512, 2, 2)
+        loc_feature = self.local_img_branch(local_img)    # (bs, 512, 2, 2)
+        aud_feature = self.audio_branch(audio_wav)        # (bs, 512, 1, 4)
         # ---- first training stage class guide -----
-        glo_cls = self.global_cls_guide(glo_feature)
-        loc_cls = self.local_cls_guide(loc_feature)
-        wav_cls = self.wav_cls_guide(aud_feature)
+        glo_cls = self.global_cls_guide(glo_feature)      # (bs, 5, 4)
+        loc_cls = self.local_cls_guide(loc_feature)       # (bs, 5, 4)
+        wav_cls = self.wav_cls_guide(aud_feature)         # (bs, 5, 4)
 
         glo_cls = glo_cls.view(glo_cls.size(0), 5, -1)
         loc_cls = loc_cls.view(loc_cls.size(0), 5, -1)
