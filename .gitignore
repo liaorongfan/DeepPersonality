@@ -21,7 +21,8 @@ pretrained/
 output/
 mlruns/
 /snippet
-
+tmp/
+events.out*
 # current output files
 *.png
 *.json
@@ -29,6 +30,7 @@ mlruns/
 *.jpg
 *.zip
 *.log
+ev
 # compilation and distribution
 __pycache__
 _ext
