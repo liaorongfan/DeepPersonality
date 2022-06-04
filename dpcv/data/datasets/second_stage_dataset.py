@@ -11,7 +11,7 @@ from math import ceil
 
 class SecondStageData(Dataset):
 
-    def __init__(self, data_dir, data_type="pred", method="statistic", used_frame=400, top_n_sample=80):
+    def __init__(self, data_dir, data_type="pred", method="statistic", used_frame=400, top_n_sample=80, sample=False):
         assert data_type in ["pred", "feat"]
         assert method in ["statistic", "spectrum"]
 
@@ -22,6 +22,7 @@ class SecondStageData(Dataset):
         self.save_to = os.path.join(data_root, f"{self.data_type}_{self.process_method}_{data_split}.pkl")
         self.used_frame = used_frame
         self.top_n_sample = top_n_sample
+        self.sample = sample
         self.data_preprocess(data_dir)  # save processed data to disk first
         self.data_ls = self.load_data()
 
@@ -72,7 +73,7 @@ class SecondStageData(Dataset):
             #     self.signal_num = signal_num
             # for large feature save 1000 item every time in case of memory issue
             # last_seg = ceil(len(sample_pth_ls) / 1000)
-            data_seg = 500
+            data_seg = 2000
             if len(data_ls) == data_seg:
                 seg_id += 1
                 torch.save(data_ls[:data_seg], self.save_to.replace(".pkl", f"_{seg_id}.pkl"))
@@ -141,7 +142,11 @@ class SecondStageData(Dataset):
         # for one trait there n prediction from n frames
         # data: (1, n)  eg:（1， 382）
         valid = True
-        data = data[:, :self.used_frame]
+        if self.sample:
+            indexes = np.linspace(0, data.shape[1], 100, endpoint=False, dtype=np.int16)
+            data = data[:, indexes]
+        else:
+            data = data[:, :self.used_frame]
         pred_fft = np.fft.fft2(data)  # pred_fft (1, 382)  complex num
         length = int(len(pred_fft[0]) / 2)
         amp, pha = np.abs(pred_fft),  np.angle(pred_fft)  # amp:(1, 382) pha:(1, 382)

@@ -77,10 +77,10 @@ class SpectrumConv1D2(nn.Module):
             nn.BatchNorm1d(hidden_units[0]),
             nn.LeakyReLU(),
         )  # (bs, 1024, 180）
-        self.shortcut_1 = nn.Sequential(
-            nn.Conv1d(in_channels=spectron_len, out_channels=hidden_units[0], kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(),
-        )
+        # self.shortcut_1 = nn.Sequential(
+        #     nn.Conv1d(in_channels=spectron_len, out_channels=hidden_units[0], kernel_size=3, stride=1, padding=1),
+        #     nn.LeakyReLU(),
+        # )
 
         # stage 2
         self.con1d_stage = nn.Sequential(
@@ -116,12 +116,9 @@ class SpectrumConv1D2(nn.Module):
 
         # stage 4
         self.conv1d_s2 = nn.Sequential(
-            # nn.Conv1d(
-            #     in_channels=hidden_units[2], out_channels=hidden_units[2],
-            #     kernel_size=3, padding=1, stride=1,
-            # ),
-            # nn.BatchNorm1d(hidden_units[2]),
-            # nn.LeakyReLU(),
+            nn.Conv1d(in_channels=hidden_units[2], out_channels=hidden_units[2], kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm1d(hidden_units[2]),
+            nn.LeakyReLU(),
 
             nn.Conv1d(in_channels=hidden_units[2], out_channels=hidden_units[2], kernel_size=3, padding=1, stride=2),
             nn.BatchNorm1d(hidden_units[2]),
@@ -150,13 +147,16 @@ class SpectrumConv1D2(nn.Module):
                         elif isinstance(m_i, nn.BatchNorm1d):
                             nn.init.constant_(m_i.weight, 1)
                             nn.init.constant_(m_i.bias, 0)
+                        elif isinstance(m_i, nn.Conv2d):
+                            nn.init.kaiming_normal_(m_i.weight)
 
                 elif isinstance(m, nn.Conv1d):
+                    nn.init.kaiming_normal_(m.weight)
+                elif isinstance(m, nn.Conv2d):
                     nn.init.kaiming_normal_(m.weight)
                 elif isinstance(m, nn.BatchNorm1d):
                     nn.init.constant_(m.weight, 1)
                     nn.init.constant_(m.bias, 0)
-
                 elif isinstance(m, nn.Linear):
                     nn.init.constant_(m.bias, 0)
 
@@ -164,7 +164,7 @@ class SpectrumConv1D2(nn.Module):
         # init input
         x = self.init_input_conv2d(x).squeeze(dim=2)
         # stage 1:
-        x_1 = x
+        # x_1 = x
         x = self.conv1d_up2_s2_1(x)
         # x_shortcut_1 = self.shortcut_1(x_1)
         # x += x_shortcut_1

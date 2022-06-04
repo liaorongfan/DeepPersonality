@@ -17,7 +17,7 @@ LOSS:
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.01
+  LR_INIT: 0.02
   MILESTONE: [50,]
 TRAIN:
   TRAINER: "SpectrumTrainer"
