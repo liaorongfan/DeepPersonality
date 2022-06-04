@@ -23,4 +23,4 @@ TRAIN:
   TRAINER: "SpectrumTrainer"
   MAX_EPOCH: 8
   LOG_INTERVAL: 100
-  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/04_crnet_spectrum"
+  OUTPUT_DIR: "results_second_stage/spectrum_on_feat_deprecat/04_crnet_spectrum"

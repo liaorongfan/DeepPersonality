@@ -36,6 +36,7 @@ def main():
 
 
 if __name__ == "__main__":
+    # for debug setting
     import os
     os.chdir("..")
     main()

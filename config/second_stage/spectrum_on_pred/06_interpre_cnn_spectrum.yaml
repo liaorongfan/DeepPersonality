@@ -17,9 +17,11 @@ LOSS:
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.0001
-  MILESTONE: [80,]
+  LR_INIT: 0.01
+  MILESTONE: [50,]
 TRAIN:
   TRAINER: "SpectrumTrainer"
-  MAX_EPOCH: 20
+  MAX_EPOCH: 100
+  LOG_INTERVAL: 50
+  VALID_INTERVAL: 1
   OUTPUT_DIR: "results_second_stage/spectrum_pred/06_interpret_cnn_spectrum"

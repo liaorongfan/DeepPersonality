@@ -22,4 +22,4 @@ SOLVER:
 TRAIN:
   TRAINER: "SpectrumTrainer"
   MAX_EPOCH: 50
-  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/01_deep_bimodal_spectrum"
+  OUTPUT_DIR: "results_second_stage/spectrum_on_feat_deprecat/01_deep_bimodal_spectrum"

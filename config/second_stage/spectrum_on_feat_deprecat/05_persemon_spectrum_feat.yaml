@@ -22,4 +22,4 @@ SOLVER:
 TRAIN:
   TRAINER: "SpectrumTrainer"
   MAX_EPOCH: 15
-  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/05_persemon_spectrum"
+  OUTPUT_DIR: "results_second_stage/spectrum_on_feat_deprecat/05_persemon_spectrum"

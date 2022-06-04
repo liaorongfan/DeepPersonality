@@ -7,36 +7,36 @@ from dpcv.modeling.module.weight_init_helper import initialize_weights
 
 class SpectrumConv1D(nn.Module):
 
-    def __init__(self, channel=80, hidden_units=[64, 256, 1024]):
+    def __init__(self, channel=80, hidden_units=[128, 512, 2048]):
         super(SpectrumConv1D, self).__init__()
 
         self.conv_in = nn.Sequential(
             nn.Conv1d(
-                in_channels=2, out_channels=hidden_units[0], kernel_size=(1, 7), padding=(0, 3)
+                in_channels=2, out_channels=hidden_units[0], kernel_size=(1, 49), padding=(0, 24)
             ),
             nn.ReLU(),
             nn.Conv1d(
-                in_channels=hidden_units[0], out_channels=hidden_units[1], kernel_size=(1, 5), padding=(0, 2)
+                in_channels=hidden_units[0], out_channels=hidden_units[1], kernel_size=(1, 25), padding=(0, 12)
             ),
             nn.ReLU(),
         )
         self.conv_up_scale = nn.Sequential(
             nn.Conv1d(
                 in_channels=hidden_units[1], out_channels=hidden_units[1],
-                kernel_size=(1, 3), padding=(0, 1),
+                kernel_size=(1, 9), padding=(0, 4),
             ),
             nn.ReLU(),
 
             nn.Conv1d(
                 in_channels=hidden_units[1], out_channels=hidden_units[2],
-                kernel_size=(1, 3), padding=(0, 1),
+                kernel_size=(1, 9), padding=(0, 4),
             ),
             nn.ReLU()
         )
         self.conv_down_scale = nn.Sequential(
             nn.Conv1d(
                 in_channels=hidden_units[2], out_channels=hidden_units[1],
-                kernel_size=(1, 3), padding=(0, 1),
+                kernel_size=(1, 9), padding=(0, 4),
             ),
             nn.ReLU(),
         )
@@ -65,10 +65,10 @@ class SpectrumConv1D(nn.Module):
 
 class SpectrumConv1D2(nn.Module):
 
-    def __init__(self, signal_num=512, spectron_len=80, hidden_units=[512, 1024, 2048, 512], init_weight=False):
+    def __init__(self, signal_num=512, spectron_len=80, hidden_units=[256, 512, 1024, 512], init_weight=False):
         super(SpectrumConv1D2, self).__init__()
         # init_input
-        self.init_input_conv2d = nn.Conv2d(in_channels=2, out_channels=hidden_units[0], kernel_size=(512, 1), stride=1)
+        self.init_input_conv2d = nn.Conv2d(in_channels=2, out_channels=signal_num, kernel_size=(signal_num, 1), stride=1)
         self.conv1d_in = nn.Sequential(
             nn.Conv1d(
                 in_channels=signal_num, out_channels=hidden_units[0],
@@ -80,7 +80,7 @@ class SpectrumConv1D2(nn.Module):
         # stage 1
         self.conv1d_up2_s2_1 = nn.Sequential(
             nn.Conv1d(
-                in_channels=hidden_units[0], out_channels=hidden_units[1],
+                in_channels=signal_num, out_channels=hidden_units[1],
                 kernel_size=5, padding=2, stride=2,
             ),
             nn.BatchNorm1d(hidden_units[1]),
@@ -89,7 +89,7 @@ class SpectrumConv1D2(nn.Module):
 
         self.shortcut_1 = nn.Sequential(
             nn.Conv1d(
-                in_channels=hidden_units[0], out_channels=hidden_units[1],
+                in_channels=signal_num, out_channels=hidden_units[1],
                 kernel_size=3, stride=2, padding=1,
             ),
             # nn.BatchNorm1d(hidden_units[1]),
@@ -106,19 +106,19 @@ class SpectrumConv1D2(nn.Module):
         )
         # stage 3
         self.conv1d_up2_s2_2 = nn.Sequential(
-            nn.Conv1d(
-                in_channels=hidden_units[1], out_channels=hidden_units[1],
-                kernel_size=3, padding=1, stride=1,
-            ),
-            nn.BatchNorm1d(hidden_units[1]),
-            nn.LeakyReLU(),
+            # nn.Conv1d(
+            #     in_channels=hidden_units[1], out_channels=hidden_units[1],
+            #     kernel_size=3, padding=1, stride=1,
+            # ),
+            # nn.BatchNorm1d(hidden_units[1]),
+            # nn.LeakyReLU(),
 
-            nn.Conv1d(
-                in_channels=hidden_units[1], out_channels=hidden_units[1],
-                kernel_size=3, padding=1, stride=1,
-            ),
-            nn.BatchNorm1d(hidden_units[1]),
-            nn.LeakyReLU(),
+            # nn.Conv1d(
+            #     in_channels=hidden_units[1], out_channels=hidden_units[1],
+            #     kernel_size=3, padding=1, stride=1,
+            # ),
+            # nn.BatchNorm1d(hidden_units[1]),
+            # nn.LeakyReLU(),
 
             nn.Conv1d(
                 in_channels=hidden_units[1], out_channels=hidden_units[2],
@@ -137,12 +137,12 @@ class SpectrumConv1D2(nn.Module):
         )
         # stage 4
         self.conv1d_s2 = nn.Sequential(
-            nn.Conv1d(
-                in_channels=hidden_units[2], out_channels=hidden_units[2],
-                kernel_size=3, padding=1, stride=1,
-            ),
-            nn.BatchNorm1d(hidden_units[2]),
-            nn.LeakyReLU(),
+            # nn.Conv1d(
+            #     in_channels=hidden_units[2], out_channels=hidden_units[2],
+            #     kernel_size=3, padding=1, stride=1,
+            # ),
+            # nn.BatchNorm1d(hidden_units[2]),
+            # nn.LeakyReLU(),
 
             nn.Conv1d(
                 in_channels=hidden_units[2], out_channels=hidden_units[2],
