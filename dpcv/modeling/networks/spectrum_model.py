@@ -65,20 +65,20 @@ class SpectrumConv1D(nn.Module):
 
 class SpectrumConv1D2(nn.Module):
 
-    def __init__(self, signal_num=512, spectron_len=80, hidden_units=[256, 512, 1024, 512], init_weight=False):
+    def __init__(self, signal_num=512, spectron_len=5, hidden_units=[256, 512, 1024, 512], init_weight=False):
         super(SpectrumConv1D2, self).__init__()
         # init_input
         self.init_input_conv2d = nn.Conv2d(
-            in_channels=2, out_channels=signal_num, kernel_size=(signal_num, 1), stride=1)
+            in_channels=2, out_channels=spectron_len, kernel_size=(signal_num, 1), stride=1)
 
         # stage 1
         self.conv1d_up2_s2_1 = nn.Sequential(
-            nn.Conv1d(in_channels=signal_num, out_channels=hidden_units[0], kernel_size=5, stride=2, padding=2),
+            nn.Conv1d(in_channels=spectron_len, out_channels=hidden_units[0], kernel_size=5, stride=1, padding=2),
             nn.BatchNorm1d(hidden_units[0]),
             nn.LeakyReLU(),
         )  # (bs, 1024, 180）
         self.shortcut_1 = nn.Sequential(
-            nn.Conv1d(in_channels=signal_num, out_channels=hidden_units[0], kernel_size=3, stride=2, padding=1),
+            nn.Conv1d(in_channels=spectron_len, out_channels=hidden_units[0], kernel_size=3, stride=1, padding=1),
             nn.LeakyReLU(),
         )
 
@@ -105,7 +105,7 @@ class SpectrumConv1D2(nn.Module):
             # nn.BatchNorm1d(hidden_units[1]),
             # nn.LeakyReLU(),
 
-            nn.Conv1d(in_channels=hidden_units[1], out_channels=hidden_units[2], kernel_size=3, padding=1, stride=2),
+            nn.Conv1d(in_channels=hidden_units[1], out_channels=hidden_units[2], kernel_size=3, stride=2, padding=1),
             nn.BatchNorm1d(hidden_units[2]),
             nn.LeakyReLU(),
         )  # (bs, 2048, 90)
@@ -166,15 +166,15 @@ class SpectrumConv1D2(nn.Module):
         # stage 1:
         x_1 = x
         x = self.conv1d_up2_s2_1(x)
-        x_shortcut_1 = self.shortcut_1(x_1)
-        x += x_shortcut_1
+        # x_shortcut_1 = self.shortcut_1(x_1)
+        # x += x_shortcut_1
         # stage 2:
         x = self.con1d_stage(x)
         # stage 3:
         x_3 = x
         x = self.conv1d_up2_s2_2(x)
-        x_shortcut = self.shortcut_2(x_3)
-        x += x_shortcut
+        x_shortcut_3 = self.shortcut_2(x_3)
+        x += x_shortcut_3
         # stage 4:
         x = self.conv1d_s2(x)
         # regressor
