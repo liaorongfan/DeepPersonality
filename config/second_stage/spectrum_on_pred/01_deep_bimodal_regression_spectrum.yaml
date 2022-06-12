@@ -10,16 +10,16 @@ DATA_LOADER:
   TRAIN_BATCH_SIZE: 64
   NUM_WORKERS: 0
 MODEL:
-  NAME: "spectrum_conv_model"
-  SPECTRUM_CHANNEL: 80
+  NAME: "spectrum_conv_model2"
+  SPECTRUM_CHANNEL: 5
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.005
-  MILESTONE: [100,]
+  LR_INIT: 0.001
+  MILESTONE: [80,]
 TRAIN:
   TRAINER: "SpectrumTrainer"
   MAX_EPOCH: 200
-  OUTPUT_DIR: "results_second_stage/spectrum_on_pred/06_interpre_cnn_spectrum"
+  OUTPUT_DIR: "results_second_stage/spectrum_on_pred/01_deep_bimodal_regression_spectrum"
