@@ -15,7 +15,10 @@ from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
 
 class Chalearn21FrameData(Dataset):
 
-    def __init__(self, data_root, data_split, task, data_type="frame", even_downsample=2000, trans=None, segment=False):
+    def __init__(
+        self, data_root, data_split, task, data_type="frame",
+        even_downsample=2000, trans=None, segment=False
+    ):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
         self.session_id, self.parts_personality = self.load_annotation(task, data_split)
@@ -179,6 +182,77 @@ class CRNetAudioTruePersonality(Chlearn21AudioData):
         return one_hot_cls
 
 
+class Chalearn21PersemonData(Chalearn21FrameData):
+
+    def __init__(
+        self, data_root, data_split, task, data_type, trans,
+        emo_data_root, emo_img_dir, emo_label, emo_trans,
+    ):
+        super().__init__(
+            data_root, data_split, task, data_type=data_type,
+            even_downsample=2000, trans=trans, segment=False
+        )
+        self.emo_data_root = emo_data_root
+        self.emo_img_dir = emo_img_dir
+        self.emo_label = emo_label
+        self.emo_trans = emo_trans
+        self.emo_data_ls = self.emo_data_parser()
+
+    def emo_data_parser(self):
+        emo_label_path = os.path.join(self.emo_data_root, self.emo_label)
+        video_files = [file for file in os.listdir(emo_label_path) if len(file) < 12]
+        video_files_pt = [os.path.join(emo_label_path, video_file) for video_file in video_files]
+        return video_files_pt
+
+    def __getitem__(self, index):
+        per_img_ls, per_lab_ls = self.gather_personality_data(index)
+        emo_img_ls, emo_lab_ls = self.gather_emotion_data()
+        if self.trans:
+            per_img_ls = [self.trans(per_img) for per_img in per_img_ls]
+        if self.emo_trans:
+            emo_img_ls = [self.emo_trans(emo_img) for emo_img in emo_img_ls]
+
+        per_imgs_ts = torch.stack(per_img_ls, 0)
+        per_labs = torch.as_tensor(per_lab_ls, dtype=torch.float32)
+        emo_imgs_ts = torch.stack(emo_img_ls, 0)
+        emo_labs = torch.as_tensor(emo_lab_ls)
+        sample = {
+            "per_img": per_imgs_ts,
+            "emo_img": emo_imgs_ts,
+            "per_label": per_labs,
+            "emo_label": emo_labs,
+        }
+        return sample
+
+    def gather_emotion_data(self):
+        file = random.choice(self.emo_data_ls)
+        file_name = Path(file).stem
+        img_dir = os.path.join(self.emo_data_root, self.emo_img_dir, file_name)
+        imgs = os.listdir(img_dir)
+        random.shuffle(imgs)
+        imgs = imgs[:100]
+        imgs_pt = [os.path.join(img_dir, img) for img in imgs]
+        with open(file, 'r') as f:
+            frame_label = [map(lambda x: float(x), line.strip().split(",")) for line in f.readlines()[1:]]
+        try:
+            imgs_label = [list(frame_label[int(img_name.split(".")[0])]) for img_name in imgs]
+        except:
+            return self.gather_emotion_data()
+        imgs_rgb = [Image.open(img_pt) for img_pt in imgs_pt]
+        return imgs_rgb, imgs_label
+
+    def gather_personality_data(self, index):
+        img_files = self.all_images[index * 100: (index + 1) * 100]
+        img_ls = []
+        label_ls = []
+        for img_file in img_files:
+            img_ls.append(Image.open(img_file))
+            label_ls.append(self.get_ocean_label(img_file))
+        return img_ls, label_ls
+
+    def __len__(self):
+        return int(len(self.all_images) / 100)
+
 
 @DATA_LOADER_REGISTRY.register()
 def true_personality_dataloader(cfg, mode):
@@ -246,6 +320,34 @@ def true_personality_crnet_audio_dataloader(cfg, mode):
     return data_loader
 
 
+@DATA_LOADER_REGISTRY.register()
+def true_personality_persemon_dataloader(cfg, mode):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+
+    transforms = build_transform_spatial(cfg)
+    persemon_dataset = Chalearn21PersemonData(
+        data_root=cfg.DATA.ROOT,    # "datasets/chalearn2021",
+        data_split=mode,
+        task=cfg.DATA.SESSION,
+        data_type=cfg.DATA.TYPE,  # "frame",
+        trans=transforms,
+        emo_data_root=cfg.DATA.VA_ROOT,  # "datasets",
+        emo_img_dir=cfg.DATA.VA_DATA,  # "va_data/cropped_aligned",
+        emo_label=cfg.DATA.VA_TRAIN_LABEL if mode == "train" else cfg.DATA.VA_VALID_LABEL,
+        emo_trans=transforms,
+    )
+    data_loader = DataLoader(
+        dataset=persemon_dataset,
+        batch_size=1,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
+
 if __name__ == "__main__":
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
     # train_dataset = Chalearn21FrameData(
@@ -271,13 +373,32 @@ if __name__ == "__main__":
     # )
     # print(len(val_dataset))
     # print(val_dataset[1])
-    train_dataset = Chlearn21AudioData(
-        data_root="datasets/chalearn2021",
-        data_split="train",
-        task="talk",
+    # train_dataset = Chlearn21AudioData(
+    #     data_root="datasets/chalearn2021",
+    #     data_split="train",
+    #     task="talk",
+    # )
+    #
+    # print(len(train_dataset))
+    # print(train_dataset[1])
+
+    def face_image_transform():
+        import torchvision.transforms as transforms
+        norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
+        norm_std = [0.229, 0.224, 0.225]
+        transforms = transforms.Compose([
+            transforms.Resize(112),
+            transforms.RandomHorizontalFlip(0.5),
+            transforms.ToTensor(),
+            transforms.Normalize(norm_mean, norm_std)
+        ])
+        return transforms
+
+    transforms = face_image_transform()
+    persemon_dataset = Chalearn21PersemonData(
+        data_root="datasets/chalearn2021", data_split="train", task="talk", data_type="frame", trans=transforms,
+        emo_data_root="datasets", emo_img_dir="va_data/cropped_aligned",
+        emo_label="va_data/va_label/VA_Set/Train_Set", emo_trans=transforms,
     )
-
-    print(len(train_dataset))
-    print(train_dataset[1])
-
+    print(persemon_dataset[2])
 

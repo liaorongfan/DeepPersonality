@@ -8,7 +8,7 @@ from dpcv.modeling.module.weight_init_helper import initialize_weights
 
 class InterpretDAN(nn.Module):
 
-    def __init__(self, features, num_classes=5, init_weights=True, return_feat=False):
+    def __init__(self, features, num_classes=5, init_weights=True, return_feat=False, use_sigmoid=True):
         super(InterpretDAN, self).__init__()
         self.features = features
         self.glo_ave_pooling = nn.AdaptiveAvgPool2d((1, 1))
@@ -16,13 +16,15 @@ class InterpretDAN(nn.Module):
         if init_weights:
             initialize_weights(self)
         self.return_feat = return_feat
+        self.use_sigmoid = use_sigmoid
 
     def forward(self, x):  # x (2, 3, 244, 244)
         x = self.features(x)         # x (2, 512, 7, 7)
         x = self.glo_ave_pooling(x)  # x (2, 512, 1, 1)
         feat = x.flatten(1)  # feat (2, 512)
         x = self.fc(feat)
-        x = torch.sigmoid(x)  # since the regression range always fall in (0, 1)
+        if self.use_sigmoid:
+            x = torch.sigmoid(x)  # since the regression range always fall in (0, 1)
         if self.return_feat:
             return x, feat
         return x
@@ -57,6 +59,17 @@ def get_interpret_dan_model(cfg, pretrained=False, **kwargs):
 def interpret_dan_model(cfg):
     interpret_dan = InterpretDAN(
         make_layers(backbone['VGG16'], batch_norm=True), return_feat=cfg.MODEL.RETURN_FEATURE)
+    interpret_dan.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return interpret_dan
+
+
+@NETWORK_REGISTRY.register()
+def interpret_dan_model_true_personality(cfg):
+    interpret_dan = InterpretDAN(
+        make_layers(backbone['VGG16'], batch_norm=True),
+        return_feat=cfg.MODEL.RETURN_FEATURE,
+        use_sigmoid=False
+    )
     interpret_dan.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return interpret_dan
 

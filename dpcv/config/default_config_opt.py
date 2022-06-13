@@ -36,6 +36,7 @@ __C.DATA.TEST_IMG_FACE_DATA = "image_data/test_data_face"
 __C.DATA.TEST_AUD_DATA = "raw_voice/testData"
 __C.DATA.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 
+__C.DATA.VA_ROOT = "datasets"
 __C.DATA.VA_DATA = "va_data/cropped_aligned"
 __C.DATA.VA_TRAIN_LABEL = "va_data/va_label/VA_Set/Train_Set"
 __C.DATA.VA_VALID_LABEL = "va_data/va_label/VA_Set/Validation_Set"
