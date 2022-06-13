@@ -150,6 +150,35 @@ class Chlearn21AudioData(Chalearn21FrameData):
         return participant_trait
 
 
+class Chalearn21AudioVisualData(Chalearn21FrameData):
+    sample_len = 50176
+
+    def __getitem__(self, idx):
+        img_file = self.all_images[idx]
+        img = Image.open(img_file)
+        label = self.get_ocean_label(img_file)
+        dir_name = os.path.dirname(img_file)
+        wav = self.get_wave_data(dir_name)
+        if self.trans:
+            img = self.trans(img)
+
+        wav = torch.as_tensor(wav, dtype=img.dtype)
+        label = torch.as_tensor(label, dtype=img.dtype)
+        return {"image": img, "audio": wav, "label": label}
+
+    def get_wave_data(self, dir_name):
+        if self.type == "frame":
+            aud_file = f"{dir_name}.npy"
+        if self.type == "face":
+            dir_name = dir_name.replace("_face", "")
+            aud_file = f"{dir_name}.npy"
+        aud_data = np.load(aud_file)
+        data_len = aud_data.shape[-1]
+        start = np.random.randint(data_len - self.sample_len)
+        end = start + self.sample_len
+        return aud_data[:, :, start: end]
+
+
 class CRNetAudioTruePersonality(Chlearn21AudioData):
 
     def __init__(self, data_root, data_split, task, sample_len=244832):
@@ -346,6 +375,31 @@ def true_personality_persemon_dataloader(cfg, mode):
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )
     return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def true_personality_audio_visual_dataloader(cfg, mode):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    transforms = build_transform_spatial(cfg)
+    num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 1
+    dataset = Chalearn21AudioVisualData(
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+        data_split=mode,
+        task=cfg.DATA.SESSION,  # "talk"
+        data_type=cfg.DATA.TYPE,
+        trans=transforms
+    )
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=num_worker,
+    )
+    return data_loader
+
 
 
 if __name__ == "__main__":

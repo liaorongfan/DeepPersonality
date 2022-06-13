@@ -515,8 +515,10 @@ class PersEmoTrainer(BiModalTrainer):
 
     def test(self, data_loader, model):
         model.eval()
+        mse = torch.nn.MSELoss(reduction="none")
         with torch.no_grad():
             ocean_acc = []
+            ocean_mse = []
             label_list = []
             output_list = []
             for data in tqdm(data_loader):
@@ -526,13 +528,24 @@ class PersEmoTrainer(BiModalTrainer):
                 p_labels = p_labels.cpu().detach()
                 output_list.append(p_score)
                 label_list.append(p_labels)
+                ocean_mse_batch = mse(p_score, p_labels).mean(dim=0)
                 ocean_acc_batch = (1 - torch.abs(p_score - p_labels)).mean(dim=0)
+                ocean_mse.append(ocean_mse_batch)
                 ocean_acc.append(ocean_acc_batch)
+            ocean_mse = torch.stack(ocean_mse, dim=0).mean(dim=0).numpy()
             ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
+            ocean_mse_avg = ocean_mse.mean()
             ocean_acc_avg = ocean_acc.mean()
+
             dataset_output = torch.stack(output_list, dim=0).view(-1, 5).numpy()
             dataset_label = torch.stack(label_list, dim=0).view(-1, 5).numpy()
-        return ocean_acc_avg, ocean_acc, dataset_output, dataset_label
+
+        keys = ["O", "C", "E", "A", "N"]
+        ocean_mse_dict, ocean_acc_dict = {}, {}
+        for i, k in enumerate(keys):
+            ocean_mse_dict[k] = np.round(ocean_mse[i], 4)
+            ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
+        return ocean_acc_avg, ocean_acc_dict, dataset_output, dataset_label, (ocean_mse_dict, ocean_mse_avg)
 
     def full_test(self, data_loader, model):
         return self.test(data_loader, model)
