@@ -179,6 +179,70 @@ class Chalearn21AudioVisualData(Chalearn21FrameData):
         return aud_data[:, :, start: end]
 
 
+class Chalearn21CRNetData(Chalearn21FrameData):
+    sample_len = 244832
+
+    def __getitem__(self, idx):
+        img_file = self.all_images[idx]
+        img = Image.open(img_file)
+
+        loc_img = self.get_loc_img(img_file)
+
+        label = self.get_ocean_label(img_file)
+        label_cls_encode = self.cls_encode(label)
+
+        dir_name = os.path.dirname(img_file)
+        wav = self.get_wave_data(dir_name)
+        if self.trans:
+            img = self.trans["frame"](img)
+            loc_img = self.trans["face"](loc_img)
+
+        wav = torch.as_tensor(wav, dtype=img.dtype)
+        label = torch.as_tensor(label, dtype=img.dtype)
+        return {"glo_img": img, "loc_img": loc_img, "wav_aud": wav,
+                "reg_label": label, "cls_label": label_cls_encode}
+
+    def get_wave_data(self, dir_name):
+        if self.type == "frame":
+            aud_file = f"{dir_name}.npy"
+        if self.type == "face":
+            dir_name = dir_name.replace("_face", "")
+            aud_file = f"{dir_name}.npy"
+        aud_data = np.load(aud_file)
+        data_len = aud_data.shape[-1]
+        start = np.random.randint(data_len - self.sample_len)
+        end = start + self.sample_len
+        return aud_data[:, :, start: end]
+
+    def get_loc_img(self, img_file):
+        img_file = Path(img_file)
+        img_id = img_file.stem.split("_")[-1]
+        loc_img_dir = f"{img_file.parent}_face"
+        loc_img_file = f"{loc_img_dir}/face_{img_id}.jpg"
+        try:
+            loc_img = Image.open(loc_img_file)
+        except FileNotFoundError:
+            loc_img_ls = list(Path(loc_img_dir).rglob("*.jpg"))
+            loc_img_file = random.choice(loc_img_ls)
+            loc_img = Image.open(loc_img_file)
+        return loc_img
+
+    @staticmethod
+    def cls_encode(score):
+        index = []
+        for v in score:
+            if v < -1:
+                index.append(0)
+            elif -1 <= v < 0:
+                index.append(1)
+            elif 0 <= v < 1:
+                index.append(2)
+            else:
+                index.append(3)
+        one_hot_cls = np.eye(4)[index]
+        return one_hot_cls
+
+
 class CRNetAudioTruePersonality(Chlearn21AudioData):
 
     def __init__(self, data_root, data_split, task, sample_len=244832):
@@ -329,6 +393,29 @@ def true_personality_audio_dataloader(cfg, mode):
 
 
 @DATA_LOADER_REGISTRY.register()
+def true_personality_crnet_dataloader(cfg, mode):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    transforms = build_transform_spatial(cfg)
+    num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 1
+    dataset = Chalearn21CRNetData(
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+        data_split=mode,
+        task=cfg.DATA.SESSION,  # "talk"
+        trans=transforms,
+    )
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=0,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
 def true_personality_crnet_audio_dataloader(cfg, mode):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
@@ -401,7 +488,6 @@ def true_personality_audio_visual_dataloader(cfg, mode):
     return data_loader
 
 
-
 if __name__ == "__main__":
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
     # train_dataset = Chalearn21FrameData(
@@ -411,7 +497,8 @@ if __name__ == "__main__":
     # )
     # print(len(train_dataset))
     # print(train_dataset[1])
-    #
+
+    # ==========================================================
     # test_dataset = Chalearn21FrameData(
     #     data_root="datasets/chalearn2021",
     #     data_split="test",
@@ -419,7 +506,8 @@ if __name__ == "__main__":
     # )
     # print(len(test_dataset))
     # print(test_dataset[1])
-    #
+
+    # ===========================================================
     # val_dataset = Chalearn21FrameData(
     #     data_root="datasets/chalearn2021",
     #     data_split="val",
@@ -427,6 +515,8 @@ if __name__ == "__main__":
     # )
     # print(len(val_dataset))
     # print(val_dataset[1])
+
+    # ===========================================================================================================
     # train_dataset = Chlearn21AudioData(
     #     data_root="datasets/chalearn2021",
     #     data_split="train",
@@ -436,23 +526,32 @@ if __name__ == "__main__":
     # print(len(train_dataset))
     # print(train_dataset[1])
 
-    def face_image_transform():
-        import torchvision.transforms as transforms
-        norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
-        norm_std = [0.229, 0.224, 0.225]
-        transforms = transforms.Compose([
-            transforms.Resize(112),
-            transforms.RandomHorizontalFlip(0.5),
-            transforms.ToTensor(),
-            transforms.Normalize(norm_mean, norm_std)
-        ])
-        return transforms
+    # ============================================================================================================
+    # def face_image_transform():
+    #     import torchvision.transforms as transforms
+    #     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
+    #     norm_std = [0.229, 0.224, 0.225]
+    #     transforms = transforms.Compose([
+    #         transforms.Resize(112),
+    #         transforms.RandomHorizontalFlip(0.5),
+    #         transforms.ToTensor(),
+    #         transforms.Normalize(norm_mean, norm_std)
+    #     ])
+    #     return transforms
+    #
+    # transforms = face_image_transform()
+    # persemon_dataset = Chalearn21PersemonData(
+    #     data_root="datasets/chalearn2021", data_split="train", task="talk", data_type="frame", trans=transforms,
+    #     emo_data_root="datasets", emo_img_dir="va_data/cropped_aligned",
+    #     emo_label="va_data/va_label/VA_Set/Train_Set", emo_trans=transforms,
+    # )
+    # print(persemon_dataset[2])
 
-    transforms = face_image_transform()
-    persemon_dataset = Chalearn21PersemonData(
-        data_root="datasets/chalearn2021", data_split="train", task="talk", data_type="frame", trans=transforms,
-        emo_data_root="datasets", emo_img_dir="va_data/cropped_aligned",
-        emo_label="va_data/va_label/VA_Set/Train_Set", emo_trans=transforms,
+    train_dataset = Chalearn21CRNetData(
+        data_root="datasets/chalearn2021",
+        data_split="train",
+        task="talk",
     )
-    print(persemon_dataset[2])
 
+    print(len(train_dataset))
+    print(train_dataset[1])

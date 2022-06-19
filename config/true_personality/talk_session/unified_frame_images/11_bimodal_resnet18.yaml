@@ -20,4 +20,4 @@ SOLVER:
 TRAIN:
   TRAINER: "BiModalTrainer"
   MAX_EPOCH: 5
-  OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/11_bimodal_resnet18.yaml"
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/11_bimodal_resnet18"
