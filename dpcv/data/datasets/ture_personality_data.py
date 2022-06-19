@@ -347,6 +347,62 @@ class Chalearn21PersemonData(Chalearn21FrameData):
         return int(len(self.all_images) / 100)
 
 
+class Chalearn21LSTMData(Chalearn21FrameData):
+    def __init__(
+            self, data_root, data_split, task, data_type="frame",
+            even_downsample=2000, trans=None, segment=True,
+    ):
+        super().__init__(data_root, data_split, task, data_type, even_downsample, trans, segment)
+
+    def __getitem__(self, idx):
+        imgs_array_ls, file_ls = self._get_statistic_img_sample(idx)
+        wav_ft = self._get_wav_sample(file_ls[0])
+        anno_score = self.get_ocean_label(file_ls[0])
+        if self.trans:
+            imgs_ten_ls = []
+            for img_arr in imgs_array_ls:
+                img_ten = self.trans(img_arr)
+                imgs_ten_ls.append(img_ten)
+            imgs_ten = torch.stack(imgs_ten_ls, dim=0)
+        else:
+            imgs_ten = torch.as_tensor(imgs_array_ls)
+
+        wav_ft = torch.as_tensor(wav_ft, dtype=imgs_ten.dtype)
+        anno_score = torch.as_tensor(anno_score, dtype=imgs_ten.dtype)
+        sample = {"image": imgs_ten, "audio": wav_ft, "label": anno_score}
+        return sample
+
+    def __len__(self):
+        return len(self.img_dir_ls)
+
+    def _get_statistic_img_sample(self, index):
+        img_dir = self.img_dir_ls[index]
+        imgs = glob.glob(opt.join(self.data_dir, img_dir, "*.jpg"))
+        if self.type == "frame":
+            imgs = sorted(imgs, key=lambda x: int(Path(x).stem[6:]))
+        elif self.type == "face":
+            imgs = sorted(imgs, key=lambda x: int(Path(x).stem[5:]))
+        if len(imgs) > 10:
+            separate = np.linspace(0, len(imgs) - 1, 7, endpoint=True, dtype=np.int16)
+            selected = [random.randint(separate[idx], separate[idx + 1]) for idx in range(6)]
+            img_array_ls = []
+            img_file_ls = []
+            for idx in selected:
+                img_pt = imgs[idx]
+                img_array = Image.open(img_pt).convert("RGB")
+                img_array_ls.append(img_array)
+                img_file_ls.append(img_pt)
+            return img_array_ls, img_file_ls
+        else:
+            raise ValueError("encountered bad input {}".format(self.img_dir_ls[index]))
+
+    def _get_wav_sample(self, img_file):
+        img_dir_name = os.path.dirname(img_file)
+        wav_path = f"{img_dir_name}.wav_mfcc_mt.csv"
+        wav_ft = np.loadtxt(wav_path, delimiter=",")
+        return wav_ft
+
+
 @DATA_LOADER_REGISTRY.register()
 def true_personality_dataloader(cfg, mode):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
@@ -473,6 +529,30 @@ def true_personality_audio_visual_dataloader(cfg, mode):
     transforms = build_transform_spatial(cfg)
     num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 1
     dataset = Chalearn21AudioVisualData(
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+        data_split=mode,
+        task=cfg.DATA.SESSION,  # "talk"
+        data_type=cfg.DATA.TYPE,
+        trans=transforms
+    )
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=num_worker,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def true_personality_lstm_dataloader(cfg, mode):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    transforms = build_transform_spatial(cfg)
+    num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 0
+    dataset = Chalearn21LSTMData(
         data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
         data_split=mode,
         task=cfg.DATA.SESSION,  # "talk"
