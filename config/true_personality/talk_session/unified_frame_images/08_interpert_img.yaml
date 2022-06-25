@@ -20,6 +20,6 @@ SOLVER:
   MILESTONE: [3, 4]
 TRAIN:
   TRAINER: "ImageModalTrainer"
-  MAX_EPOCH: 5
+  MAX_EPOCH: 4
   LOG_INTERVAL: 50
   OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/08_interpret_img.yaml"

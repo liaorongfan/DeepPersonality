@@ -79,7 +79,7 @@ class CRNet(nn.Module):
 class CRNet2(nn.Module):
     def __init__(self, init_weights=True, return_feat=False):
         super(CRNet2, self).__init__()
-        self.train_guider_epo = 30
+        self.train_guider_epo = 1
         self.return_feat = return_feat
         self.train_regressor = False
 

@@ -19,5 +19,5 @@ SOLVER:
   MILESTONE: [80, 90]
 TRAIN:
   TRAINER: "CRNetTrainer2"
-  MAX_EPOCH: 100
+  MAX_EPOCH: 4
   OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/12_crnet"

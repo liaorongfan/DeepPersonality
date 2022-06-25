@@ -19,5 +19,5 @@ SOLVER:
   MILESTONE: [80, 90]
 TRAIN:
   TRAINER: "ImageModalTrainer"
-  MAX_EPOCH: 5
+  MAX_EPOCH: 4
   OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/10_deep_bimodal_regression.yaml"

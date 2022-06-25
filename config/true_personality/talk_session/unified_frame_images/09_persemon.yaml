@@ -20,6 +20,6 @@ SOLVER:
   MILESTONE: [3, 4]
 TRAIN:
   TRAINER: "PersEmoTrainer"
-  MAX_EPOCH: 2
+  MAX_EPOCH: 3
   LOG_INTERVAL: 5
   OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/09_persemon.yaml"

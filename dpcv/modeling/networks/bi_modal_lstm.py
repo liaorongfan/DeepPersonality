@@ -5,7 +5,7 @@ from .build import NETWORK_REGISTRY
 
 
 class BiModelLSTM(nn.Module):
-    def __init__(self, init_weights=True):
+    def __init__(self, init_weights=True, true_personality=False):
         super(BiModelLSTM, self).__init__()
         self.audio_branch = nn.Linear(in_features=68, out_features=32)
         self.image_branch_conv = nn.Sequential(
@@ -30,7 +30,7 @@ class BiModelLSTM(nn.Module):
         # self.out_linear = nn.Linear(in_features=128, out_features=5)
         self.lstm = nn.LSTM(input_size=160, hidden_size=512)
         self.out_linear = nn.Linear(in_features=512, out_features=5)
-
+        self.true_personality = true_personality
         if init_weights:
             initialize_weights(self)
 
@@ -43,6 +43,8 @@ class BiModelLSTM(nn.Module):
         x, _ = self.lstm(x)  # x_shape = (6, bs, 128)
         x = self.out_linear(x)  # x_shape = (6, bs, 5)
         x = x.permute(1, 0, 2)  # x_shape = (bs, 6, 5)
+        if self.true_personality:
+            return x.mean(dim=1)
         y = torch.sigmoid(x).mean(dim=1)  # y_shape = (bs, 5)
         return y
 
@@ -108,6 +110,13 @@ def get_bi_modal_lstm_model():
 @NETWORK_REGISTRY.register()
 def bi_modal_lstm_model(cfg=None):
     bi_modal_lstm = BiModelLSTM()
+    bi_modal_lstm.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return bi_modal_lstm
+
+
+@NETWORK_REGISTRY.register()
+def bi_modal_lstm_model_true_personality(cfg=None):
+    bi_modal_lstm = BiModelLSTM(true_personality=True)
     bi_modal_lstm.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return bi_modal_lstm
 

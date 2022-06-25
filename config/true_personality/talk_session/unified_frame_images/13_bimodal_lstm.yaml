@@ -7,7 +7,7 @@ DATA_LOADER:
   TRAIN_BATCH_SIZE: 64
   NUM_WORKERS: 0
 MODEL:
-  NAME: "bi_modal_lstm_model"
+  NAME: "bi_modal_lstm_model_true_personality"
 LOSS:
   NAME: "mean_square_error"
 SOLVER:

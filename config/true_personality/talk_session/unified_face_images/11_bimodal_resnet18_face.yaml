@@ -20,5 +20,5 @@ SOLVER:
   MILESTONE: [100, 200]
 TRAIN:
   TRAINER: "BiModalTrainer"
-  MAX_EPOCH: 5
+  MAX_EPOCH: 4
   OUTPUT_DIR: "results_true_personality/unified_face_images_talk/11_bimodal_resnet18.yaml"
