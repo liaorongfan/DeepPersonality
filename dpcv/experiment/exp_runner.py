@@ -15,7 +15,7 @@ from dpcv.tools.logger import make_logger
 
 class ExpRunner:
 
-    def __init__(self, cfg):
+    def __init__(self, cfg, feature_extract=None):
         """ run exp from config file
 
         arg:
@@ -32,8 +32,8 @@ class ExpRunner:
         self.cfg = cfg
         self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR)
         self.log_cfg_info()
-
-        self.data_loader = self.build_dataloader()
+        if not feature_extract:
+            self.data_loader = self.build_dataloader()
 
         self.model = self.build_model()
         self.loss_f = self.build_loss_function()
@@ -173,6 +173,6 @@ class ExpRunner:
 
     def data_extract(self, dataloader, output_dir):
 
-        return self.trainer.data_extract(dataloader, output_dir, self.model)
+        return self.trainer.data_extract(self.model, dataloader, output_dir)
 
 

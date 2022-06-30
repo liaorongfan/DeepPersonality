@@ -547,7 +547,7 @@ class SwinTransformer(nn.Module):
         self.patch_norm = patch_norm
         self.num_features = int(embed_dim * 2 ** (self.num_layers - 1))
         self.mlp_ratio = mlp_ratio
-        self.return_feat = return_feat
+        self.return_feature = return_feat
 
         # split image into non-overlapping patches
         self.patch_embed = PatchEmbed(
@@ -629,7 +629,7 @@ class SwinTransformer(nn.Module):
         x = self.head(feat)
         if self.normalize_output:
             x = torch.sigmoid(x)
-        if self.return_feat:
+        if self.return_feature:
             return x, feat
         return x
 

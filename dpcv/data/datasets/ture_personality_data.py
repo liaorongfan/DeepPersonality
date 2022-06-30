@@ -157,8 +157,7 @@ class Chalearn21AudioVisualData(Chalearn21FrameData):
         img_file = self.all_images[idx]
         img = Image.open(img_file)
         label = self.get_ocean_label(img_file)
-        dir_name = os.path.dirname(img_file)
-        wav = self.get_wave_data(dir_name)
+        wav = self.get_wave_data(img_file)
         if self.trans:
             img = self.trans(img)
 
@@ -166,7 +165,8 @@ class Chalearn21AudioVisualData(Chalearn21FrameData):
         label = torch.as_tensor(label, dtype=img.dtype)
         return {"image": img, "audio": wav, "label": label}
 
-    def get_wave_data(self, dir_name):
+    def get_wave_data(self, img_file):
+        dir_name = os.path.dirname(img_file)
         if self.type == "frame":
             aud_file = f"{dir_name}.npy"
         if self.type == "face":
@@ -191,8 +191,7 @@ class Chalearn21CRNetData(Chalearn21FrameData):
         label = self.get_ocean_label(img_file)
         label_cls_encode = self.cls_encode(label)
 
-        dir_name = os.path.dirname(img_file)
-        wav = self.get_wave_data(dir_name)
+        wav = self.get_wave_data(img_file)
         if self.trans:
             img = self.trans["frame"](img)
             loc_img = self.trans["face"](loc_img)
@@ -202,7 +201,8 @@ class Chalearn21CRNetData(Chalearn21FrameData):
         return {"glo_img": img, "loc_img": loc_img, "wav_aud": wav,
                 "reg_label": label, "cls_label": label_cls_encode}
 
-    def get_wave_data(self, dir_name):
+    def get_wave_data(self, img_file):
+        dir_name = os.path.dirname(img_file)
         if self.type == "frame":
             aud_file = f"{dir_name}.npy"
         if self.type == "face":
@@ -279,11 +279,11 @@ class Chalearn21PersemonData(Chalearn21FrameData):
 
     def __init__(
         self, data_root, data_split, task, data_type, trans,
-        emo_data_root, emo_img_dir, emo_label, emo_trans,
+        emo_data_root, emo_img_dir, emo_label, emo_trans, segment=False,
     ):
         super().__init__(
             data_root, data_split, task, data_type=data_type,
-            even_downsample=2000, trans=trans, segment=False
+            even_downsample=2000, trans=trans, segment=segment
         )
         self.emo_data_root = emo_data_root
         self.emo_img_dir = emo_img_dir

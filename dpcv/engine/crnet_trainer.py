@@ -356,7 +356,7 @@ class CRNetTrainer2(BiModalTrainer):
         loss = loss_1 + loss_2 + loss_3 + loss_4
         return loss
 
-    def data_extract(self, data_set, output_dir, model):
+    def data_extract(self, model, data_set, output_dir):
         os.makedirs(output_dir, exist_ok=True)
         model.eval()
         model.set_train_regressor()
@@ -370,11 +370,17 @@ class CRNetTrainer2(BiModalTrainer):
                     mini_batch_i_2 = inputs[1][(i * mini_batch_size): (i + 1) * mini_batch_size]
                     mini_batch_i_3 = inputs[2][(i * mini_batch_size): (i + 1) * mini_batch_size]
                     mini_batch_i = (mini_batch_i_1, mini_batch_i_2, mini_batch_i_3)
-                    _, out, feat = model(*mini_batch_i)
-                    out_ls.append(out.cpu())
-                    feat_ls.append(feat.cpu())
+                    if model.return_feature:
+                        _, out, feat = model(*mini_batch_i)
+                        out_ls.append(out.cpu())
+                        feat_ls.append(feat.cpu())
+                    else:
+                        _, out = model(*mini_batch_i)
+                        out_ls.append(out.cpu())
+                        feat_ls.append(torch.tensor([0]))
+
                 # out.shape = (64, 5) feat.shape = (64, 5, 512)
-                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0).mean(dim=1)
+                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
                 video_extract = {
                     "video_frames_pred": out_pred,
                     "video_frames_feat": out_feat,

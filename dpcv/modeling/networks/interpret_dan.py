@@ -15,7 +15,7 @@ class InterpretDAN(nn.Module):
         self.fc = nn.Linear(512, num_classes)
         if init_weights:
             initialize_weights(self)
-        self.return_feat = return_feat
+        self.return_feature = return_feat
         self.use_sigmoid = use_sigmoid
 
     def forward(self, x):  # x (2, 3, 244, 244)
@@ -25,7 +25,7 @@ class InterpretDAN(nn.Module):
         x = self.fc(feat)
         if self.use_sigmoid:
             x = torch.sigmoid(x)  # since the regression range always fall in (0, 1)
-        if self.return_feat:
+        if self.return_feature:
             return x, feat
         return x
 

@@ -163,7 +163,7 @@ class BiModalTrainer(object):
 
         return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label
 
-    def data_extract(self, data_set, output_dir, model):
+    def data_extract(self, model, data_set, output_dir):
         os.makedirs(output_dir, exist_ok=True)
         model.eval()
         with torch.no_grad():
@@ -181,9 +181,14 @@ class BiModalTrainer(object):
                         pass
 
                     # mini_batch = (mini_batch_1, mini_batch_2)
-                    out, feat = model(*mini_batch)
-                    out_ls.append(out.cpu())
-                    feat_ls.append(feat.cpu())
+                    if model.return_feature:
+                        out, feat = model(*mini_batch)
+                        out_ls.append(out.cpu())
+                        feat_ls.append(feat.cpu())
+                    else:
+                        out = model(*mini_batch)
+                        out_ls.append(out.cpu())
+                        feat_ls.append(torch.tensor([0]))
                 out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
                 video_extract = {
                     "video_frames_pred": out_pred,
@@ -557,7 +562,7 @@ class PersEmoTrainer(BiModalTrainer):
         per_labels, emo_labels = data["per_label"], data["emo_label"]
         return (per_inputs, emo_inputs), per_labels[0]
 
-    def data_extract(self, data_set, output_dir, model):
+    def data_extract(self, model, data_set, output_dir):
         os.makedirs(output_dir, exist_ok=True)
         model.eval()
         with torch.no_grad():

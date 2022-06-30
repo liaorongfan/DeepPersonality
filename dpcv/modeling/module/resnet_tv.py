@@ -108,7 +108,7 @@ class ResNet(nn.Module):
             return_feat=False,
     ):
         super(ResNet, self).__init__()
-        self.return_feat = return_feat
+        self.return_feature = return_feat
         self.sigmoid_output = sigmoid_output
         self.inplanes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -179,7 +179,7 @@ class ResNet(nn.Module):
         x = self.fc(feat)
         if self.sigmoid_output:
             x = torch.sigmoid(x)
-        if self.return_feat:
+        if self.return_feature:
             return x, feat
         return x
 

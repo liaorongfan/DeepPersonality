@@ -11,7 +11,7 @@ class AudioVisualResNet18(nn.Module):
 
     def __init__(self, init_weights=True, return_feat=False):
         super(AudioVisualResNet18, self).__init__()
-        self.return_feat = return_feat
+        self.return_feature = return_feat
         self.audio_branch = AudioVisualResNet(
             in_channels=1, init_stage=AudInitStage,
             block=BiModalBasicBlock, conv=[aud_conv1x9, aud_conv1x1],
@@ -41,7 +41,7 @@ class AudioVisualResNet18(nn.Module):
         x = torch.sigmoid(x)
         # x = torch.tanh(x)
         # x = (x + 1) / 2  # scale tanh output to [0, 1]
-        if self.return_feat:
+        if self.return_feature:
             return x, feat
         return x
 

@@ -80,7 +80,7 @@ class CRNet2(nn.Module):
     def __init__(self, init_weights=True, return_feat=False):
         super(CRNet2, self).__init__()
         self.train_guider_epo = 1
-        self.return_feat = return_feat
+        self.return_feature = return_feat
         self.train_regressor = False
 
         self.global_img_branch = AudioVisualResNet(
@@ -147,7 +147,7 @@ class CRNet2(nn.Module):
         out_reg = guided_glo_reg + guided_loc_reg + guided_wav_reg
         out = self.out_map(out_reg)
         out = out.view(out.size(0), -1)
-        if self.return_feat:
+        if self.return_feature:
             return cls_guide, out, out_reg
         return cls_guide, out
 
