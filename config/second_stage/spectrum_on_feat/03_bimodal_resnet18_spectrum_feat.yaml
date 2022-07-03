@@ -1,0 +1,25 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/second_stage/bimodal_resnet18_extract/train"
+  VALID_IMG_DATA: "datasets/second_stage/bimodal_resnet18_extract/valid"
+  TEST_IMG_DATA: "datasets/second_stage/bimodal_resnet18_extract/test"
+DATA_LOADER:
+  NAME: "second_stage_data"
+  SECOND_STAGE:
+    METHOD: "spectrum"
+    TYPE: "feat"
+  TRAIN_BATCH_SIZE: 4
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "spectrum_feat_resnet18"
+  SPECTRUM_CHANNEL: 512
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  MILESTONE: [15,]
+TRAIN:
+  TRAINER: "SpectrumTrainer"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/03_bimodal_resnet18_spectrum"

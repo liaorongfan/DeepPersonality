@@ -1,0 +1,27 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/second_stage/interpret_cnn_extract/train"
+  VALID_IMG_DATA: "datasets/second_stage/interpret_cnn_extract/valid"
+  TEST_IMG_DATA: "datasets/second_stage/interpret_cnn_extract/test"
+DATA_LOADER:
+  NAME: "second_stage_data"
+  SECOND_STAGE:
+    METHOD: "spectrum"
+    TYPE: "feat"
+  TRAIN_BATCH_SIZE: 512
+  NUM_WORKERS: 0  # more threads are slower in that case     
+MODEL:
+  NAME: "spectrum_conv_model2"
+  SPECTRUM_CHANNEL: 512
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.125
+  MILESTONE: [40, 80]
+TRAIN:
+  TRAINER: "SpectrumTrainer"
+  MAX_EPOCH: 50
+  LOG_INTERVAL: 2
+  VALID_INTERVAL: 5
+  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/06_interpret_cnn_spectrum"

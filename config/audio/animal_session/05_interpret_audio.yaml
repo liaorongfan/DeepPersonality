@@ -1,0 +1,22 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "animal"
+DATA_LOADER:
+  NAME: "true_personality_interpret_aud_dataloader"
+  TRAIN_BATCH_SIZE: 2
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "interpret_audio_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.05
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [80, 100, 150]
+TRAIN:
+  TRAINER: "AudioTrainer"
+  MAX_EPOCH: 4
+  OUTPUT_DIR: "results_true_personality/audio_animal/05_interpret_audio"

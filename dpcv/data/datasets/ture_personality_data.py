@@ -9,8 +9,16 @@ import json
 import random
 from pathlib import Path
 from PIL import Image
+import torchaudio
 from dpcv.data.transforms.build import build_transform_spatial
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
+
+
+def norm(aud_ten):
+    mean = aud_ten.mean()
+    std = aud_ten.std()
+    normed_ten = (aud_ten - mean) / (std + 1e-10)
+    return normed_ten
 
 
 class Chalearn21FrameData(Dataset):
@@ -148,6 +156,30 @@ class Chlearn21AudioData(Chalearn21FrameData):
         participant_trait = self.parts_personality[participant_id]
         participant_trait = np.array([float(v) for v in participant_trait.values()])
         return participant_trait
+
+
+class Chalearn21LSTMAudioData(Chlearn21AudioData):
+
+    def sample_audio_data(self, img_dir):
+        aud_file = opt.join(self.data_dir, f"{img_dir}.wav_mfcc_mt.csv")
+        wav_ft = np.loadtxt(aud_file, delimiter=",")
+        return wav_ft
+
+
+class Chalearn21InterpretAudioData(Chlearn21AudioData):
+
+    def sample_audio_data(self, img_dir):
+        aud_file = opt.join(self.data_dir, f"{img_dir}.wav")
+        aud_data, sample_rate = torchaudio.load(aud_file)
+        trans_aud = torchaudio.transforms.Resample(sample_rate, 4000)(aud_data[0, :].view(1, -1))
+        trans_fft = torch.fft.fft(trans_aud)
+        half_length = int(trans_aud.shape[-1] / 2)
+        trans_fre = torch.abs(trans_fft)[..., :half_length]
+        trans_fre = trans_fre[:, :40000]
+        trans_fre_norm = norm(trans_fre)
+        # if trans_fre_norm.shape[-1] < 30604:
+        #     return self.get_wave_data(index - 1)
+        return trans_fre_norm
 
 
 class Chalearn21AudioVisualData(Chalearn21FrameData):
@@ -383,7 +415,7 @@ class Chalearn21LSTMData(Chalearn21FrameData):
         elif self.type == "face":
             imgs = sorted(imgs, key=lambda x: int(Path(x).stem[5:]))
         if len(imgs) > 10:
-            separate = np.linspace(0, len(imgs) - 1, 7, endpoint=True, dtype=np.int16)
+            separate = np.linspace(0, len(imgs) - 1, 7, endpoint=True, dtype=np.int32)
             selected = [random.randint(separate[idx], separate[idx + 1]) for idx in range(6)]
             img_array_ls = []
             img_file_ls = []
@@ -398,6 +430,8 @@ class Chalearn21LSTMData(Chalearn21FrameData):
 
     def _get_wav_sample(self, img_file):
         img_dir_name = os.path.dirname(img_file)
+        if "face" in img_dir_name:
+            img_dir_name = img_dir_name.replace("_face", "")
         wav_path = f"{img_dir_name}.wav_mfcc_mt.csv"
         wav_ft = np.loadtxt(wav_path, delimiter=",")
         return wav_ft
@@ -446,6 +480,49 @@ def true_personality_audio_dataloader(cfg, mode):
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )
     return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def true_personality_audio_bimodal_lstm_dataloader(cfg, mode):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+
+    dataset = Chalearn21LSTMAudioData(
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+        data_split=mode,
+        task=cfg.DATA.SESSION,  # "talk"
+    )
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def true_personality_interpret_aud_dataloader(cfg, mode):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+
+    dataset = Chalearn21InterpretAudioData(
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+        data_split=mode,
+        task=cfg.DATA.SESSION,  # "talk"
+    )
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
 
 
 @DATA_LOADER_REGISTRY.register()

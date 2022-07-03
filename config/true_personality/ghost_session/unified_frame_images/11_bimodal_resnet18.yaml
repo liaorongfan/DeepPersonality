@@ -1,0 +1,23 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "ghost"
+DATA_LOADER:
+  NAME: "true_personality_audio_visual_dataloader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "audiovisual_resnet"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [100, 200]
+TRAIN:
+  TRAINER: "BiModalTrainer"
+  MAX_EPOCH: 5
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_ghost/11_bimodal_resnet18"

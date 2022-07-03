@@ -1,0 +1,23 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "lego"
+DATA_LOADER:
+  NAME: "true_personality_lstm_dataloader"
+  TRANSFORM: "face_image_transform"  # for different input image resolution
+  TRAIN_BATCH_SIZE: 16
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "bi_modal_lstm_model_true_personality"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.05
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [80,]
+TRAIN:
+  TRAINER: "BimodalLSTMTrain"
+  MAX_EPOCH: 50
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_lego/13_bimodal_lstm"

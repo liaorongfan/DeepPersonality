@@ -1,0 +1,23 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "lego"
+DATA_LOADER:
+  NAME: "true_personality_dataloader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "dan_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.05
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [2,]
+TRAIN:
+  TRAINER: "ImageModalTrainer"
+  MAX_EPOCH: 3
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_lego/10_deep_bimodal_regression"

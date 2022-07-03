@@ -1,0 +1,27 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/second_stage/deep_bimodal_reg_extract/train"
+  VALID_IMG_DATA: "datasets/second_stage/deep_bimodal_reg_extract/valid"
+  TEST_IMG_DATA: "datasets/second_stage/deep_bimodal_reg_extract/test"
+DATA_LOADER:
+  NAME: "second_stage_data"
+  SECOND_STAGE:
+    METHOD: "spectrum"
+    TYPE: "feat"
+  TRAIN_BATCH_SIZE: 256
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "spectrum_conv_model3"
+  SPECTRUM_CHANNEL: 1024
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.1
+  MILESTONE: [20, 30]
+TRAIN:
+  TRAINER: "SpectrumTrainer"
+  MAX_EPOCH: 40
+  LOG_INTERVAL: 2
+  VALID_INTERVAL: 1
+  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/01_deep_bimodal_spectrum"

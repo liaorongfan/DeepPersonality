@@ -1,0 +1,25 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/second_stage/persemon_extract/train"
+  VALID_IMG_DATA: "datasets/second_stage/persemon_extract/valid"
+  TEST_IMG_DATA: "datasets/second_stage/persemon_extract/test"
+DATA_LOADER:
+  NAME: "second_stage_data"
+  SECOND_STAGE:
+    METHOD: "spectrum"
+    TYPE: "feat"
+  TRAIN_BATCH_SIZE: 4
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "spectrum_Feat_conv_model"
+  SPECTRUM_CHANNEL: 512
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  MILESTONE: [10,]
+TRAIN:
+  TRAINER: "SpectrumTrainer"
+  MAX_EPOCH: 15
+  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/05_persemon_spectrum"

@@ -21,7 +21,7 @@ pretrained/
 output/
 mlruns/
 /snippet
-temp/*.txt
+#temp/*.txt
 events.out*
 # current output files
 *.png

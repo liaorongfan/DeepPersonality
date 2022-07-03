@@ -85,11 +85,12 @@ class ImgLSTM(nn.Module):
 
 class AudioLSTM(nn.Module):
 
-    def __init__(self):
+    def __init__(self, with_sigmoid=False):
         super(AudioLSTM, self).__init__()
         self.audio_branch = nn.Linear(in_features=68, out_features=32)
         self.lstm = nn.LSTM(input_size=32, hidden_size=128)
         self.out_linear = nn.Linear(in_features=128, out_features=5)
+        self.with_sigmoid = with_sigmoid
 
     def forward(self, audio_feature):
         x_audio = self.audio_branch(audio_feature)  # (bs * 6, 32)
@@ -97,7 +98,10 @@ class AudioLSTM(nn.Module):
         x, _ = self.lstm(x)  # x_shape = (6, bs, 128)
         x = self.out_linear(x)  # x_shape = (6, bs, 5)
         x = x.permute(1, 0, 2)  # x_shape = (bs, 6, 5)
-        y = torch.sigmoid(x).mean(dim=1)  # y_shape = (bs, 5)
+        if self.with_sigmoid:
+            y = torch.sigmoid(x).mean(dim=1)  # y_shape = (bs, 5)
+        else:
+            y = x.mean(dim=1)
         return y
 
 

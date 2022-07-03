@@ -1,0 +1,27 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/second_stage/cr_net_extract/train"
+  VALID_IMG_DATA: "datasets/second_stage/cr_net_extract/valid"
+  TEST_IMG_DATA: "datasets/second_stage/cr_net_extract/test"
+DATA_LOADER:
+  NAME: "second_stage_data"
+  SECOND_STAGE:
+    METHOD: "spectrum"
+    TYPE: "feat"
+  TRAIN_BATCH_SIZE: 4
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "spectrum_feat_resnet18"
+  SPECTRUM_CHANNEL: 512
+LOSS:
+  NAME: "l1_loss"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.1
+  MILESTONE: [20,]
+TRAIN:
+  TRAINER: "SpectrumTrainer"
+  MAX_EPOCH: 30
+  LOG_INTERVAL: 100
+  VALID_INTERVAL: 2
+  OUTPUT_DIR: "results_second_stage/spectrum_on_feat/04_crnet_spectrum"

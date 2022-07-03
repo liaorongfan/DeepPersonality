@@ -1,0 +1,18 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "ghost"
+DATA_LOADER:
+  NAME: "true_personality_audio_bimodal_lstm_dataloader"
+  TRAIN_BATCH_SIZE: 4
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "get_aud_modal_lstm_model"
+SOLVER:
+  LR_INIT: 0.05
+  MOMENTUM: 0.9
+  WEIGHT_DECAY: 0.0005
+  MILESTONE: [500, 800, 900]
+TRAIN:
+  TRAINER: "AudioTrainer"
+  MAX_EPOCH: 100
+  OUTPUT_DIR: "results_true_personality/audio_ghost/04_aud_lstm"

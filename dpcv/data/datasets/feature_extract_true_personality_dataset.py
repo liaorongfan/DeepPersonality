@@ -7,6 +7,8 @@ from pathlib import Path
 import numpy as np
 import random
 from PIL import Image
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class AllSampleTruePersonalityData(Chalearn21FrameData):

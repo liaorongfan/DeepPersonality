@@ -1,0 +1,25 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "lego"
+  TYPE: "frame"
+DATA_LOADER:
+  NAME: "true_personality_persemon_dataloader"
+  TRANSFORM: "face_image_transform"
+  TRAIN_BATCH_SIZE: 16
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "pers_emo_model"
+LOSS:
+  NAME: "PeremonLoss"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.0001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [2,]
+TRAIN:
+  TRAINER: "PersEmoTrainer"
+  MAX_EPOCH: 3
+  LOG_INTERVAL: 5
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_lego/09_persemon"
