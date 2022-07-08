@@ -105,66 +105,12 @@ if __name__ == "__main__":
     #     data_loader=setup_bimodal_resnet_dataloader,
     #     output_dir="datasets/second_stage/bimodal_resnet18_extract",
     # )
+
     # deep_bimodal_regression feature extract
-    # feature_extract(
-    #     cfg_file="config/unified_frame_images/01_deep_bimodal_regression.yaml",
-    #     model_weight="results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl",
-    #     data_loader=setup_dataloader,
-    #     output_dir="datasets/second_stage/deep_bimodal_reg_extract",
-    # )
-    print("  ")
-    # feature_extract_true_personality(
-    #     cfg_file="config/true_personality/talk_session/unified_frame_images/10_deep_bimodal_regression.yaml",
-    #     model_weight="results_true_personality/unified_frame_images_talk/10_deep_bimodal_regression.yaml/06-22_20-01/checkpoint_0.pkl",
-    #     data_loader=set_true_personality_dataloader,
-    #     output_dir="datasets/second_stage_TP/deep_bimodal_reg_extract",
-    # )
-
-    # feature_extract_true_personality(
-    #     cfg_file="config/true_personality/talk_session/unified_frame_images/08_interpert_img.yaml",
-    #     model_weight="results_true_personality/unified_frame_images_talk/08_interpret_img.yaml/06-22_04-49/checkpoint_2.pkl",
-    #     data_loader=set_true_personality_dataloader,
-    #     output_dir="datasets/second_stage_TP/interpret_img",
-    # )
-
-    # feature_extract_true_personality(
-    #     cfg_file="config/true_personality/talk_session/unified_frame_images/01_setnet.yaml",
-    #     model_weight="results_true_personality/unified_frame_images_talk/01_senet/03-07_23-12/checkpoint_12.pkl",
-    #     data_loader=set_true_personality_dataloader,
-    #     output_dir="datasets/second_stage_TP/senet",
-    # )
-
-    # feature_extract_true_personality(
-    #     cfg_file="config/true_personality/talk_session/unified_frame_images/02_hrnet.yaml",
-    #     model_weight="results_true_personality/unified_frame_images_talk/02_hrnet/03-09_00-15/checkpoint_12.pkl",
-    #     data_loader=set_true_personality_dataloader,
-    #     output_dir="datasets/second_stage_TP/hrnet",
-    # )
-
-    # feature_extract_true_personality(
-    #     cfg_file="config/true_personality/talk_session/unified_frame_images/03_swin_transformer.yaml",
-    #     model_weight="results_true_personality/unified_frame_images_talk/03_swin_transformer/03-10_00-15/checkpoint_10.pkl",
-    #     data_loader=set_true_personality_dataloader,
-    #     output_dir="datasets/second_stage_TP/swin_transformer",
-    # )
-
-    # feature_extract_true_personality(
-    #     cfg_file="config/true_personality/talk_session/unified_frame_images/11_bimodal_resnet18.yaml",
-    #     model_weight="results_true_personality/unified_frame_images_talk/11_bimodal_resnet18/06-23_04-57/checkpoint_0.pkl",
-    #     data_loader=set_audiovisual_true_personality_dataloader,
-    #     output_dir="datasets/second_stage_TP/bimodal_resnet18",
-    # )
-
-    # feature_extract_true_personality(
-    #     cfg_file="config/true_personality/talk_session/unified_frame_images/09_persemon.yaml",
-    #     model_weight="results_true_personality/unified_frame_images_talk/09_persemon/06-22_12-30/checkpoint_0.pkl",
-    #     data_loader=set_persemon_true_personality_dataloader,
-    #     output_dir="datasets/second_stage_TP/persemon",
-    # )
-
-    feature_extract_true_personality(
-        cfg_file="config/true_personality/talk_session/unified_frame_images/12_crnet.yaml",
-        model_weight="results_true_personality/unified_frame_images_talk/12_crnet/06-23_21-15/checkpoint_2.pkl",
-        data_loader=set_crnet_true_personality_dataloader,
-        output_dir="datasets/second_stage_TP/crnet",
+    feature_extract(
+        cfg_file="config/unified_frame_images/01_deep_bimodal_regression.yaml",
+        model_weight="results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/deep_bimodal_reg_extract",
     )
+
