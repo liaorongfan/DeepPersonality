@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-labels = ['SENet', 'HRNet', 'SwinTrans', "3DResNet", "SlowFast", "TPN", "VAT"]
-frame_ccc = [51.22, 52.70, 23.33, 53.61, 1.9, 24.94, 58.02]
-face_ccc = [53.79, 61.48, 20.69, 31.85, 2.1, 44.2, 62.98]
+labels = ['SENet', 'HRNet', 'SwTran', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
+frame_ccc = [51.22, 52.70, 23.33, 53.61, 1.9, 24.94, 58.02, 37.96]
+face_ccc = [53.79, 61.48, 20.69, 31.85, 2.1, 44.2, 62.98, 39.58]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.4  # the width of the bars
@@ -22,11 +22,11 @@ ax.set_xticklabels(labels)
 ax.legend()
 
 
-def autolabel_label(rects, xytxt=(-1, 2)):
+def autolabel_label(rects, xytxt=(-2, 2)):
     """Attach a text label above each bar in *rects*, displaying its height."""
     for rect in rects:
         height = rect.get_height()
-        ax.annotate('{}'.format(height),
+        ax.annotate('{:.2f}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
                     xytext=xytxt,  # 3 points vertical offset
                     textcoords="offset points",
@@ -47,7 +47,7 @@ def autolabel_label(rects, xytxt=(-1, 2)):
 
 
 autolabel_label(frame)
-autolabel_label(face, (1, 2))
+autolabel_label(face, (2, 2))
 
 fig.tight_layout()
 plt.ylim(0, 70)

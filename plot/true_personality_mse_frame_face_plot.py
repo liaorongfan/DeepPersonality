@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-labels = ['SENet', 'HRNet', 'SwTran', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
-frame_acc = [90.51, 90.50, 89.07, 90.46, 86.09, 89.18, 90.63, 89.49]
-face_acc = [90.75, 91.13, 89.09,  89.48, 86.50, 90.03, 91.18, 89.73]
+labels = ["IntImg", "PersE", 'SENet', 'HRNet', 'SwTran', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
+frame_acc = [1.10, 1.02, 1.14, 1.27, 1.27, 1.18, 1.27, 1.06, 1.02, 1.15]
+face_acc = [1.01, 1.02, 1.15,  1.28, 1.08, 1.10, 1.33, 1.06, 0.96, 1.11]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.4  # the width of the bars
@@ -15,8 +15,8 @@ frame = ax.bar(x - width / 2, frame_acc, width, label='Frame')
 face = ax.bar(x + width / 2, face_acc, width, label='Face')
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_ylabel('ACC (%)')
-ax.set_title('Impression ACC scores by frame and face images')
+ax.set_ylabel('MSE')
+ax.set_title('True personality MSE scores by frame and face images')
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
 ax.legend()
@@ -50,6 +50,7 @@ autolabel_frame(frame)
 autolabel_face(face)
 
 fig.tight_layout()
-plt.ylim(85, 93)
-plt.savefig("Impression_ACC.png", dpi=300)
+plt.ylim(0.9, 1.4)
+# plt.xlim(0, 10)
+plt.savefig("True_personality_MSE.png", dpi=300)
 plt.show()
