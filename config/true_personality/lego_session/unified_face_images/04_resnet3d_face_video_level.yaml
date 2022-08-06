@@ -1,0 +1,25 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "lego"
+  TYPE: "face"
+DATA_LOADER:
+  NAME: "true_personality_spatial_temporal_data_loader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 2
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "resnet50_3d_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [15, 18]
+TRAIN:
+  TRAINER: "ImageModalTrainer"
+  MAX_EPOCH: 100
+  LOG_INTERVAL: 10
+  OUTPUT_DIR: "results_true_personality/unified_face_images_lego/04_resnet3d_video_level"

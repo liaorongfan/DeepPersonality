@@ -117,7 +117,7 @@ class TemporalDownsample:
         self.len = length
 
     def __call__(self, frame_indices):
-        sample_frames = np.linspace(0, len(frame_indices), self.len, endpoint=False, dtype=np.int16)
+        sample_frames = np.linspace(0, len(frame_indices), self.len, endpoint=False, dtype=np.int32)
         frame_indices = np.array(frame_indices)[sample_frames]
         return frame_indices.tolist()
 
