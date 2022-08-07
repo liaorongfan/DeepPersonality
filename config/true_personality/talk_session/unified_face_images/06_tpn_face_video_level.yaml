@@ -1,14 +1,14 @@
 DATA:
   ROOT: "datasets/chalearn2021"
-  SESSION: "animal"
+  SESSION: "talk"
   TYPE: "face"
 DATA_LOADER:
-  NAME: "true_per_slow_fast_data_loader"
-  TRANSFORM: "standard_frame_transform"
+  NAME: "tpn_true_per_data_loader"
+  TRANSFORM: "set_tpn_transform_op"
   TRAIN_BATCH_SIZE: 2
   NUM_WORKERS: 8
 MODEL:
-  NAME: "slow_fast_model"
+  NAME: "tpn_model"
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -17,10 +17,9 @@ SOLVER:
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [10, 80]
+  MILESTONE: [15, 18]
 TRAIN:
-  TRAINER: "ImageListTrainer"
+  TRAINER: "TPNTrainer"
   MAX_EPOCH: 100
   LOG_INTERVAL: 10
-  VALID_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/unified_face_images_animal/05_slow_fast"
+  OUTPUT_DIR: "results_true_personality/unified_face_images_talk/06_tpn_video_level"

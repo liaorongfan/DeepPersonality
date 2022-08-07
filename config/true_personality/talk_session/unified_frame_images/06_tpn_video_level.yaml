@@ -1,7 +1,7 @@
 DATA:
   ROOT: "datasets/chalearn2021"
-  SESSION: "animal"
-  TYPE: "face"
+  SESSION: "talk"
+  TYPE: "frame"
 DATA_LOADER:
   NAME: "tpn_true_per_data_loader"
   TRANSFORM: "set_tpn_transform_op"
@@ -22,4 +22,4 @@ TRAIN:
   TRAINER: "TPNTrainer"
   MAX_EPOCH: 100
   LOG_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/unified_face_images_animal/06_tpn_video_level"
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/06_tpn_video_level"

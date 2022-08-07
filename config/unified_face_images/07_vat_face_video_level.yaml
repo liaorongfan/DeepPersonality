@@ -1,0 +1,14 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data_face"
+  VALID_IMG_DATA: "image_data/valid_data_face"
+  TEST_IMG_DATA: "image_data/test_data_face"
+DATA_LOADER:
+  NAME: "vat_data_loader"
+  TRANSFORM: "set_vat_transform_op"
+  TRAIN_BATCH_SIZE: 2
+MODEL:
+  NAME: "vat_model"
+SOLVER:
+  LR_INIT: 0.001
+TRAIN:
+  OUTPUT_DIR: "results/unified_face_images/07_vat_face"

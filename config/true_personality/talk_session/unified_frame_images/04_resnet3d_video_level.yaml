@@ -1,14 +1,14 @@
 DATA:
   ROOT: "datasets/chalearn2021"
-  SESSION: "animal"
-  TYPE: "face"
+  SESSION: "talk"
+  TYPE: "frame"
 DATA_LOADER:
-  NAME: "true_per_slow_fast_data_loader"
+  NAME: "true_personality_spatial_temporal_data_loader"
   TRANSFORM: "standard_frame_transform"
   TRAIN_BATCH_SIZE: 2
-  NUM_WORKERS: 8
+  NUM_WORKERS: 0
 MODEL:
-  NAME: "slow_fast_model"
+  NAME: "resnet50_3d_model"
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -17,10 +17,9 @@ SOLVER:
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [10, 80]
+  MILESTONE: [15, 18]
 TRAIN:
-  TRAINER: "ImageListTrainer"
+  TRAINER: "ImageModalTrainer"
   MAX_EPOCH: 100
   LOG_INTERVAL: 10
-  VALID_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/unified_face_images_animal/05_slow_fast"
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/04_resnet3d_video_level"

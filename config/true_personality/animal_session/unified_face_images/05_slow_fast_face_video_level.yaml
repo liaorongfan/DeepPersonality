@@ -1,6 +1,6 @@
 DATA:
   ROOT: "datasets/chalearn2021"
-  SESSION: "lego"
+  SESSION: "animal"
   TYPE: "face"
 DATA_LOADER:
   NAME: "true_per_slow_fast_data_loader"
