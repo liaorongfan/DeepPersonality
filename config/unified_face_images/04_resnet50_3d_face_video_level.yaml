@@ -1,0 +1,14 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data_face"
+  VALID_IMG_DATA: "image_data/valid_data_face"
+  TEST_IMG_DATA: "image_data/test_data_face"
+DATA_LOADER:
+  NAME: "spatial_temporal_data_loader"
+  TRANSFORM: "face_image_x2_transform"
+  TRAIN_BATCH_SIZE: 2
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "resnet50_3d_model"
+TRAIN:
+  MAX_EPOCH: 50
+  OUTPUT_DIR: "results/unified_face_images/04_resnet50_3d_face_vl"

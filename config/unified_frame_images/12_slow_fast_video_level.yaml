@@ -1,0 +1,11 @@
+DATA_LOADER:
+  NAME: "slow_fast_data_loader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 2
+MODEL:
+  NAME: "slow_fast_model"
+SOLVER:
+  LR_INIT: 0.002
+TRAIN:
+  TRAINER: "ImageListTrainer"
+  OUTPUT_DIR: "results/unified_frame_images/12_slow_fast"

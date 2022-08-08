@@ -1,0 +1,9 @@
+DATA_LOADER:
+  NAME: "spatial_temporal_data_loader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 2
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "resnet50_3d_model"
+TRAIN:
+  OUTPUT_DIR: "results/unified_frame_images/11_resnet50_3d"
