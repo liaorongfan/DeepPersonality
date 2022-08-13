@@ -5,4 +5,5 @@ DATA_LOADER:
 MODEL:
   NAME: "vat_model"
 TRAIN:
-  OUTPUT_DIR: "results/unified_frame_images/14_vat"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results/unified_frame_images/14_vat_vl"

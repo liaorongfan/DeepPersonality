@@ -13,4 +13,4 @@ SOLVER:
 TRAIN:
   TRAINER: "TPNTrainer"
   MAX_EPOCH: 20
-  OUTPUT_DIR: "results/unified_face_images/13_tpn_level"
+  OUTPUT_DIR: "results/unified_face_images/06_tpn_level"

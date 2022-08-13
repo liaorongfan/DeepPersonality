@@ -6,4 +6,5 @@ DATA_LOADER:
 MODEL:
   NAME: "resnet50_3d_model"
 TRAIN:
-  OUTPUT_DIR: "results/unified_frame_images/11_resnet50_3d"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results/unified_frame_images/11_resnet50_3d_vl"
