@@ -274,6 +274,18 @@ class ImageModalTrainer(BiModalTrainer):
 
 
 @TRAINER_REGISTRY.register()
+class MultiModalTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feature"], data["label"]
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
 class ImageListTrainer(BiModalTrainer):
     """
     for interpret cnn model, only image data used
