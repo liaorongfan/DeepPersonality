@@ -1,6 +1,6 @@
 DATA:
-  ROOT: "datasets/extracted_feature_impression"
-  SESSION: "none"
+  ROOT: "datasets/extracted_feature_tp"
+  SESSION: "talk"
   TYPE: "face"
 DATA_LOADER:
   NAME: "multi_modal_data_loader"
@@ -20,4 +20,4 @@ SOLVER:
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 500
-  OUTPUT_DIR: "results/unified_face_images/8_multi_modal_pred"
+  OUTPUT_DIR: "results_true_personality/unified_face_images_talk/14_multi_modal_pred"

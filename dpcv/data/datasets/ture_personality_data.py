@@ -24,8 +24,8 @@ def norm(aud_ten):
 class Chalearn21FrameData(Dataset):
 
     def __init__(
-        self, data_root, data_split, task, data_type="frame",
-        even_downsample=2000, trans=None, segment=False
+            self, data_root, data_split, task, data_type="frame",
+            even_downsample=2000, trans=None, segment=False
     ):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
@@ -38,16 +38,17 @@ class Chalearn21FrameData(Dataset):
         self.sample_size = even_downsample
         self.img_dir_ls = []
         self.task_mark = self.get_task_mark(task)
-        if data_type == "frame":
+        if data_type == "frame" or "audio":
             for dire in self.sessions:
                 self.img_dir_ls.extend([f"{dire}/FC1_{self.task_mark}", f"{dire}/FC2_{self.task_mark}"])
         elif data_type == "face":
             for dire in self.sessions:
                 self.img_dir_ls.extend([f"{dire}/FC1_{self.task_mark}_face", f"{dire}/FC2_{self.task_mark}_face"])
         else:
-            raise TypeError(f"type should be 'face' or 'frame', but got {type}")
+            raise TypeError(f"type should be 'face' or 'frame' or 'audio', but got {type}")
 
-        if not segment:
+        self.segment = segment
+        if not data_type == "audio":
             self.all_images = self.assemble_images()
         self.trans = trans
 
@@ -56,11 +57,18 @@ class Chalearn21FrameData(Dataset):
 
     def __getitem__(self, idx):
         img_file = self.all_images[idx]
-        img = Image.open(img_file)
-        label = self.get_ocean_label(img_file)
+        if not self.segment:
+            img = Image.open(img_file)
+            label = self.get_ocean_label(img_file)
 
-        if self.trans:
-            img = self.trans(img)
+            if self.trans:
+                img = self.trans(img)
+        else:
+            img_ls = [Image.open(img) for img in img_file]
+            label = self.get_ocean_label(img_file[0])
+            if self.trans:
+                img_ls = [self.trans(img) for img in img_ls]
+            img = torch.stack(img_ls, dim=0)
 
         return {"image": img, "label": torch.as_tensor(label, dtype=torch.float32)}
 
@@ -104,7 +112,10 @@ class Chalearn21FrameData(Dataset):
     def assemble_images(self):
         all_images = []
         for img_dir in self.img_dir_ls:
-            all_images.extend(self.sample_img(img_dir))
+            if not self.segment:
+                all_images.extend(self.sample_img(img_dir))
+            else:
+                all_images.append(self.sample_img(img_dir))
         return all_images
 
     @staticmethod
@@ -122,11 +133,19 @@ class Chalearn21FrameData(Dataset):
                 f" task should be in one [talk, animal, ghost, lego]"
             )
 
+    def get_file_path(self, idx):
+        file = self.all_images[idx]
+        if not self.segment:
+            return file
+        else:
+            return file[0]
+
 
 class Chlearn21AudioData(Chalearn21FrameData):
-    def __init__(self, data_root, data_split, task, sample_len=244832):
-        super().__init__(data_root, data_split, task, segment=True)
+    def __init__(self, data_root, data_split, task, sample_len=244832, suffix_type="npy", data_type="audio"):
+        super().__init__(data_root, data_split, task, data_type=data_type, segment=True)
         self.sample_len = sample_len
+        self.suffix = suffix_type
 
     def __len__(self):
         return len(self.img_dir_ls)
@@ -142,7 +161,7 @@ class Chlearn21AudioData(Chalearn21FrameData):
         return sample
 
     def sample_audio_data(self, img_dir):
-        aud_file = opt.join(self.data_dir, f"{img_dir}.npy")
+        aud_file = opt.join(self.data_dir, f"{img_dir}.{self.suffix}")
         aud_data = np.load(aud_file)
         data_len = aud_data.shape[-1]
         start = np.random.randint(data_len - self.sample_len)
@@ -156,6 +175,25 @@ class Chlearn21AudioData(Chalearn21FrameData):
         participant_trait = self.parts_personality[participant_id]
         participant_trait = np.array([float(v) for v in participant_trait.values()])
         return participant_trait
+
+
+class Chalearn21AudioDataPath(Chlearn21AudioData):
+    def __init__(self, data_root, data_split, task):
+        super().__init__(data_root, data_split, task)
+
+    def __getitem__(self, idx):
+        img_dir = self.img_dir_ls[idx]
+        aud_path = self.get_audio_path(img_dir)
+        aud_label = self.get_ocean_label(img_dir)
+        sample = {
+            "aud_path": aud_path,
+            "aud_label": torch.as_tensor(aud_label, dtype=torch.float32)
+        }
+        return sample
+
+    def get_audio_path(self, img_dir):
+        aud_path = os.path.join(self.data_dir, f"{img_dir}.wav")
+        return aud_path
 
 
 class Chalearn21LSTMAudioData(Chlearn21AudioData):
@@ -310,8 +348,8 @@ class CRNetAudioTruePersonality(Chlearn21AudioData):
 class Chalearn21PersemonData(Chalearn21FrameData):
 
     def __init__(
-        self, data_root, data_split, task, data_type, trans,
-        emo_data_root, emo_img_dir, emo_label, emo_trans, segment=False,
+            self, data_root, data_split, task, data_type, trans,
+            emo_data_root, emo_img_dir, emo_label, emo_trans, segment=False,
     ):
         super().__init__(
             data_root, data_split, task, data_type=data_type,
@@ -524,7 +562,6 @@ def true_personality_interpret_aud_dataloader(cfg, mode):
     return data_loader
 
 
-
 @DATA_LOADER_REGISTRY.register()
 def true_personality_crnet_dataloader(cfg, mode):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
@@ -578,7 +615,7 @@ def true_personality_persemon_dataloader(cfg, mode):
 
     transforms = build_transform_spatial(cfg)
     persemon_dataset = Chalearn21PersemonData(
-        data_root=cfg.DATA.ROOT,    # "datasets/chalearn2021",
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
         data_split=mode,
         task=cfg.DATA.SESSION,
         data_type=cfg.DATA.TYPE,  # "frame",

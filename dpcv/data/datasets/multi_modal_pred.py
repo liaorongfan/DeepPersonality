@@ -1,26 +1,35 @@
 import torch
 import glob
+import os
 from torch.utils.data import DataLoader
 from .build import DATA_LOADER_REGISTRY
 
 
 class MultiModalData:
 
-    def __init__(self, data_root, split, mode):
+    def __init__(self, data_root, split, mode, session, spectrum_channel=15):
+        assert session in ["none", "talk", "animal", "lego", "ghost"], \
+            "session should be in one of ['none', 'talk', 'animal', 'ghost'] or 'none'"
         self.data_root = data_root
         self.split = split
         self.mode = mode
+        self.session = session
+        self.spectrum_channel = spectrum_channel
         self.sample_ls = self.get_data_ls(split, mode)
 
     def __getitem__(self, idx):
         sample = self.sample_ls[idx]
         if self.mode == "audio":
             feature = sample["feature"]
-            sample_len = len(feature)
-            if sample_len < 15:
-                temp = torch.zeros(15, 128, dtype=feature.dtype)
-                temp[: sample_len, :] = feature
+            if self.session in ["talk", "animal", "lego", "ghost"]:
+                temp = feature[:self.spectrum_channel]
                 sample["feature"] = temp
+            else:
+                sample_len = len(feature)
+                if sample_len < 15:
+                    temp = torch.zeros(15, 128, dtype=feature.dtype)
+                    temp[: sample_len, :] = feature
+                    sample["feature"] = temp
 
         # data, label = sample["data"], sample["label"]
         return sample
@@ -29,7 +38,10 @@ class MultiModalData:
         return len(self.sample_ls)
 
     def get_data_ls(self, split, mode):
-        data_dir = f"{split}_{mode}"
+        if self.session in ["talk", "animal", "lego", "ghost"]:
+            data_dir = f"{self.session}/{split}_{mode}"
+        else:
+            data_dir = f"{split}_{mode}"
         data_dir_path = os.path.join(self.data_root, data_dir)
         data_ls_path = glob.glob(f"{data_dir_path}/*.pkl")
         data_ls_sample = []
@@ -49,18 +61,24 @@ def multi_modal_data_loader(cfg, mode="train"):
             data_root=cfg.DATA.ROOT,
             split="train",
             mode=cfg.DATA.TYPE,
+            session=cfg.DATA.SESSION,
+            spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
         )
     elif mode == "valid":
         data_set = MultiModalData(
             data_root=cfg.DATA.ROOT,
             split="valid",
             mode=cfg.DATA.TYPE,
+            session=cfg.DATA.SESSION,
+            spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
         )
     else:
         data_set = MultiModalData(
             data_root=cfg.DATA.ROOT,
             split="test",
             mode=cfg.DATA.TYPE,
+            session=cfg.DATA.SESSION,
+            spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
         )
 
     data_loader = DataLoader(

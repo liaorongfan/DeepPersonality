@@ -135,8 +135,9 @@ class VisualFCNet(nn.Module):
 
 class AudioFCNet(nn.Module):
 
-    def __init__(self, input_dim, out_dim=5, use_sigmoid=True):
+    def __init__(self, input_dim, out_dim=5, spectrum_channel=15, use_sigmoid=True):
         super().__init__()
+        self.spectrum_channel = spectrum_channel
         self.fc = nn.Sequential(
             nn.Linear(input_dim, 1024),
             nn.ReLU(),
@@ -148,7 +149,7 @@ class AudioFCNet(nn.Module):
         self.use_sigmoid = use_sigmoid
 
     def forward(self, x):
-        x = x.view(-1, 15 * 128)
+        x = x.view(-1, self.spectrum_channel * 128)
         x = (x - x.mean()) / x.std()
         x = self.fc(x)
         if self.use_sigmoid:
@@ -165,9 +166,14 @@ def multi_modal_visual_model(cfg):
 
 @NETWORK_REGISTRY.register()
 def multi_modal_audio_model(cfg):
-    model = AudioFCNet(128 * 15)
+    if cfg.DATA.SESSION in ["talk", "session", "talk", "lego"]:
+        dim = cfg.MODEL.SPECTRUM_CHANNEL * 128
+    else:
+        dim = 15 * 128
+    model = AudioFCNet(dim, spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
+
 
 if __name__ == "__main__":
     model = resnet101_visual_feature_extractor()

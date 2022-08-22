@@ -1,13 +1,14 @@
 DATA:
-  ROOT: "datasets/extracted_feature_impression"
-  SESSION: "none"
-  TYPE: "face"
+  ROOT: "datasets/extracted_feature_tp"
+  SESSION: "talk"
+  TYPE: "audio"
 DATA_LOADER:
   NAME: "multi_modal_data_loader"
   TRAIN_BATCH_SIZE: 32
   NUM_WORKERS: 0
 MODEL:
-  NAME: "multi_modal_visual_model"
+  NAME: "multi_modal_audio_model"
+  SPECTRUM_CHANNEL: 256
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -20,4 +21,4 @@ SOLVER:
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 500
-  OUTPUT_DIR: "results/unified_face_images/8_multi_modal_pred"
+  OUTPUT_DIR: "results_true_personality/audio_talk/06_multi_modal_pred"
