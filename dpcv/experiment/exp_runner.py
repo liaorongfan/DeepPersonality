@@ -1,6 +1,7 @@
 import os
 import json
 import numpy as np
+import torch
 from datetime import datetime
 from dpcv.data.datasets.build import build_dataloader
 from dpcv.modeling.networks.build import build_model
@@ -145,7 +146,10 @@ class ExpRunner:
             ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label)
             self.logger.info(f"ccc: {ccc_dict} mean: {ccc_mean}")
             self.latex_info(ccc_dict, ccc_mean)
-
+        if cfg.SAVE_DATASET_OUTPUT:
+            os.makedirs(cfg.SAVE_DATASET_OUTPUT, exist_ok=True)
+            torch.save(dataset_output, os.path.join(cfg.SAVE_DATASET_OUTPUT, "pred.pkl"))
+            torch.save(dataset_label, os.path.join(cfg.SAVE_DATASET_OUTPUT, "label.pkl"))
         return
 
     def run(self):

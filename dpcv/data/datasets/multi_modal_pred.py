@@ -43,7 +43,7 @@ class MultiModalData:
         else:
             data_dir = f"{split}_{mode}"
         data_dir_path = os.path.join(self.data_root, data_dir)
-        data_ls_path = glob.glob(f"{data_dir_path}/*.pkl")
+        data_ls_path = sorted(glob.glob(f"{data_dir_path}/*.pkl"))
         data_ls_sample = []
         for sample in data_ls_path:
             data_ls_sample.append(torch.load(sample))
@@ -55,6 +55,7 @@ def multi_modal_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+    shuffle = cfg.DATA_LOADER.SHUFFLE
 
     if mode == "train":
         data_set = MultiModalData(
@@ -73,6 +74,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
         )
     else:
+        shuffle = False
         data_set = MultiModalData(
             data_root=cfg.DATA.ROOT,
             split="test",
@@ -84,7 +86,7 @@ def multi_modal_data_loader(cfg, mode="train"):
     data_loader = DataLoader(
         dataset=data_set,
         batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
-        shuffle=cfg.DATA_LOADER.SHUFFLE,
+        shuffle=shuffle,
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )
     return data_loader

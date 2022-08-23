@@ -1,6 +1,7 @@
 DATA:
   ROOT: "datasets/extracted_feature_impression"
   TYPE: "frame"
+  SESSION: "none"
 DATA_LOADER:
   NAME: "multi_modal_data_loader"
   TRAIN_BATCH_SIZE: 32
