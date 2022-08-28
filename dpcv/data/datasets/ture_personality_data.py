@@ -38,7 +38,7 @@ class Chalearn21FrameData(Dataset):
         self.sample_size = even_downsample
         self.img_dir_ls = []
         self.task_mark = self.get_task_mark(task)
-        if data_type == "frame" or "audio":
+        if (data_type == "frame") or (data_type == "audio"):
             for dire in self.sessions:
                 self.img_dir_ls.extend([f"{dire}/FC1_{self.task_mark}", f"{dire}/FC2_{self.task_mark}"])
         elif data_type == "face":

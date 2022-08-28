@@ -1,0 +1,23 @@
+DATA:
+  ROOT: "datasets/extracted_feature_tp"
+  SESSION: "lego"
+  TYPE: "face"
+DATA_LOADER:
+  NAME: "multi_modal_data_loader"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "multi_modal_visual_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.01
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [300, 400]
+TRAIN:
+  TRAINER: "MultiModalTrainer"
+  MAX_EPOCH: 500
+  OUTPUT_DIR: "results_true_personality/unified_face_images_lego/14_multi_modal_pred"

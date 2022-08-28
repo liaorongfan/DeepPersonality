@@ -36,6 +36,7 @@ class TPExtractVisualFeatureData:
             model = resnet101_visual_feature_extractor()
         else:
             model = vggish()
+        model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         return model.eval()
 
     def extract_and_save_feat(self):
@@ -51,12 +52,16 @@ class TPExtractVisualFeatureData:
                         data, label = dataset[i]["image"], dataset[i]["label"]
                         dir_name = os.path.dirname(dataset.get_file_path(i))
                         name = "_".join(dir_name.split("/")[-2:])
-                        feat = self.model(data)
+                        feat = self.model(
+                            data.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+                        )
                     else:
                         file_path, label = dataset[i]["aud_path"], dataset[i]["aud_label"]
                         name = "_".join(file_path.split("/")[-2:]).replace(".wav", "")
                         example = vggish_input.wavfile_to_examples(file_path)
-                        feat = self.model.forward(example)
+                        feat = self.model.forward(
+                            example.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+                        )
 
                     sample = {
                         "feature": feat,
@@ -69,13 +74,16 @@ class TPExtractVisualFeatureData:
 if __name__ == "__main__":
     from dpcv.data.transforms.transform import set_transform_op
 
-    os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
+    # os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
+    task = "lego"
+    type = "audio"
+
     transform = set_transform_op()
     extractor = TPExtractVisualFeatureData(
         data_root="datasets/chalearn2021",
-        data_type="audio",
-        task="talk",
+        data_type=type,
+        task=task,
         trans=transform,
-        save_to="datasets/extracted_feature_tp/talk",
+        save_to=f"datasets/extracted_feature_tp/{task}",
     )
     extractor.extract_and_save_feat()

@@ -166,11 +166,13 @@ def multi_modal_visual_model(cfg):
 
 @NETWORK_REGISTRY.register()
 def multi_modal_audio_model(cfg):
-    if cfg.DATA.SESSION in ["talk", "session", "talk", "lego"]:
+    if cfg.DATA.SESSION in ["talk", "animal", "ghost", "lego"]:
         dim = cfg.MODEL.SPECTRUM_CHANNEL * 128
+        use_sigmoid = False
     else:
         dim = 15 * 128
-    model = AudioFCNet(dim, spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL)
+        use_sigmoid = True
+    model = AudioFCNet(dim, spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL, use_sigmoid=use_sigmoid)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 
