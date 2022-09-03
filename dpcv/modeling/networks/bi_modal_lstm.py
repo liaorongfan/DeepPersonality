@@ -125,7 +125,8 @@ def bi_modal_lstm_model_true_personality(cfg=None):
     return bi_modal_lstm
 
 
-def get_img_modal_lstm_model():
+@NETWORK_REGISTRY.register()
+def get_img_modal_lstm_model(cfg=None):
     img_lstm = ImgLSTM()
     img_lstm.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return img_lstm

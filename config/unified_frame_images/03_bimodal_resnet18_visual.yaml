@@ -1,0 +1,27 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data"
+  VALID_IMG_DATA: "image_data/valid_data"
+  TEST_IMG_DATA: "image_data/test_data"
+  TRAIN_AUD_DATA: "voice_data/voice_librosa/train_data"
+  VALID_AUD_DATA: "voice_data/voice_librosa/valid_data"
+  TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
+DATA_LOADER:
+  NAME: "bimodal_resnet_data_loader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "get_visual_resnet_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [100, 200]
+TRAIN:
+  TRAINER: "ImageModalTrainer"
+  MAX_EPOCH: 50
+  OUTPUT_DIR: "results/unified_frame_images/03_bimodal_resnet_visual"

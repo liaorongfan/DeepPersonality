@@ -1,0 +1,27 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data_face"
+  VALID_IMG_DATA: "image_data/valid_data_face"
+  TEST_IMG_DATA: "image_data/test_data_face"
+  TRAIN_AUD_DATA: "voice_data/voice_mfcc/train_data_mfcc"
+  VALID_AUD_DATA: "voice_data/voice_mfcc/valid_data_mfcc"
+  TEST_AUD_DATA: "voice_data/voice_mfcc/test_data_mfcc"
+DATA_LOADER:
+  NAME: "bimodal_lstm_data_loader"
+  TRANSFORM: "face_image_transform"  # for different input image resolution
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "get_img_modal_lstm_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.05
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [120, 150, 180]
+TRAIN:
+  TRAINER: "BimodalLSTMTrainVisual"
+  MAX_EPOCH: 50
+  OUTPUT_DIR: "results/unified_frame_images/02_bimodal_lstm_visual"
