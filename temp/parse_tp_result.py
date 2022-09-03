@@ -109,7 +109,8 @@ if __name__ == "__main__":
     dir = "tp_result"
     files = [
         ("multi_modal_pred.txt", "tp_multi_modal_pred.txt"),
-        ("multi_modal_pred_audio.txt", "tp_multi_modal_pred_audio.txt")
+        ("multi_modal_pred_audio.txt", "tp_multi_modal_pred_audio.txt"),
+        ("multi_modal_aud_vis.txt", "tp_multi_modal_aud_vis.txt"),
     ]
 
     for sour, tgt in files:

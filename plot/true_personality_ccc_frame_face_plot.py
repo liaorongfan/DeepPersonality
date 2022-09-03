@@ -2,20 +2,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-labels = ["IntImg", "PersE", 'SENet', 'HRNet', 'SwTran', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
-frame_acc = [10.59, 0.68, 11.91, 10.07, 5.92, 0.17, 0.32, 3.52, 4.38, 5.28]
-face_acc = [17.38, 0.45, 15.1,  17.52, 2.56, 0.72, 0.16, 1.25, 0.31, 6.16]
+labels = ['ResNet', 'SENet', 'HRNet', 'SwTran', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
+frame_acc = [0.00, 11.91, 10.07, 5.92, 0.17, 0.32, 3.52, 4.38, 4.54]
+face_acc = [0.032, 15.1,  17.52, 2.56, 0.72, 0.16, 1.25, 0.31, 4.70]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.4  # the width of the bars
 
 fig, ax = plt.subplots()
-frame = ax.bar(x - width / 2, frame_acc, width, label='Frame')
-face = ax.bar(x + width / 2, face_acc, width, label='Face')
+frame = ax.bar(x - width / 2, frame_acc, width, label='Full frame')
+face = ax.bar(x + width / 2, face_acc, width, label='Face frame')
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_ylabel('CCC (%)')
-ax.set_title('True personality CCC scores by frame and face images')
+ax.set_ylabel('CCC (%)', fontsize=15)
+# ax.set_title('True personality CCC scores by frame and face images')
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
 ax.legend()

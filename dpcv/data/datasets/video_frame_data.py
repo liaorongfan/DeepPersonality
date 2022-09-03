@@ -130,7 +130,7 @@ def single_frame_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
-
+    shuffle = cfg.DATA_LOADER.SHUFFLE
     transform = build_transform_spatial(cfg)
     if mode == "train":
         data_set = SingleFrameData(
@@ -146,6 +146,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.VALID_LABEL_DATA,
             transform,
         )
+        shuffle = False
     elif mode == "trainval":
         data_set = SingleFrameData(
             cfg.DATA.ROOT,
@@ -167,10 +168,12 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TEST_LABEL_DATA,
             transform,
         )
+        shuffle = False
+
     data_loader = DataLoader(
         dataset=data_set,
         batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
-        shuffle=cfg.DATA_LOADER.SHUFFLE,
+        shuffle=shuffle,
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )
     return data_loader
