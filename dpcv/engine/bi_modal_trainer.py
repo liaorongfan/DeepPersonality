@@ -230,7 +230,7 @@ class BimodalLSTMTrainVisual(BiModalTrainer):
     def data_fmt(self, data):
         for k, v in data.items():
             data[k] = v.to(self.device)
-        img_in, aud_in, labels = data["image"], data["audio"], data["label"]
+        img_in,  labels = data["image"],  data["label"]
         img_in = img_in.view(-1, 3, 112, 112)
         # aud_in = aud_in.view(-1, 68)
         return (img_in,), labels

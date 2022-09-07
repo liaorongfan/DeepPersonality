@@ -475,6 +475,25 @@ class Chalearn21LSTMData(Chalearn21FrameData):
         return wav_ft
 
 
+class Chalearn21LSTMVisualData(Chalearn21LSTMData):
+
+    def __getitem__(self, idx):
+        imgs_array_ls, file_ls = self._get_statistic_img_sample(idx)
+        anno_score = self.get_ocean_label(file_ls[0])
+        if self.trans:
+            imgs_ten_ls = []
+            for img_arr in imgs_array_ls:
+                img_ten = self.trans(img_arr)
+                imgs_ten_ls.append(img_ten)
+            imgs_ten = torch.stack(imgs_ten_ls, dim=0)
+        else:
+            imgs_ten = torch.as_tensor(imgs_array_ls)
+
+        anno_score = torch.as_tensor(anno_score, dtype=imgs_ten.dtype)
+        sample = {"image": imgs_ten, "label": anno_score}
+        return sample
+
+
 @DATA_LOADER_REGISTRY.register()
 def true_personality_dataloader(cfg, mode):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
@@ -667,6 +686,30 @@ def true_personality_lstm_dataloader(cfg, mode):
     transforms = build_transform_spatial(cfg)
     num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 0
     dataset = Chalearn21LSTMData(
+        data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+        data_split=mode,
+        task=cfg.DATA.SESSION,  # "talk"
+        data_type=cfg.DATA.TYPE,
+        trans=transforms
+    )
+    data_loader = DataLoader(
+        dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=num_worker,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def true_personality_lstm_visual_dataloader(cfg, mode):
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    transforms = build_transform_spatial(cfg)
+    num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 0
+    dataset = Chalearn21LSTMVisualData(
         data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
         data_split=mode,
         task=cfg.DATA.SESSION,  # "talk"
