@@ -35,7 +35,7 @@ video-level:
 """
 
 
-labels = ['O', 'C', 'E', "A", "N", "Avg"]
+labels = ['Ope', 'Con', 'Ext', "Agr", "Neu", "Avg"]
 frame_ccc = [9.79, 24.01, 2.83, 9.63, 21.52, 13.55]
 segment_ccc = [-1.55,	1.15, 1.96,	1.30, 0.73,	0.43]
 video_ccc = [-2.61, -1.60, 3.74, -3.05, -2.67, -1.237]
@@ -45,9 +45,9 @@ x = np.arange(len(labels))  # the label locations
 width = 0.5  # the width of the bars
 
 fig, ax = plt.subplots()
-frame = ax.bar(2 * x - 0.5, frame_ccc, width, label='Frame')
-face = ax.bar(2 * x, segment_ccc, width, label='Segment')
-face2 = ax.bar(2 * x + 0.5, video_ccc, width, label='Video')
+frame = ax.bar(2 * x - 0.5, frame_ccc, width, label='Frame-level systems')
+face = ax.bar(2 * x, segment_ccc, width, label='Segment-level systems')
+face2 = ax.bar(2 * x + 0.5, video_ccc, width, label='Video-level systems')
 
 x_line = np.arange(-1, 12, 2)
 line = ax.plot(x_line, [0] * len(x_line), color="black", linewidth=1)

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-labels = ['ResNet', 'SENet', 'HRNet', 'SwTran', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
+labels = ['AmbFac', 'SENet', 'HRNet', 'Swin', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
 frame_acc = [0.9902, 1.14, 1.27, 1.27, 1.18, 1.27, 1.06, 1.02, 1.15]
 face_acc = [1.0704, 1.15,  1.28, 1.08, 1.10, 1.33, 1.06, 0.96, 1.13]
 

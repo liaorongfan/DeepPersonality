@@ -9,6 +9,8 @@ import json
 import random
 from pathlib import Path
 from PIL import Image
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 import torchaudio
 from dpcv.data.transforms.build import build_transform_spatial
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY

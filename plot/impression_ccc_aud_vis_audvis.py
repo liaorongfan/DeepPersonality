@@ -35,7 +35,7 @@ video-level:
 """
 
 
-labels = ['O', 'C', 'E', "A", "N", "Avg"]
+labels = ['Ope', 'Con', 'Ext', "Agr", "Neu", "Avg"]
 frame_ccc = [19.83, 17.03, 17.46, 13.96, 20.20, 17.70 ]  # audio
 segment_ccc = [36.90,	40.93,	40.41,	28.87,	37.53,	36.93]
 video_ccc = [38.60,	39.69,	38.77,	29.69,	39.24,	37.20]

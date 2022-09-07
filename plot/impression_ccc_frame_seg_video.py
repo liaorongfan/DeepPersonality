@@ -31,7 +31,7 @@ video-level:
 """
 
 
-labels = ['O', 'C', 'E', "A", "N", "Avg"]
+labels = ['Ope', 'Con', 'Ext', "Agr", "Neu", "Avg"]
 frame_ccc = [48.32, 53.67, 52.77, 39.79, 50.30, 48.97]
 segment_ccc = [38.51, 43.19, 42.75,	30.15, 40.07, 38.94]
 face2_ccc = [9.31,	8.19,	8.37,	3.35,	8.41,	7.52]
@@ -40,9 +40,9 @@ x = np.arange(len(labels))  # the label locations
 width = 0.5  # the width of the bars
 
 fig, ax = plt.subplots()
-frame = ax.bar(2 * x - 0.5, frame_ccc, width, label='Frame')
-face = ax.bar(2 * x, segment_ccc, width, label='Segment')
-face2 = ax.bar(2 * x + 0.5, face2_ccc, width, label='Video')
+frame = ax.bar(2 * x - 0.5, frame_ccc, width, label='Frame-level systems')
+face = ax.bar(2 * x, segment_ccc, width, label='Segment-level systems')
+face2 = ax.bar(2 * x + 0.5, face2_ccc, width, label='Video-level systems')
 # Add some text for labels, title and custom x-axis tick labels, etc.
 ax.set_ylabel('CCC (%)', fontsize=15)
 # ax.set_title('Impression CCC scores by frame and face images')

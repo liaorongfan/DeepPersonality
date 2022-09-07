@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-labels = ['ResNet', 'SENet', 'HRNet', 'SwTran', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
+labels = ['AmbFac', 'SENet', 'HRNet', 'Swin', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
 frame_ccc = [60.60, 51.22, 52.70, 23.33, 53.61, 1.9, 24.94, 58.02, 40.79]
 face_ccc = [53.56, 53.79, 61.48, 20.69, 31.85, 2.1, 44.2, 62.98, 41.33]
 
