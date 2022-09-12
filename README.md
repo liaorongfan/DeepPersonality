@@ -1,6 +1,22 @@
 # Benchmarking Deep Learning Models for Audio-visual Automatic Self-reported and Apparent Personality Recognition
 
 
+
+## Requirements and Dependecies
+
+
+
+## Usage for reproducing reproted experiments
+
+
+
+
+
+## Usage for developing new personality computing models
+
+
+
+
 ## Command line interface
 * train:
 ```shell
