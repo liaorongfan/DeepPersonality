@@ -1,5 +1,5 @@
-# DeepPersonality
-Personality prediction with neural networks
+# Benchmarking Deep Learning Models for Audio-visual Automatic Self-reported and Apparent Personality Recognition
+
 
 ## Command line interface
 * train:
