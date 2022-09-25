@@ -13,7 +13,7 @@ import pickle
 
 
 class ExtractVisualFeatureData(VideoData):
-    def __init__(self, data_root, img_dir, label_file, save_to, length=6, suffix="frame_"):
+    def __init__(self, data_root, img_dir, label_file, save_to, length=100, suffix="frame_"):
         super().__init__(data_root, img_dir, label_file)
         self.len = length
         self.trans = set_transform_op()
@@ -61,6 +61,7 @@ class ExtractVisualFeatureData(VideoData):
     def img_transform(self, img_obj_ls):
         img_obj_ls = [self.trans(img) for img in img_obj_ls]
         img_obj_ls = torch.stack(img_obj_ls, dim=0)
+        img_obj_ls = img_obj_ls.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         return img_obj_ls
 
 
@@ -112,10 +113,10 @@ if __name__ == "__main__":
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
     extractor = ExtractVisualFeatureData(
         data_root="datasets",
-        img_dir="image_data/test_data",
+        img_dir="image_data/test_data_face",
         label_file="annotation/annotation_test.pkl",
-        save_to="datasets/extracted_feature_impression/test_frame",
-        suffix="frame_",
+        save_to="datasets/extracted_feature_impression/test_face",
+        suffix="face_",
     )
     extractor.extract_and_save_feat()
 

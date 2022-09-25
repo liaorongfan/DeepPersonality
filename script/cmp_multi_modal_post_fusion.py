@@ -12,7 +12,7 @@ class CmpPostFusion:
         self.visual_data = self.read_data(visual_data_path)
         self.audio_data = self.read_data(audio_data_path)
         self.label_data = self.read_data(label_data_path)
-        self.addition = None
+        self.addition = []
         self.num_modal = 2
         if addition_data_path:
             self.addition = self.read_data(addition_data_path)
@@ -27,7 +27,7 @@ class CmpPostFusion:
         self.audio_data = self.audio_data[:max_len, :]
         self.label_data = self.label_data[:max_len, :]
 
-        if self.addition:
+        if len(self.addition) > 0:
             data = (self.visual_data + self.audio_data + self.addition) / self.num_modal
         else:
             data = (self.visual_data + self.audio_data) / self.num_modal
@@ -61,6 +61,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="post fusion")
     parser.add_argument("-v", "--visual", type=str)
     parser.add_argument("-a", "--audio", type=str)
+    parser.add_argument("-o", "--other", default="")
     parser.add_argument("-l", "--label", type=str)
     args = parser.parse_args()
 
@@ -74,6 +75,7 @@ if __name__ == "__main__":
         visual_data_path=args.visual,
         audio_data_path=args.audio,
         label_data_path=args.label,
+        addition_data_path=args.other,
     )
 
     fusion.compute()

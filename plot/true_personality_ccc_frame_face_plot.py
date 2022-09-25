@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-labels = ['AmbFac', 'SENet', 'HRNet', 'Swin', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
-frame_acc = [0.00, 11.91, 10.07, 5.92, 0.17, 0.32, 3.52, 4.38, 4.54]
-face_acc = [0.032, 15.1,  17.52, 2.56, 0.72, 0.16, 1.25, 0.31, 4.70]
+labels = ['SENet', 'HRNet', 'Swin', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
+frame_acc = [11.91, 10.07, 5.92, 0.17, 0.32, 3.52, 4.38, 5.18]
+face_acc = [15.1,  17.52, 2.56, 0.72, 0.16, 1.25, 0.31, 5.37]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.4  # the width of the bars

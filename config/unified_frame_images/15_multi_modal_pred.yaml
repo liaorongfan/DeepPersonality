@@ -19,5 +19,5 @@ SOLVER:
   MILESTONE: [300, 400]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 500
+  MAX_EPOCH: 80
   OUTPUT_DIR: "results/unified_frame_images/15_multi_modal_pred"

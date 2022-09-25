@@ -2,6 +2,7 @@ import torch
 import glob
 import os
 from torch.utils.data import DataLoader
+from pathlib import Path
 from .build import DATA_LOADER_REGISTRY
 
 
@@ -19,6 +20,7 @@ class MultiModalData:
 
     def __getitem__(self, idx):
         sample = self.sample_ls[idx]
+        sample = torch.load(sample)
         if self.mode == "audio":
             feature = sample["feature"]
             if self.session in ["talk", "animal", "lego", "ghost"]:
@@ -42,11 +44,12 @@ class MultiModalData:
             data_dir = f"{self.session}/{split}_{mode}"
         else:
             data_dir = f"{split}_{mode}"
-        data_dir_path = os.path.join(self.data_root, data_dir)
-        data_ls_path = sorted(glob.glob(f"{data_dir_path}/*.pkl"))
-        data_ls_sample = []
-        for sample in data_ls_path:
-            data_ls_sample.append(torch.load(sample))
+        data_dir_path = Path(os.path.join(self.data_root, data_dir))
+        data_ls_path = sorted(data_dir_path.rglob("*.pkl"))
+        data_ls_sample = list(data_ls_path)
+        # for sample in data_ls_path:
+        #     data_ls_sample.append(sample)
+
         return data_ls_sample
 
 

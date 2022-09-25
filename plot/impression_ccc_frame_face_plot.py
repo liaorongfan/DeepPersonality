@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-labels = ['AmbFac', 'SENet', 'HRNet', 'Swin', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
-frame_ccc = [60.60, 51.22, 52.70, 23.33, 53.61, 1.9, 24.94, 58.02, 40.79]
-face_ccc = [53.56, 53.79, 61.48, 20.69, 31.85, 2.1, 44.2, 62.98, 41.33]
+labels = ['SENet', 'HRNet', 'Swin', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
+frame_ccc = [51.22, 52.70, 23.33, 53.61, 1.9, 24.94, 58.02, 37.96]
+face_ccc = [53.79, 61.48, 20.69, 31.85, 2.1, 44.2, 62.98, 39.58]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.4  # the width of the bars

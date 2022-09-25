@@ -19,5 +19,5 @@ SOLVER:
   MILESTONE: [300, 400]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 500
+  MAX_EPOCH: 30
   OUTPUT_DIR: "results_true_personality/unified_frame_images_talk/14_multi_modal_pred"

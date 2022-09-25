@@ -108,7 +108,7 @@ def resnet101_visual_feature_extractor(pretrained=True, **kwargs):
         # 2. overwrite entries in the existing state dict
         model_dict.update(pretrained_dict)
         model.load_state_dict(model_dict)
-    return model
+    return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
 class VisualFCNet(nn.Module):

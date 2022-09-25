@@ -8,7 +8,7 @@ from dpcv.data.datasets.ture_personality_data import Chalearn21FrameData, Chalea
 
 
 class TPExtractVisualFeatureData:
-    def __init__(self, data_root, data_type, task, trans=None, save_to=""):
+    def __init__(self, data_root, data_type, task, trans=None, save_to="", sample_num=2000):
         assert data_type in ["frame", "face", "audio"], "data_type should be one of [frame, face or video]"
 
         self.type = data_type
@@ -21,11 +21,11 @@ class TPExtractVisualFeatureData:
         else:
             self.dataset = {
                 "train": Chalearn21FrameData(
-                    data_root, "train", task, data_type, even_downsample=6, trans=trans, segment=True),
+                    data_root, "train", task, data_type, even_downsample=sample_num, trans=trans, segment=False),
                 "valid": Chalearn21FrameData(
-                    data_root, "valid", task, data_type, even_downsample=6, trans=trans, segment=True),
+                    data_root, "valid", task, data_type, even_downsample=sample_num, trans=trans, segment=False),
                 "test": Chalearn21FrameData(
-                    data_root, "test", task, data_type, even_downsample=6, trans=trans, segment=True),
+                    data_root, "test", task, data_type, even_downsample=sample_num, trans=trans, segment=False),
             }
         self.model = self.get_extract_model()
         # os.makedirs(save_to, exist_ok=True)
@@ -50,33 +50,43 @@ class TPExtractVisualFeatureData:
 
                     if not self.type == "audio":
                         data, label = dataset[i]["image"], dataset[i]["label"]
-                        dir_name = os.path.dirname(dataset.get_file_path(i))
-                        name = "_".join(dir_name.split("/")[-2:])
+                        file_path = dataset.get_file_path(i)
+                        file_name = os.path.basename(file_path).replace(".jpg", "")
+                        dir_path = os.path.dirname(file_path)
+                        dir_name = "_".join(dir_path.split("/")[-2:])
                         feat = self.model(
-                            data.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+                            data[None].to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
                         )
+                        sample = {
+                            "feature": feat,
+                            "label": np.array(label, dtype="float32"),
+                        }
+                        save_to_dir = os.path.join(save_dir, dir_name)
+                        os.makedirs(save_to_dir, exist_ok=True)
+                        saved_path = os.path.join(save_to_dir, f"{file_name}.pkl")
+                        torch.save(sample, saved_path)
                     else:
                         file_path, label = dataset[i]["aud_path"], dataset[i]["aud_label"]
-                        name = "_".join(file_path.split("/")[-2:]).replace(".wav", "")
+                        dir_name = "_".join(file_path.split("/")[-2:]).replace(".wav", "")
                         example = vggish_input.wavfile_to_examples(file_path)
                         feat = self.model.forward(
                             example.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
                         )
 
-                    sample = {
-                        "feature": feat,
-                        "label": np.array(label, dtype="float32"),
-                    }
-                    saved_path = os.path.join(save_dir, f"{name}.pkl")
-                    torch.save(sample, saved_path)
+                        sample = {
+                            "feature": feat,
+                            "label": np.array(label, dtype="float32"),
+                        }
+                        saved_path = os.path.join(save_dir, f"{dir_name}.pkl")
+                        torch.save(sample, saved_path)
 
 
 if __name__ == "__main__":
     from dpcv.data.transforms.transform import set_transform_op
 
-    # os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
-    task = "lego"
-    type = "audio"
+    os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
+    task = "talk"
+    type = "frame"
 
     transform = set_transform_op()
     extractor = TPExtractVisualFeatureData(

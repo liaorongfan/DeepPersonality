@@ -1,0 +1,23 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "animal"
+DATA_LOADER:
+  NAME: "true_personality_crnet_dataloader"
+  TRANSFORM: "crnet_frame_face_transform"
+  TRAIN_BATCH_SIZE: 8
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "get_crnet_vis_model"
+LOSS:
+  NAME: "crnet_loss_func"
+SOLVER:
+  NAME: "crnet_solver"
+  SCHEDULER: "crnet_multi_step_scale"
+  LR_INIT: 0.002
+  WEIGHT_DECAY: 0.005
+  MOMENTUM: 0.9
+  MILESTONE: [80, 90]
+TRAIN:
+  TRAINER: "CRNetTrainer2Vis"
+  MAX_EPOCH: 1
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_animal/12_crnet_visaul"

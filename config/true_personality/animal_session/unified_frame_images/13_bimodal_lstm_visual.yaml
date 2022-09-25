@@ -1,0 +1,23 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "animal"
+DATA_LOADER:
+  NAME: "true_personality_lstm_visual_dataloader"
+  TRANSFORM: "face_image_transform"  # for different input image resolution
+  TRAIN_BATCH_SIZE: 128
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "get_img_modal_lstm_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.05
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [120, 150, 180]
+TRAIN:
+  TRAINER: "BimodalLSTMTrainVisual"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results_true_personality/unified_frame_images_animal/13_bimodal_lstm_visual"

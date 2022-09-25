@@ -116,12 +116,17 @@ if __name__ == "__main__":
     #     ("multi_modal_aud_vis.txt", "tp_multi_modal_aud_vis.txt"),
     # ]
 
-    dir = "visual_in_bimodal"
+    # dir = "visual_in_bimodal"
+    # files = [
+    #     ("10_bimodel_reg_vis.txt", "10.txt"),
+    #     ("11_bimodal_renet_18.txt", "11.txt"),
+    #     ("12_crnet_vis.txt", "12.txt"),
+    #     ("13_bimodal_lstm_vis.txt", "13.txt"),
+    # ]
+
+    dir = "multi_model_pred"
     files = [
-        ("10_bimodel_reg_vis.txt", "10.txt"),
-        ("11_bimodal_renet_18.txt", "11.txt"),
-        ("12_crnet_vis.txt", "12.txt"),
-        ("13_bimodal_lstm_vis.txt", "13.txt"),
+        ("multi_model_pred.txt", "tp_multi_pred.txt")
     ]
     for sour, tgt in files:
         parse_tp_results(os.path.join(dir, sour), tgt)
