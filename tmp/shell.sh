@@ -1,2 +1,0 @@
-#python script/run_exp.py -c config/audio/aud_linear_regressor.yaml --test_only --set TEST.WEIGHT results/audio/aud_linear_regressor/11-30_01-52/checkpoint_998.pkl TEST.SAVE_DATASET_OUTPUT tmp/impresssion/audio
-python script/run_exp.py -c config/unified_frame_images/01_deep_bimodal_regression.yaml --test_only --set TEST.WEIGHT results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl TEST.SAVE_DATASET_OUTPUT tmp/impresssion/frame

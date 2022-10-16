@@ -28,6 +28,7 @@ results_second_stage_tp
 results_second_stage
 results_true_personality
 #temp/*.txt
+
 events.out*
 # current output files
 *.png

@@ -2,22 +2,26 @@
 
 
 
-## Requirements and Dependecies
+## Requirements and Dependencies
+ **Setup project**: you can use both Conda and Virtualenv to create a virtual environment to run this program.
+```shell
+# clone current repo
+git clone DeepPersonality
+cd DeepPersonality
 
+# create and activate a virtual environment
+virtualenv -p python38 venv
+source venv/bin/activate
+
+# install required packages and dependencies
+pip install -r requirements.txt
+```
 
 
 ## Usage for reproducing reproted experiments
+We employ a build-from-config manner to set up an experiment
 
-
-
-
-
-## Usage for developing new personality computing models
-
-
-
-
-## Command line interface
+### Command line interface
 * train:
 ```shell
 python run_exp.py \
@@ -41,4 +45,14 @@ python run_exp.py \
 --set TEST.WEIGHT results/unified_frame_images/09_hrnet/12-20_22-12/checkpoint_186.pkl
 
 ```
+
+
+
+## Usage for developing new personality computing models
+We use config-pipe line files and registration mechanism to organize our experiments. If user want to add their own 
+models or algorithms into this program please reference the config files in it.
+
+
+
+
 
