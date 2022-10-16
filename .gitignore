@@ -1,5 +1,4 @@
 # output dir
-results/
 ExpManager/
 checkpoints/
 pre_trained_weights/
@@ -18,9 +17,16 @@ datasets/*.txt
 datasets/annotation
 datasets/va_data
 pretrained/
-output/
 mlruns/
 /snippet
+/plot
+/docs
+# ingore output data
+output/
+results/
+results_second_stage_tp
+results_second_stage
+results_true_personality
 #temp/*.txt
 events.out*
 # current output files
