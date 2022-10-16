@@ -11,4 +11,5 @@ MODEL:
 SOLVER:
   LR_INIT: 0.001
 TRAIN:
-  OUTPUT_DIR: "results/unified_face_images/07_vat_face"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results/unified_face_images/07_vat_face_vl"

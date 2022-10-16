@@ -147,6 +147,7 @@ class VoiceLibrosaSwinTransformer(AudioData):
 
 @DATA_LOADER_REGISTRY.register()
 def build_audio_loader(cfg, dataset_cls, mode="train"):
+    shuffle = cfg.DATA_LOADER.SHUFFLE
     if mode == "train":
         dataset = dataset_cls(
             cfg.DATA.ROOT,
@@ -159,19 +160,21 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.VALID_AUD_DATA,
             cfg.DATA.VALID_LABEL_DATA,
         )
+        shuffle = False
     elif mode == "test":
         dataset = dataset_cls(
             cfg.DATA.ROOT,
             cfg.DATA.TEST_AUD_DATA,
             cfg.DATA.TEST_LABEL_DATA,
         )
+        shuffle = False
     else:
         raise ValueError("mode must be one of 'train' or 'valid' or test' ")
 
     data_loader = DataLoader(
         dataset,
         batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
-        shuffle=cfg.DATA_LOADER.SHUFFLE,
+        shuffle=shuffle,
         drop_last=cfg.DATA_LOADER.DROP_LAST,
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )

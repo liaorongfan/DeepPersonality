@@ -1,18 +1,39 @@
 Frame_image:
     talk:
 
+
+
+
     animal:
+
+
+
 
     ghost:
 
+
+
+
     lego:
+
+
+
 
 Face_image:
     talk:
 
+
+
+
     animal:
 
+
+
+
     ghost:
+
+
+
 
     lego:
 

@@ -12,4 +12,5 @@ SOLVER:
   LR_INIT: 0.001
 TRAIN:
   TRAINER: "ImageListTrainer"
-  OUTPUT_DIR: "results/unified_face_images/05_slow_fast_face"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results/unified_face_images/05_slow_fast_face_vl"

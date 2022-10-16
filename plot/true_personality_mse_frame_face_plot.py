@@ -3,20 +3,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-labels = ["IntImg", "PersE", 'SENet', 'HRNet', 'SwTran', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
-frame_acc = [1.10, 1.02, 1.14, 1.27, 1.27, 1.18, 1.27, 1.06, 1.02, 1.15]
-face_acc = [1.01, 1.02, 1.15,  1.28, 1.08, 1.10, 1.33, 1.06, 0.96, 1.11]
+labels = ['SENet', 'HRNet', 'Swin', "3DRes", "SlowFast", "TPN", "VAT", "Average"]
+frame_acc = [1.14, 1.27, 1.27, 1.18, 1.27, 1.06, 1.02, 1.17]
+face_acc = [1.15,  1.28, 1.08, 1.10, 1.33, 1.06, 0.96, 1.14]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.4  # the width of the bars
 
 fig, ax = plt.subplots()
-frame = ax.bar(x - width / 2, frame_acc, width, label='Frame')
-face = ax.bar(x + width / 2, face_acc, width, label='Face')
+frame = ax.bar(x - width / 2, frame_acc, width, label='Full frame')
+face = ax.bar(x + width / 2, face_acc, width, label='Face frame')
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_ylabel('MSE')
-ax.set_title('True personality MSE scores by frame and face images')
+ax.set_ylabel('MSE', fontsize=15)
+# ax.set_title('True personality MSE scores by frame and face images')
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
 ax.legend()

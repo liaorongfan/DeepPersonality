@@ -32,10 +32,10 @@ class VideoData(Dataset):
         if isinstance(data_dir, list):
             data_dir_path = []
             for dir_i in data_dir:
-                data_dir_ls = os.listdir(os.path.join(self.data_root, dir_i))
+                data_dir_ls = sorted(os.listdir(os.path.join(self.data_root, dir_i)))
                 data_dir_path.extend([os.path.join(self.data_root, dir_i, item) for item in data_dir_ls])
         else:
-            data_dir_ls = os.listdir(os.path.join(self.data_root, data_dir))
+            data_dir_ls = sorted(os.listdir(os.path.join(self.data_root, data_dir)))
             data_dir_path = [os.path.join(self.data_root, data_dir, item) for item in data_dir_ls]
         return data_dir_path
 

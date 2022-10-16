@@ -1,4 +1,4 @@
-# python run_exp.py -c config/second_stage/spectrum_on_pred_TP/animal/01_deep_bimodal_regression_spectrum.yaml
+python run_exp.py -c config/second_stage/spectrum_on_pred_TP/animal/01_deep_bimodal_regression_spectrum.yaml
 python run_exp.py -c config/second_stage/spectrum_on_pred_TP/animal/03_bimodal_resnet18_spectrum.yaml
 python run_exp.py -c config/second_stage/spectrum_on_pred_TP/animal/04_crnet_spectrum.yaml
 python run_exp.py -c config/second_stage/spectrum_on_pred_TP/animal/05_persemon_spectrum.yaml

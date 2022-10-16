@@ -10,5 +10,6 @@ from .bi_modal_trainer import (
     TPNTrainer,
     PersEmoTrainer,
     AudioTrainer,
+    MultiModalTrainer,
 )
 from .crnet_trainer import CRNetTrainer2

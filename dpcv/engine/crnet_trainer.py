@@ -390,6 +390,16 @@ class CRNetTrainer2(BiModalTrainer):
                 torch.save(video_extract, save_to_file)
 
 
+@TRAINER_REGISTRY.register()
+class CRNetTrainer2Vis(CRNetTrainer2):
+
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs = data["glo_img"], data["loc_img"]
+        cls_label, reg_label = data["cls_label"], data["reg_label"]
+        return inputs, cls_label, reg_label
+
 
 @TRAINER_REGISTRY.register()
 class CRNetAudTrainer(CRNetTrainer2):

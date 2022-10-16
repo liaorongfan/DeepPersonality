@@ -1,0 +1,12 @@
+DATA_LOADER:
+  NAME: "tpn_data_loader"
+  TRANSFORM: "set_tpn_transform_op"
+  TRAIN_BATCH_SIZE: 2
+MODEL:
+  NAME: "tpn_model"
+SOLVER:
+  LR_INIT: 0.001
+TRAIN:
+  TRAINER: "TPNTrainer"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results/unified_frame_images/13_tpn_vl"

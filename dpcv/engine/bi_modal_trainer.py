@@ -225,6 +225,18 @@ class BimodalLSTMTrain(BiModalTrainer):
 
 
 @TRAINER_REGISTRY.register()
+class BimodalLSTMTrainVisual(BiModalTrainer):
+
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        img_in,  labels = data["image"],  data["label"]
+        img_in = img_in.view(-1, 3, 112, 112)
+        # aud_in = aud_in.view(-1, 68)
+        return (img_in,), labels
+
+
+@TRAINER_REGISTRY.register()
 class ImgModalLSTMTrain(BiModalTrainer):
 
     def data_fmt(self, data):
@@ -271,6 +283,18 @@ class ImageModalTrainer(BiModalTrainer):
         images, label = data["all_images"], data["label"]
         images_in = torch.stack(images, 0).to(self.device)
         return (images_in, ), label
+
+
+@TRAINER_REGISTRY.register()
+class MultiModalTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feature"], data["label"]
+        return (inputs,), labels
 
 
 @TRAINER_REGISTRY.register()

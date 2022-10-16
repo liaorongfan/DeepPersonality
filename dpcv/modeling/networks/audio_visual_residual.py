@@ -46,6 +46,40 @@ class AudioVisualResNet18(nn.Module):
         return x
 
 
+class VisualResNet18(nn.Module):
+
+    def __init__(self, init_weights=True, return_feat=False):
+        super(VisualResNet18, self).__init__()
+        self.return_feature = return_feat
+
+        self.visual_branch = AudioVisualResNet(
+            in_channels=3, init_stage=VisInitStage,
+            block=BiModalBasicBlock, conv=[vis_conv3x3, vis_conv1x1],
+            channels=[32, 64, 128, 256],
+            layers=[2, 2, 2, 2]
+        )
+        self.linear = nn.Linear(256, 5)
+
+        if init_weights:
+            initialize_weights(self)
+
+    def forward(self, vis_input):
+        # aud_x = self.audio_branch(aud_input)
+        vis_x = self.visual_branch(vis_input)
+
+        # aud_x = aud_x.view(aud_x.size(0), -1)
+        vis_x = vis_x.view(vis_x.size(0), -1)
+
+        feat = vis_x
+        x = self.linear(vis_x)
+        x = torch.sigmoid(x)
+        # x = torch.tanh(x)
+        # x = (x + 1) / 2  # scale tanh output to [0, 1]
+        if self.return_feature:
+            return x, feat
+        return x
+
+
 class AudioResNet18(nn.Module):
 
     def __init__(self):
@@ -84,6 +118,13 @@ def get_audio_resnet_model(cfg=None):
     aud_modal_model = AudioResNet18()
     aud_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return aud_modal_model
+
+
+@NETWORK_REGISTRY.register()
+def get_visual_resnet_model(cfg=None):
+    visual_modal_model = VisualResNet18()
+    visual_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return visual_modal_model
 
 
 if __name__ == "__main__":

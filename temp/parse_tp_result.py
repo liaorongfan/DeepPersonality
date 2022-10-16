@@ -34,7 +34,10 @@ def parse_tp_results(file="tp_result/deep_bimodal_reg_tp.txt", output_file="tp_o
     def collect_session_data(data_ls):
         session_data = {}
         for line in data_ls[1:]:
-            key, val = line.split(":")
+            try:
+                key, val = line.split(":")
+            except:
+                print(line)
             session_data[key.strip()] = val.strip()
         return session_data
 
@@ -87,17 +90,43 @@ def parse_tp_results(file="tp_result/deep_bimodal_reg_tp.txt", output_file="tp_o
 
 if __name__ == "__main__":
     import os
-    dir = "tp_result"
-    parse_tp_results()
+    # files = [
+    #     ("deep_bimodal_reg_tp.txt", "tp_output_deep_bimodal.txt"),
+    #     ("interpre_img_tp.txt", "tp_output_interpret_img.txt"),
+    #     ("audioviaual_resnet_tp.txt", "tp_output_audiovisual_resnet.txt"),
+    #     ("bimodal_lstm.txt", "tp_output_bimodal_lstm.txt"),
+    #     ("crnet_tp.txt", "tp_output_crnet.txt"),
+    #     ("persemon.txt", "tp_output_persemon.txt"),
+    #     ("aud_lstm_tp.txt", "tp_output_aud_lstm.txt"),
+    #     ("aud_interpret_aud.txt", "tp_output_interpret_aud.txt"),
+    # ]
+
+    # dir = "tp_result_vl"
+    # files = [
+    #     ("3DResNet.txt", "tp_3DResNet_vl.txt"),
+    #     ("slow_fast.txt", "tp_slow_fast_vl.txt"),
+    #     ("tpn.txt", "tp_tpn_vl.txt"),
+    #     ("vat.txt", "tp_vat_vl.txt")
+    # ]
+
+    # dir = "tp_result"
+    # files = [
+    #     ("multi_modal_pred.txt", "tp_multi_modal_pred.txt"),
+    #     ("multi_modal_pred_audio.txt", "tp_multi_modal_pred_audio.txt"),
+    #     ("multi_modal_aud_vis.txt", "tp_multi_modal_aud_vis.txt"),
+    # ]
+
+    # dir = "visual_in_bimodal"
+    # files = [
+    #     ("10_bimodel_reg_vis.txt", "10.txt"),
+    #     ("11_bimodal_renet_18.txt", "11.txt"),
+    #     ("12_crnet_vis.txt", "12.txt"),
+    #     ("13_bimodal_lstm_vis.txt", "13.txt"),
+    # ]
+
+    dir = "multi_model_pred"
     files = [
-        ("deep_bimodal_reg_tp.txt", "tp_output_deep_bimodal.txt"),
-        ("interpre_img_tp.txt", "tp_output_interpret_img.txt"),
-        ("audioviaual_resnet_tp.txt", "tp_output_audiovisual_resnet.txt"),
-        ("bimodal_lstm.txt", "tp_output_bimodal_lstm.txt"),
-        ("crnet_tp.txt", "tp_output_crnet.txt"),
-        ("persemon.txt", "tp_output_persemon.txt"),
-        ("aud_lstm_tp.txt", "tp_output_aud_lstm.txt"),
-        ("aud_interpret_aud.txt", "tp_output_interpret_aud.txt"),
+        ("multi_model_pred.txt", "tp_multi_pred.txt")
     ]
     for sour, tgt in files:
         parse_tp_results(os.path.join(dir, sour), tgt)

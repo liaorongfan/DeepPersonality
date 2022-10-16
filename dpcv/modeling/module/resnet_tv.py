@@ -246,7 +246,7 @@ def resnet152(pretrained=False, **kwargs):
 
 if __name__ == "__main__":
     import torch
-    model = resnet18(pretrained=False)
+    model = resnet101(pretrained=True)
 
     # change network layer
     for name, module in model.named_modules():

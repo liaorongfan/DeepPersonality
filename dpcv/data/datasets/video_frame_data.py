@@ -41,9 +41,10 @@ class SingleFrameData(VideoData):
 
 
 class AllSampleFrameData(VideoData):
-    def __init__(self, data_root, img_dir, label_file, trans=None):
+    def __init__(self, data_root, img_dir, label_file, trans=None, length=100):
         super().__init__(data_root, img_dir, label_file)
         self.trans = trans
+        self.len = length
 
     def __getitem__(self, idx):
         img_obj_ls = self.get_sample_frames(idx)
@@ -57,7 +58,7 @@ class AllSampleFrameData(VideoData):
         # Note randomly ordered after glob search
         img_path_ls = glob.glob(f"{img_dir}/*.jpg")
         # downsample the frames to 100 / video
-        sample_frames_id = np.linspace(0, len(img_path_ls), 100, endpoint=False, dtype=np.int16).tolist()
+        sample_frames_id = np.linspace(0, len(img_path_ls), self.len, endpoint=False, dtype=np.int16).tolist()
         img_path_ls_sampled = [img_path_ls[idx] for idx in sample_frames_id]
         img_obj_ls = [Image.open(img_path) for img_path in img_path_ls_sampled]
         return img_obj_ls
@@ -129,7 +130,7 @@ def single_frame_data_loader(cfg, mode="train"):
 
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
-
+    shuffle = cfg.DATA_LOADER.SHUFFLE
     transform = build_transform_spatial(cfg)
     if mode == "train":
         data_set = SingleFrameData(
@@ -145,6 +146,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.VALID_LABEL_DATA,
             transform,
         )
+        shuffle = False
     elif mode == "trainval":
         data_set = SingleFrameData(
             cfg.DATA.ROOT,
@@ -166,10 +168,12 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TEST_LABEL_DATA,
             transform,
         )
+        shuffle = False
+
     data_loader = DataLoader(
         dataset=data_set,
         batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
-        shuffle=cfg.DATA_LOADER.SHUFFLE,
+        shuffle=shuffle,
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )
     return data_loader
