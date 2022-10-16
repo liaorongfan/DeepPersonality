@@ -19,7 +19,7 @@ datasets/va_data
 pretrained/
 mlruns/
 /snippet
-/plot
+plot
 /docs
 # ingore output data
 output/
