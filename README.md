@@ -1,5 +1,5 @@
 # Benchmarking Deep Learning Models for Audio-visual Automatic Self-reported and Apparent Personality Recognition
-
+# (The code structure and README will be updated soon for all potential users)
 
 
 ## Requirements and Dependencies
