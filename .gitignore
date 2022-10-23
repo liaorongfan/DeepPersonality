@@ -20,7 +20,8 @@ pretrained/
 mlruns/
 /snippet
 plot
-/docs
+/docs/temp
+/docs/tmp
 # ingore output data
 output/
 results/
@@ -31,13 +32,13 @@ results_true_personality
 
 events.out*
 # current output files
-*.png
+#*.png
 *.json
 *.diff
 *.jpg
 *.zip
 *.log
-ev
+#/!docs/figures/pipeline.png
 # compilation and distribution
 __pycache__
 _ext

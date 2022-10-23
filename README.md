@@ -1,6 +1,6 @@
-# Benchmarking Deep Learning Models for Audio-visual Automatic Self-reported and Apparent Personality Recognition
-# (The code structure and README will be updated soon to facilitate all potential users)
+# An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition
 
+<img src="docs/figures/pipeline.png"/>
 
 ## Requirements and Dependencies
  **Setup project**: you can use both Conda and Virtualenv to create a virtual environment to run this program.
@@ -16,8 +16,23 @@ source venv/bin/activate
 # install required packages and dependencies
 pip install -r requirements.txt
 ```
+## Datasets 
+The datasets we used for benchmark are `Chalearn First Impression` and `UDIVA`. 
 
+The former contains  10, 000 video clips that come from 2, 764 YouTube users for apparent personality recognition(impression), 
+where each video lasts for about 15 seconds with 30 fps. Each video is labelled with the Big-Five personality traits that
+are annotated by human annotators.
 
+The latter, UDIVA for self-reported personality, is released in 2021 and records 188 dyadic interaction video clips between 147 
+voluntary participants, with total 90.5h of recordings. Each clip contains two audiovisual files, where each records a 
+single participant’s behaviours. During the recordings, participants were asked to sit at 90 degrees to the conversational
+partner around a table, and under the dyadic interactions based on five tasks: Talk, ’Animal games’, Lego building, 
+“Ghost blitz” card game, and Gaze events.
+
+To meet various requirements from different models or experiments, we first extract all frames from a video and then extract
+all face images from each full frame, termed as face frames.
+
+**Please find the process methods in [dataset preparation](datasets/README.md).**
 ## Usage for reproducing reproted experiments
 We employ a build-from-config manner to set up an experiment
 
@@ -56,3 +71,5 @@ models or algorithms into this program please reference the config files in it.
 
 
 
+## To Be Updated
+(The code structure and README will be updated soon to facilitate all potential users)
