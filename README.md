@@ -123,8 +123,27 @@ models or algorithms into this program please reference the config files in it.
 
 
 
+## Papers from which the models are reproduced
+
+- Deep bimodal regression of apparent personality traits from short video sequences
+- Bi-modal first impressions recognition using temporally ordered deep audio and stochastic visual features
+- Deep impression: Audiovisual deep residual networks for multimodal apparent personality trait recognition
+- Cr-net: A deep classification-regression network for multimodal apparent personality analysis
+- Interpreting cnn models for apparent personality trait regression
+- On the use of interpretable cnn for personality trait recognition from audio
+- Persemon: a deep network for joint analysis of apparent personality, emotion and their relationship
+- A multi-modal personality prediction system
+- Squeeze-and-excitation networks
+- Deep high-resolution representation learning for visual recognition
+- Swin transformer: Hierarchical vision transformer using shifted windows
+- Can spatiotemporal 3d cnns retrace the history of 2d cnns and imagenet
+- Slowfast networks for video recognition
+- Temporal pyramid network for action recognition
+- Video action transformer network
+
+
 
 ## To Be Updated
 - [ ] Detailed Data prepare pipeline description
-- [ ] Pip install 
+- [ ] Pip install
 - [ ] Description of adding new models
