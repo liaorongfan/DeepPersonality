@@ -22,7 +22,7 @@ personality datasets as well as adding more modalities (e.g.,language). **We wil
 and try to make it easy-to-use, hoping this work would save as a useful tool-kit to all interested researchers.**
 
 
-## Requirements and Dependencies
+## Requirements and dependencies
  **Setup project**: you can use both Conda and Virtualenv to create a virtual environment to run this program.
 ```shell
 # clone current repo
@@ -36,23 +36,19 @@ source venv/bin/activate
 # install required packages and dependencies
 pip install -r requirements.txt
 ```
-## Datasets 
+## Datasets description and preparation
 The datasets we used for benchmark are [Chalearn First Impression](https://chalearnlap.cvc.uab.cat/dataset/24/description/#) 
-and [UDIVA](https://chalearnlap.cvc.uab.es/dataset/41/description/#). 
-
-The former contains  10, 000 video clips that come from 2, 764 YouTube users for apparent personality recognition(impression), 
-where each video lasts for about 15 seconds with 30 fps. 
-
-The latter, UDIVA for self-reported personality, is released in 2021 and records 188 dyadic interaction video clips between 147 
-voluntary participants, with total 90.5h of recordings. Every clip contains two audiovisual files, where each records a 
-single participant’s behaviours. 
-
-Each video in both datasets is labelled with the Big-Five personality traits.
+and [UDIVA](https://chalearnlap.cvc.uab.es/dataset/41/description/#). The former contains  10, 000 video clips that come from 2, 764 YouTube users for apparent personality recognition(impression), 
+where each video lasts for about 15 seconds with 30 fps. The latter, for self-reported personality, records 188 dyadic 
+interaction video clips between 147 voluntary participants, with total 90.5h of recordings. Every clip contains two 
+audiovisual files, where each records a single participant’s behaviours. Each video in both datasets is labelled with 
+the Big-Five personality traits. 
 
 To meet various requirements from different models or experiments, we extract raw audio file and all frames from a video
-and then extract all face images from each full frame, termed as face frames.
+and then extract face images from each full frame, termed as face frames. **Please find the process methods in 
+[dataset preparation](datasets/README.md).**
 
-**Please find the process methods in [dataset preparation](datasets/README.md).**
+
 ## Usage for reproducing reproted experiments
 We employ a build-from-config manner to conduct an experiment. After setting up the environments and preparing the data needed,
 we can have a quick start by the following command line:
