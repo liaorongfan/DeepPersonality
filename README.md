@@ -13,11 +13,6 @@ the [ChaLearn UDIVA self-reported personality dataset](https://chalearnlap.cvc.u
 <img src="docs/figures/pipeline.png" />
 </center>
 
-This code base is designed to develop new personality computing models and to conduct quick evaluation of
-new models on both self-reported and apparent personality recognition tasks. Future work will focus on 
-updating the code base by adding newly published personality computing models, evaluating the benchmarked models on new
-personality datasets as well as adding more modalities (e.g.,language). **We will also continuously improve the code framework
-and try to make it easy-to-use, hoping this work would save as a useful tool-kit to all interested researchers.**
 
 
 ## Requirements and dependencies
