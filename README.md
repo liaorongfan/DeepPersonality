@@ -37,8 +37,7 @@ interaction video clips between 147 voluntary participants, with total 90.5h of 
 audiovisual files, where each records a single participant’s behaviours. Each video in both datasets is labelled with 
 the Big-Five personality traits. 
 
-To meet various requirements from different models or experiments, we extract raw audio file and all frames from a video
-and then extract face images from each full frame, termed as face frames. **Please find the process methods in 
+During experiments, we first extract raw audio file and all visual frames from each video, and then extract face images from each full frame, termed as face frames. **Please find the process methods in 
 [dataset preparation](datasets/README.md).**
 
 
