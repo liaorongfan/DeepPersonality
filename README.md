@@ -1,8 +1,8 @@
 # An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition
 ## Introduction
-This is the code repo of our paper *An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition*.
-we propose the audio-visual personality computing benchmark for both self-reported and apparent personality
-recognition tasks, which are evaluated on two widely-used and publicly available personality computing datasets: 
+This is the official code repo of *An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition* (https://arxiv.org/abs/2210.09138).
+
+All benchmarked models are evaluated on: 
 the [ChaLearn First Impression dataset](https://chalearnlap.cvc.uab.cat/dataset/24/description/#) and
 the [ChaLearn UDIVA self-reported personality dataset](https://chalearnlap.cvc.uab.es/dataset/41/description/#)
 
