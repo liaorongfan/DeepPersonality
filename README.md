@@ -16,7 +16,7 @@ the [ChaLearn UDIVA self-reported personality dataset](https://chalearnlap.cvc.u
 
 
 ## Requirements and dependencies
- **Setup project**: you can use both Conda and Virtualenv to create a virtual environment to run this program.
+ **Setup project**: you can use Conda or Virtualenv to create a virtual environment to run this program.
 ```shell
 # clone current repo
 git clone DeepPersonality
