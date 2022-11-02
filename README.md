@@ -1,29 +1,22 @@
 # An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition
 ## Introduction
-This is the code repo of our paper *An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition*.
-we propose the audio-visual personality computing benchmark for both self-reported and apparent personality
-recognition tasks, which are evaluated on two widely-used and publicly available personality computing datasets: 
+This is the official code repo of *An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition* (https://arxiv.org/abs/2210.09138).
+
+In this project, `seven visual models`, `six audio models` and `five audio-visual models` have been reproduced and evaluated on the personality datasets mentioned above. Besides, `seven widely-used visual deep learning models`, which have not been applied to video-based personality computing before, have also been employed for benchmark. Detailed description can be found in our paper.
+
+All benchmarked models are evaluated on: 
 the [ChaLearn First Impression dataset](https://chalearnlap.cvc.uab.cat/dataset/24/description/#) and
 the [ChaLearn UDIVA self-reported personality dataset](https://chalearnlap.cvc.uab.es/dataset/41/description/#)
 
-`Seven visual models`, `six audio models` and `five audio-visual models` have been reproduced and evaluated on 
-the personality datasets mentioned above. Besides, `seven widely-used visual deep learning models`, which have not been
-applied to video-based personality computing before, have also been employed for benchmark. Detailed description can be
-found in our paper.
 
 <center>
 <img src="docs/figures/pipeline.png" />
 </center>
 
-This code base is designed to develop new personality computing models and to conduct quick evaluation of
-new models on both self-reported and apparent personality recognition tasks. Future work will focus on 
-updating the code base by adding newly published personality computing models, evaluating the benchmarked models on new
-personality datasets as well as adding more modalities (e.g.,language). **We will also continuously improve the code framework
-and try to make it easy-to-use, hoping this work would save as a useful tool-kit to all interested researchers.**
 
 
 ## Requirements and dependencies
- **Setup project**: you can use both Conda and Virtualenv to create a virtual environment to run this program.
+ **Setup project**: you can use Conda or Virtualenv to create a virtual environment to run this program.
 ```shell
 # clone current repo
 git clone DeepPersonality
