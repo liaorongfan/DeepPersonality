@@ -36,17 +36,35 @@ source venv/bin/activate
 # install required packages and dependencies
 pip install -r requirements.txt
 ```
-## Datasets description and preparation
-The datasets we used for benchmark are [Chalearn First Impression](https://chalearnlap.cvc.uab.cat/dataset/24/description/#) 
-and [UDIVA](https://chalearnlap.cvc.uab.es/dataset/41/description/#). The former contains  10, 000 video clips that come from 2, 764 YouTube users for apparent personality recognition(impression), 
-where each video lasts for about 15 seconds with 30 fps. The latter, for self-reported personality, records 188 dyadic 
-interaction video clips between 147 voluntary participants, with total 90.5h of recordings. Every clip contains two 
-audiovisual files, where each records a single participant’s behaviours. Each video in both datasets is labelled with 
-the Big-Five personality traits. 
 
+
+## Datasets description and preparation
+### Datasets used
+The datasets we used for benchmark are [Chalearn First Impression](https://chalearnlap.cvc.uab.cat/dataset/24/description/#) 
+and [UDIVA](https://chalearnlap.cvc.uab.es/dataset/41/description/#). 
+
+- The former contains  10, 000 video clips that come from 2, 764 YouTube users for apparent personality recognition(impression), 
+where each video lasts for about 15 seconds with 30 fps. 
+
+- The latter, for self-reported personality, records 188 dyadic 
+interaction video clips between 147 voluntary participants, with total 90.5h of recordings. Every clip contains two audiovisual files, where each records a single participant’s behaviours. 
+
+- Each video in both datasets is labelled with the Big-Five personality traits. 
+### Data pre-processing
 To meet various requirements from different models or experiments, we extract raw audio file and all frames from a video
 and then extract face images from each full frame, termed as face frames. **Please find the process methods in 
 [dataset preparation](datasets/README.md).**
+
+### Pretrained weights
+When extracting face images from frames, we used the pretrained models which can be found in 
+[Google Drive](https://drive.google.com/drive/folders/1gxkjIkIt7jOk_3RJhzORUzIj9NkIaqT1?usp=sharing)
+and those models should be simply organized in directory `pre_trained_weights` as below:
+```
+pre_trained_weights/
+├── shape_predictor_68_face_landmarks.dat
+├── vgg16_bn-6c64b313.pth
+└── vgg_m_face_bn_fer_dag.pth
+```
 
 
 ## Usage for reproducing reproted experiments

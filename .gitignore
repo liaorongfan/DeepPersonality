@@ -1,7 +1,6 @@
 # output dir
 ExpManager/
 checkpoints/
-pre_trained_weights/
 # project dirs
 datasets/trainingData_face
 datasets/trainingData_face.zip
@@ -53,6 +52,7 @@ wheels/
 
 # pytorch/python/numpy formats
 *.pth
+*.dat
 *.pickle
 *.pkl
 *.npy
