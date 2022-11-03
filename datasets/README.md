@@ -54,3 +54,25 @@ datasets/
 
 ```
 ### Scrips for Video Frame Extraction
+
+```shell
+python dpcv/data/utils/video_to_image.py --video-path /path/to/video/directory
+```
+This script will find all mp4 files in the `directory` specified by `--video-path` and extract frames in each video into a
+directory which shares the same path and name with the video. For example, provided a directory with 2 mp4 videos
+```
+video_dir/
+    |-- video_1.mp4
+    |-- video_2.mp4
+```
+After frame extraction, it will be like this.
+```
+video_dir/
+    |-- video_1.mp4
+    |-- video_1/
+    |   |-- frame_1.jpg
+    |   |-- frame_2.jpg
+    |   |-- ...
+    |-- video_2.mp4
+    |-- video_2/
+```
