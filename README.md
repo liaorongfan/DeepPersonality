@@ -15,7 +15,7 @@ the [ChaLearn UDIVA self-reported personality dataset](https://chalearnlap.cvc.u
 <img src="docs/figures/pipeline.png" />
 </center>
 
-
+This project is currently under active development. Documentation, examples, and tutorial will be progressively detailed
 
 ## Requirements and dependencies
  **Setup project**: you can use either Conda or Virtualenv to create a virtual environment to run this program.
@@ -53,7 +53,7 @@ and then extract face images from each full frame, termed as face frames. **Plea
 ### Pretrained weights
 When extracting face images from frames, we used the pretrained models which can be found in 
 [Google Drive](https://drive.google.com/drive/folders/1gxkjIkIt7jOk_3RJhzORUzIj9NkIaqT1?usp=sharing)
-and those models should be simply organized in directory `pre_trained_weights` as below:
+and those models should be simply placed in directory `pre_trained_weights`, shown as below:
 ```
 pre_trained_weights/
 ├── shape_predictor_68_face_landmarks.dat
@@ -74,60 +74,13 @@ For example:
 # cd DeepPersonality # top directory
 script/run_exp.py --config config/unified_frame_images/01_deep_bimodal_regression.yaml
 ```
-
-
-### Command line interface
-    usage: run_exp.py [-h] [-c CFG_FILE] [--weight WEIGHT] [--test_only] [--lr LR] [--bs BS] [--resume RESUME]
-                  [-m MAX_EPOCH] [--set ...]
-
-    deep learning on personality
-
-    optional arguments:
-        -h, --help            show this help message and exit
-        -c , --cfg_file       experiment config file
-        --resume              saved model path to last training epoch
-        --test_only           only test model on specified weights
-        --weight              initialize with pretrained model weights
-        --lr                  learning rate
-        --bs                  training batch size
-        -m, --max_epoch       set max training epochs
-        --set ...             set config keys
-
-#### Training sample
-If we want to start an experiment, training can be triggered by corresponding config file
-```shell
-# <DeepPersonality as the top dir>
-script/run_exp.py \
---cfg_file config/unified_frame_images/03_bimodal_resnet18.yaml 
-
-```
-
-#### Resume sample
-If we want to resume training from a certain training checkpoint(saved model weights), parameter `resume` can be specified 
-along with the saved weights. And before re-training, the training epochs and learning rate can be reset again if needed.
-```shell
-# <DeepPersonality as the top dir>
-script/run_exp.py \
--c config/unified_frame_images/03_bimodal_resnet18.yaml \
---resume results/unified_frame_images/03_bimodal_resnet/12-19_18-15/checkpoint_199.pkl \
---max_epoch 210 \
---lr 0.001
-```
-#### Test sample
-If we only want to test a trained model, parameter `test_only` can be used, and along with `set` parameters to specify the model 
-weights used, shown as below:
-```shell
-script/run_exp.py \
--c config/unified_frame_images/09_hrnet.yaml \
---test_only \
---set TEST.WEIGHT results/unified_frame_images/09_hrnet/12-20_22-12/checkpoint_186.pkl
-```
+For detailed usage or arguments description, please find more in **[command line interface file](docs/Command_line_interface.md)**.
 
 
 
 ## Usage for developing new personality computing models
 We use config-pipe line files and registration mechanism to organize our experiments. If user want to add their own 
-models or algorithms into this program please reference the config files in it.
+models or algorithms into this program please reference the **[Notebook tutorials]()**.
 
 
 
@@ -152,7 +105,7 @@ models or algorithms into this program please reference the config files in it.
 
 
 ## History
-- 2022/10/17 
+- 2022/10/17 - Paper submission and make project publicly available.
 
 ## To Be Updated
 - [ ] Detailed Data prepare pipeline description
