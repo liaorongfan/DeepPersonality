@@ -1,5 +1,6 @@
 easydict
 tabulate
+opencv-python
 torch==1.9.1
 torchvision==0.8.2
 torchaudio==0.9.1

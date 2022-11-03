@@ -1,7 +1,6 @@
 import cv2
 import os
 import zipfile
-from tqdm import tqdm
 from pathlib import Path
 
 
@@ -251,35 +250,34 @@ def video2img_test(zipfile_test, saved_to="image_data/test_data"):
 
 
 if __name__ == "__main__":
+    import argparse
     from multiprocessing import Pool
     from tqdm import tqdm
-    # video2img_train("./chalearn/train/")
-    # print("current work directory:", os.getcwd())
-    # video2img_val("/home/rongfan/11-personality_traits/DeepPersonality/datasets/raw_data_tmp/validate/")
-    # video2img_test("/home/rongfan/11-personality_traits/DeepPersonality/datasets/raw_data_tmp/test/")
-    # video2img_train(
-    #     "/home/ssd500/personality_data/raw_data_tmp/train/", "/home/ssd500/personality_data/image_data/train_data"
-    # )
-    # F:\chalearn21\val\recordings\talk_recordings_val\001080
 
-    # video_path = "F:\\chalearn21\\val\\recordings\\talk_recordings_val\\001080\\FC2_T.mp4"
-    # save_dir = "F:\\chalearn21\\val\\recordings\\talk_recordings_val\\001080"
-    # frame_extract(video_path, save_dir, resize=(256, 256), transform=crop_to_square)
+    parser = argparse.ArgumentParser(description='extract image frames from videos')
+    parser.add_argument(
+        '-v',
+        '--video-path',
+        help="path to video directory",
+        default=None,
+        type=str,
+    )
+    args = parser.parse_args()
+
     def long_time_task(video, parent_dir):
         print(f"execute {video} ...")
         return frame_extract(video_path=video, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
 
-    p = Pool(32)
-    path = Path("/root/personality/datasets/chalearn2021/train/lego_train")
+    p = Pool(8)
+    v_path = args.video_path
+    # path = Path("/root/personality/datasets/chalearn2021/train/lego_train")
+    path = Path(v_path)
     i = 0
     video_pts = list(path.rglob("*.mp4"))
     for video in tqdm(video_pts):
         i += 1
         video_path = str(video)
         parent_dir = Path(video).parent
-        # if "001080" in str(video):
-        #     continue
-        # frame_extract(video_path=video_path, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
         p.apply_async(long_time_task, args=(video_path, parent_dir))
     print('Waiting for all subprocesses done...')
     p.close()
