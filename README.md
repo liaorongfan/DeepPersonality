@@ -17,16 +17,27 @@ the [ChaLearn UDIVA self-reported personality dataset](https://chalearnlap.cvc.u
 
 This project is currently under active development. Documentation, examples, and tutorial will be progressively detailed
 
-## Requirements and dependencies
- **Setup project**: you can use either Conda or Virtualenv to create a virtual environment to run this program.
+
+## Installation
+ **Setup project**: you can use either Conda or Virtualenv/pipenv to create a virtual environment to run this program.
+
+```shell
+# create and activate a virtual environment
+virtualenv -p python38 venv
+source venv/bin/activate
+````
+
+#### Installing from PyPI
+
+```shell
+pip install deep_personality
+``` 
+
+#### Installing from Github
 ```shell
 # clone current repo
 git clone DeepPersonality
 cd DeepPersonality
-
-# create and activate a virtual environment
-virtualenv -p python38 venv
-source venv/bin/activate
 
 # install required packages and dependencies
 pip install -r requirements.txt

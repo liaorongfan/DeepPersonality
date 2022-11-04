@@ -11,7 +11,7 @@ Documentation can be found at https://github.com/liaorongfan/DeepPersonality
 
 Example Usage
 -------------
-Here is an example launch experiment in this project.
+Here is an example to launch experiment in this project.
 
 .. code:: python
 
