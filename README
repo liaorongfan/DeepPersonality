@@ -1,0 +1,22 @@
+Deep_personality
+==================
+
+Introduction
+-------------
+This is an open source benchmark for automatic personality recognition
+
+Documentation
+--------------
+Documentation can be found at https://github.com/liaorongfan/DeepPersonality
+
+Example Usage
+-------------
+Here is an example launch experiment in this project.
+
+.. code:: python
+
+    script/run_exp.py --config path/to/config.yaml
+
+LICENSE
+-------
+See LICENSE file.

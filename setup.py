@@ -1,11 +1,14 @@
-from distutils.core import setup
+# from distutils.core import setup
+from setuptools import setup
 
-with open("README.md", 'r') as file:
+
+with open("README", 'r') as file:
     readme = file.read()
+
 
 setup(
     name="deep_personality",
-    version="0.1.0",
+    version="0.1.2",
     packages=["dpcv"],
     url="https://testpypi.python.org/pypi/deep_personality",
     license="LICENSE",
