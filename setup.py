@@ -11,7 +11,7 @@ setup(
     version="0.1.4",
     # packages=["dpcv"],
     packages=find_packages(),
-    url="https://testpypi.python.org/pypi/deep_personality",
+    url="https://pypi.python.org/pypi/deep_personality",
     license="LICENSE",
     description="an open source bench mark for automatic personality recognition",
     long_description=readme,
