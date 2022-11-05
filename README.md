@@ -61,16 +61,7 @@ To meet various requirements from different models or experiments, we extract ra
 and then extract face images from each full frame, termed as face frames. **Please find the process methods in 
 [dataset preparation](datasets/README.md).**
 
-### Used Pretrain weights
-When extracting face images from frames, we used the pretrained models which can be found in 
-[Google Drive](https://drive.google.com/drive/folders/1gxkjIkIt7jOk_3RJhzORUzIj9NkIaqT1?usp=sharing)
-and those models should be simply placed in directory `pre_trained_weights`, shown as below:
-```
-pre_trained_weights/
-├── shape_predictor_68_face_landmarks.dat
-├── vgg16_bn-6c64b313.pth
-└── vgg_m_face_bn_fer_dag.pth
-```
+
 
 
 ## Usage for reproducing reproted experiments

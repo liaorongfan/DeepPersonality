@@ -82,13 +82,25 @@ video_dir/
 
 
 ### Scrips for Video Face Extraction
+
+When extracting face images from frames, we used the pretrained models which can be found in
+[Google Drive](https://drive.google.com/drive/folders/1gxkjIkIt7jOk_3RJhzORUzIj9NkIaqT1?usp=sharing)
+and those models should be simply placed in directory `DeepPersonality/pre_trained_weights`, shown as below:
+```
+pre_trained_weights/
+├── shape_predictor_68_face_landmarks.dat
+├── vgg16_bn-6c64b313.pth
+└── vgg_m_face_bn_fer_dag.pth
+```
+
+
+The following script will also find all mp4 files in the`directory` specified by `--video-path` and extract face images from 
+every frame in each video into a directory which shares the same name with the video. Those directories are saved in 
+`path` specified by `--output-dir`
+
 ```shell
 python dpcv/data/face_extract/face_img_extractor.py --video-path /path/to/video/dir --output-dir /path/to/output/dir 
 ```
-
-This script will also find all mp4 files in the`directory` specified by `--video-path` and extract face images from 
-every frame in each video into a directory which shares the same name with the video. Those directories are saved in 
-`path` specified by `--output-dir`
 
 For example, provided a directory with 2 mp4 videos, and we run the following command line
 ```shell
