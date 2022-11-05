@@ -7,6 +7,9 @@ clips in train, valid and test split respectively. For each video clip, we extra
 the same name as the video, and then extract face images from those full frames. The extracted face images also organized 
 in corresponding directories, show as **ChaLearn 2016 Data Structure**
 
+For quick start and demo, we provide a [tiny Chalearn 2016 dataset](https://drive.google.com/file/d/1S87nJFLz9ygzw2Ep_rJUXzzWFfdz15an/view?usp=sharing) containing 100 videos within which 60 for 
+training, 20 for validation and 20 for test.
+
 ### ChaLearn 2016 Data Structure
 Expected dataset structure for Chalearn 2016 dataset. 
 ```
@@ -75,4 +78,55 @@ video_dir/
     |   |-- ...
     |-- video_2.mp4
     |-- video_2/
+```
+
+
+### Scrips for Video Face Extraction
+```shell
+python dpcv/data/face_extract/face_img_extractor.py --video-path /path/to/video/dir --output-dir /path/to/output/dir 
+```
+
+This script will also find all mp4 files in the`directory` specified by `--video-path` and extract face images from 
+every frame in each video into a directory which shares the same name with the video. Those directories are saved in 
+`path` specified by `--output-dir`
+
+For example, provided a directory with 2 mp4 videos, and we run the following command line
+```shell
+python dpcv/data/face_extract/face_img_extractor.py  \
+    --video-path /path/to/train_videos_dir \ 
+    --output-dir /path/to/train_face_img_dir 
+```
+```
+train_video_dir/
+    |-- video_1.mp4
+    |-- video_2.mp4
+```
+After face image extraction, it will be like this.
+```
+train_face_img_dir/
+    |-- video_1/
+    |   |-- face_1.jpg
+    |   |-- face_2.jpg
+    |   |-- ...
+    |-- video_2/
+```
+
+## ChaLearn2021 True Personality Dataset
+### Data Pre-processing
+We employ the same data processing methods in ChaLearn2016 dataset descript above.
+
+### ChaLearn 2021 Data Structure
+```
+datasets/
+|    chalearn2021
+|    ├── annotation
+|    │   └── talk
+|    ├── test
+|    │   └── talk_test
+|    ├── train
+|    │   └── talk_train
+|    └── valid
+|        └── talk_valid
+
+
 ```

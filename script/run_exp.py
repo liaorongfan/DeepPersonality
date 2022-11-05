@@ -2,7 +2,7 @@
 
 from dpcv.tools.common import parse_args
 from dpcv.config.default_config_opt import cfg, cfg_from_file, cfg_from_list
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 from dpcv.experiment.exp_runner import ExpRunner
 
 
@@ -37,6 +37,6 @@ def main():
 
 if __name__ == "__main__":
     # for debug setting
-    import os
+    # import os
     # os.chdir("..")
     main()

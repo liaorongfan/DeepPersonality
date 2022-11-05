@@ -7,7 +7,7 @@ from data.face_extract.face_detector import FaceDetection
 
 class FaceImageExtractor:
 
-    def __init__(self, data_root, detector_path):
+    def __init__(self, data_root, level, detector_path):
         """
         args:
             data_root:(str) : where to save the processed video directory
@@ -17,6 +17,7 @@ class FaceImageExtractor:
         self.video_name = None
         self.video_file = None
         self.save_dir = None
+        self.level = level
         self.frame_count = 0
         self.frame_count_new = 0
         self.fps = 0
@@ -33,11 +34,15 @@ class FaceImageExtractor:
         args:
             video_name:(str) name of video file end with ".mp4"
         """
-        self.video_name = f"{os.path.basename(video_name)[:-4]}_face"
+        if self.level in ["dir", "directory"]:
+            self.video_name = f"{os.path.basename(video_name)[:-4]}_face"
+        else:
+            self.video_name = os.path.basename(video_name)[:-4]  # [:-4] to remove .mp4
 
         self.save_dir = os.path.join(self.data_root, self.video_name)
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
+
         self.video_file = cv2.VideoCapture(video_name)
 
     def reduce_frame_rate(self, fps_new):
@@ -122,10 +127,12 @@ class FaceImageExtractor:
 def run_on_videos(
     video_dir,
     data_root,
-    detector_path="/home/rongfan/05-personality_traits/DeepPersonality/pre_trained_weights/",
+    level=None,
+    detector_path="pre_trained_weights/",
 ):
     image_extractor = FaceImageExtractor(
         data_root=data_root,
+        level=level,
         detector_path=detector_path,
     )
     # dirs = [name for name in os.listdir(data_root) if "face" in name]
@@ -141,21 +148,51 @@ def run_on_videos(
 
 
 if __name__ == "__main__":
+    import argparse
     from multiprocessing import Pool
+    from pathlib import Path
 
-    video_root = "/home/rongfan/05-personality_traits/DeepPersonality/datasets/chalearn2021/valid/talk_valid"
-    data_root_ls = os.listdir(video_root)
-    data_root_ls_pt = [os.path.join(video_root, d) for d in data_root_ls]
-    p = Pool(16)
-    for d in data_root_ls_pt:
-        p.apply_async(run_on_videos, args=(d, d))
-        # run_on_videos(
-        #     video_dir=d,
-        #     data_root=d,
-        #     detector_path=,
-        # )
-    print('Waiting for all subprocesses done...')
-    p.close()
-    p.join()
-    print('All subprocesses done.')
+    parser = argparse.ArgumentParser(description="detect and extract face images from videos")
+    parser.add_argument(
+        "-v",
+        "--video-path",
+        help="path to video directory",
+        default=None,
+        type=str,
+    )
+    parser.add_argument(
+        "-o", "--output-dir",
+        help="path to save processed videos",
+        default=None,
+        type=str,
+    )
+    parser.add_argument(
+        "-l", "--level",
+        help="datasets should be one of [video, directory/dir]",
+        default="video",
+        type=str,
+    )
+    args = parser.parse_args()
+
+    if args.level == "video":
+        video_dir = args.video_path
+        data_root = args.output_dir
+        run_on_videos(video_dir=video_dir, data_root=data_root)
+    elif args.level in ["directory", "dir"]:
+        video_root = args.video_path
+        # video_root = "/home/rongfan/05-personality_traits/DeepPersonality/datasets/chalearn2021/valid/talk_valid"
+        data_root_ls = os.listdir(video_root)
+        data_root_ls_pt = [os.path.join(video_root, d) for d in data_root_ls]
+
+        p = Pool(8)
+        for d in data_root_ls_pt:
+            p.apply_async(run_on_videos, args=(d, d, args.level))
+            # run_on_videos(
+            #     video_dir=d,
+            #     data_root=d,
+            # )
+        print('Waiting for all subprocesses done...')
+        p.close()
+        p.join()
+        print('All subprocesses done.')
 
