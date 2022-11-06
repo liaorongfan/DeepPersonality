@@ -105,7 +105,7 @@ class FaceImageExtractor:
                         if os.path.exists(save_to):
                             # print("image_exist...")
                             continue
-                            
+
                         cv2.imwrite(save_to, frame_crop)
 
                 if cnt >= frame_count:
@@ -125,10 +125,10 @@ class FaceImageExtractor:
 
 
 def run_on_videos(
-    video_dir,
-    data_root,
-    level=None,
-    detector_path="pre_trained_weights/",
+        video_dir,
+        data_root,
+        level=None,
+        detector_path="pre_trained_weights/",
 ):
     image_extractor = FaceImageExtractor(
         data_root=data_root,
@@ -150,28 +150,12 @@ def run_on_videos(
 if __name__ == "__main__":
     import argparse
     from multiprocessing import Pool
-    from pathlib import Path
 
     parser = argparse.ArgumentParser(description="detect and extract face images from videos")
-    parser.add_argument(
-        "-v",
-        "--video-path",
-        help="path to video directory",
-        default=None,
-        type=str,
-    )
-    parser.add_argument(
-        "-o", "--output-dir",
-        help="path to save processed videos",
-        default=None,
-        type=str,
-    )
-    parser.add_argument(
-        "-l", "--level",
-        help="datasets should be one of [video, directory/dir]",
-        default="video",
-        type=str,
-    )
+    parser.add_argument("-v", "--video-path", help="path to video directory", default=None, type=str)
+    parser.add_argument("-o", "--output-dir", help="path to save processed videos", default=None, type=str)
+    parser.add_argument("-l", "--level", default="video", type=str,
+                        help="datasets should be one of [video, directory/dir]",)
     args = parser.parse_args()
 
     if args.level == "video":
@@ -195,4 +179,3 @@ if __name__ == "__main__":
         p.close()
         p.join()
         print('All subprocesses done.')
-

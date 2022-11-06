@@ -1,13 +1,13 @@
 # Datasets
-This file describes the data pre-procession and preparation for training.
+This file describes the data pre-processing and preparation for training.
 ## ChaLearn 2016 First Impression Dataset
 ### Data Pre-processing 
 That dataset contains 10, 000 video clips which are seperated into train, valid and test splits. There are 6000, 2000 and 2000 
 clips in train, valid and test split respectively. For each video clip, we extract all frames in it into a directory with 
 the same name as the video, and then extract face images from those full frames. The extracted face images also organized 
-in corresponding directories, show as **ChaLearn 2016 Data Structure**
+in corresponding directories, shown as **ChaLearn 2016 Data Structure**
 
-For quick start and demo, we provide a [tiny Chalearn 2016 dataset](https://drive.google.com/file/d/1S87nJFLz9ygzw2Ep_rJUXzzWFfdz15an/view?usp=sharing) containing 100 videos within which 60 for 
+Following, We will demonstrate the pre-processing procedure by a [tiny Chalearn 2016 dataset](https://drive.google.com/file/d/1S87nJFLz9ygzw2Ep_rJUXzzWFfdz15an/view?usp=sharing) containing 100 videos within which 60 for 
 training, 20 for validation and 20 for test.
 
 ### ChaLearn 2016 Data Structure
@@ -56,7 +56,7 @@ datasets/
 |    |    |--- train_data/
 
 ```
-### Scrips for Video Frame Extraction
+### Script for Video Frame Extraction
 
 ```shell
 python dpcv/data/utils/video_to_image.py --video-path /path/to/video/directory
@@ -81,7 +81,7 @@ video_dir/
 ```
 
 
-### Scrips for Video Face Extraction
+### Script for Video Face Extraction
 
 When extracting face images from frames, we used the pretrained models which can be found in
 [Google Drive](https://drive.google.com/drive/folders/1gxkjIkIt7jOk_3RJhzORUzIj9NkIaqT1?usp=sharing)
@@ -92,7 +92,6 @@ pre_trained_weights/
 ├── vgg16_bn-6c64b313.pth
 └── vgg_m_face_bn_fer_dag.pth
 ```
-
 
 The following script will also find all mp4 files in the`directory` specified by `--video-path` and extract face images from 
 every frame in each video into a directory which shares the same name with the video. Those directories are saved in 
@@ -122,6 +121,48 @@ train_face_img_dir/
     |   |-- ...
     |-- video_2/
 ```
+
+
+### Script for Audio Extraction
+
+#### Extract raw audio files
+The script below will find all mp4 files in the`directory` specified by `--video-path` and extract `audio file` in `wav` 
+format from each video into a directory which shares the same name with the video. Those directories are saved in 
+`path` specified by `--output-dir`
+
+```shell
+python dpcv/data/utils/video_to_wave.py --video-path /path/to/video/dir --output-dir /path/to/output/dir 
+
+```
+
+For example, provided a directory with 2 mp4 videos, and we run the following command line
+```shell
+python dpcv/data/utils/video_to_wave.py  \
+    --video-path /path/to/train_videos_dir \ 
+    --output-dir /path/to/voice_data/voice_raw/train_data
+```
+```
+train_video_dir/
+    |-- video_1.mp4
+    |-- video_2.mp4
+```
+After face image extraction, it will be like this.
+```
+voice_data/voice_raw/train_data/
+                        |-- video_1.wav
+                        |-- video_2.wav
+```
+
+#### Process raw audio files
+The audio data processing methods we used include `librasa`, `logfbank`, `mfcc` and `opensmile`, Here we take `librasa` 
+as an example.
+```shell
+python dpcv/data/utils/raw_audio_process.py --mode <librasa/logfbank/opensmile> \
+    --audio-dir /path/to/audio_dir \
+    --output-dir /path/to/output_dir 
+```
+In this script the arguments `--audio-dir` and `--output-dir` specify the directory path to audio file and directory to 
+save the processed audio files.
 
 ## ChaLearn2021 True Personality Dataset
 ### Data Pre-processing

@@ -73,6 +73,21 @@ def chalearn21_audio_extract_ffmpeg(dir_path):
         subprocess.call(cmd, shell=True)
 
 
+def audio_extract_ffmpeg(dir_path, output_dir=None):
+    path = Path(dir_path)
+    format_str = "./*.mp4"
+    mp4_ls = path.rglob(format_str)
+    for mp4 in mp4_ls:
+        name = mp4.stem
+        if output_dir is None:
+            parent_dir = mp4.parent,
+        else:
+            os.makedirs(output_dir, exist_ok=True)
+            parent_dir = output_dir
+        cmd = f"ffmpeg -i {mp4} -ab 320k -ac 2 -ar 44100 -vn {parent_dir}/{name}.wav"
+        subprocess.call(cmd, shell=True)
+
+
 def chalearn21_audio_process(dir_path):
     wav_path_ls = glob.glob(f"{dir_path}/*/*.wav")
     for wav_path in tqdm(wav_path_ls):
@@ -85,6 +100,13 @@ def chalearn21_audio_process(dir_path):
 
 
 if __name__ == "__main__":
-    dir_path = "/home/rongfan/05-personality_traits/DeepPersonality/datasets/chalearn2021/test/talk_test"
+    import argparse
+    parser = argparse.ArgumentParser(description="ffmpeg audio extraction")
+    parser.add_argument("-v", "--video-path", default=None, type=str, help="path to video directory")
+    parser.add_argument("-o", "--output-dir", default=None, type=str, help="path to save processed videos")
+    args = parser.parse_args()
+
+    # dir_path = "/home/rongfan/05-personality_traits/DeepPersonality/datasets/chalearn2021/test/talk_test"
     # chalearn21_audio_extract_ffmpeg(dir_path)
-    chalearn21_audio_process(dir_path)
+    # chalearn21_audio_process(dir_path)
+    audio_extract_ffmpeg(dir_path=args.video_path, output_dir=args.output_dir)

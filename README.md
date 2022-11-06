@@ -58,9 +58,17 @@ interaction video clips between 147 voluntary participants, with total 90.5h of 
 - Each video in both datasets is labelled with the Big-Five personality traits. 
 
 
-To meet various requirements from different models or experiments, we extract raw audio file and all frames from a video
-and then extract face images from each full frame, termed as face frames. **Please find the process methods in 
-[dataset preparation](datasets/README.md).**
+To meet various requirements from different models and experiments, we extract raw audio file and all frames from a video
+and then extract face images from each full frame, termed as face frames. 
+
+For quick start and demonstration, we provide a
+**[tiny Chalearn 2016 dataset](https://drive.google.com/file/d/1S87nJFLz9ygzw2Ep_rJUXzzWFfdz15an/view?usp=sharing)** 
+containing 100 videos within which 60 for training, 20 for validation and 20 for test. Please find the process methods in 
+**[dataset preparation](datasets/README.md).**
+
+
+
+
 
 
 
@@ -77,7 +85,7 @@ For example:
 # cd DeepPersonality # top directory
 script/run_exp.py --config config/unified_frame_images/01_deep_bimodal_regression.yaml
 ```
-For detailed usage or arguments description, please find more in **[command line interface file](docs/Command_line_interface.md)**.
+For detailed usage or arguments description, please reference **[command line interface file](docs/Command_line_interface.md)**.
 
 
 
