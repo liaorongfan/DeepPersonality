@@ -1,9 +1,16 @@
 #! /usr/bin/env python
+import sys
+import os
+
+current_path = os.path.dirname(os.path.abspath(__file__))
+work_path = os.path.join(current_path, "../")
+sys.path.append(work_path)
 
 from dpcv.tools.common import parse_args
 from dpcv.config.default_config_opt import cfg, cfg_from_file, cfg_from_list
 # from torch.utils.tensorboard import SummaryWriter
 from dpcv.experiment.exp_runner import ExpRunner
+
 
 
 def setup():

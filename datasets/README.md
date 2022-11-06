@@ -59,24 +59,23 @@ datasets/
 ### Script for Video Frame Extraction
 
 ```shell
-python dpcv/data/utils/video_to_image.py --video-path /path/to/video/directory
+python dpcv/data/utils/video_to_image.py --video-dir /path/to/video_dir --output-dir /path/to/output_dir
 ```
-This script will find all mp4 files in the `directory` specified by `--video-path` and extract frames in each video into a
-directory which shares the same path and name with the video. For example, provided a directory with 2 mp4 videos
+This script will find all mp4 files in the `video directory` specified by `--video-dir` and extract frames in each video into a
+`image directory`  with the same name as the video. All the `image directories` will be saved into the path assigned by `--output-dir`. For example, provided a directory with 2 mp4 videos
 ```
 video_dir/
     |-- video_1.mp4
     |-- video_2.mp4
 ```
 After frame extraction, it will be like this.
+
 ```
-video_dir/
-    |-- video_1.mp4
+output_dir/
     |-- video_1/
     |   |-- frame_1.jpg
     |   |-- frame_2.jpg
     |   |-- ...
-    |-- video_2.mp4
     |-- video_2/
 ```
 
@@ -93,18 +92,18 @@ pre_trained_weights/
 └── vgg_m_face_bn_fer_dag.pth
 ```
 
-The following script will also find all mp4 files in the`directory` specified by `--video-path` and extract face images from 
+The following script will also find all mp4 files in the`directory` specified by `--video-dir` and extract face images from 
 every frame in each video into a directory which shares the same name with the video. Those directories are saved in 
 `path` specified by `--output-dir`
 
 ```shell
-python dpcv/data/face_extract/face_img_extractor.py --video-path /path/to/video/dir --output-dir /path/to/output/dir 
+python dpcv/data/face_extract/face_img_extractor.py --video-dir /path/to/video/dir --output-dir /path/to/output/dir 
 ```
 
 For example, provided a directory with 2 mp4 videos, and we run the following command line
 ```shell
 python dpcv/data/face_extract/face_img_extractor.py  \
-    --video-path /path/to/train_videos_dir \ 
+    --video-dir /path/to/train_videos_dir \ 
     --output-dir /path/to/train_face_img_dir 
 ```
 ```
@@ -126,19 +125,19 @@ train_face_img_dir/
 ### Script for Audio Extraction
 
 #### Extract raw audio files
-The script below will find all mp4 files in the`directory` specified by `--video-path` and extract `audio file` in `wav` 
+The script below will find all mp4 files in the`directory` specified by `--video-dir` and extract `audio file` in `wav` 
 format from each video into a directory which shares the same name with the video. Those directories are saved in 
 `path` specified by `--output-dir`
 
 ```shell
-python dpcv/data/utils/video_to_wave.py --video-path /path/to/video/dir --output-dir /path/to/output/dir 
+python dpcv/data/utils/video_to_wave.py --video-dir /path/to/video/dir --output-dir /path/to/output/dir 
 
 ```
 
 For example, provided a directory with 2 mp4 videos, and we run the following command line
 ```shell
 python dpcv/data/utils/video_to_wave.py  \
-    --video-path /path/to/train_videos_dir \ 
+    --video-dir /path/to/train_videos_dir \ 
     --output-dir /path/to/voice_data/voice_raw/train_data
 ```
 ```

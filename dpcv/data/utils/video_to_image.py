@@ -77,8 +77,9 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None):
     #     os.makedirs(save_dir + file_name)
 
     save_path = Path(save_dir).joinpath(file_name)
-    if not save_path.exists():
-        save_path.mkdir()
+    os.makedirs(save_path, exist_ok=True)
+    # if not save_path.exists():
+    #     save_path.mkdir()
     # except OSError:
     #     print('Error: Creating directory of data')
 
@@ -255,13 +256,8 @@ if __name__ == "__main__":
     from tqdm import tqdm
 
     parser = argparse.ArgumentParser(description='extract image frames from videos')
-    parser.add_argument(
-        '-v',
-        '--video-path',
-        help="path to video directory",
-        default=None,
-        type=str,
-    )
+    parser.add_argument('-v', '--video-dir', help="path to video directory", default=None, type=str)
+    parser.add_argument("-o", "--output-dir", default=None, type=str, help="path to the extracted frames")
     args = parser.parse_args()
 
     def long_time_task(video, parent_dir):
@@ -269,7 +265,7 @@ if __name__ == "__main__":
         return frame_extract(video_path=video, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
 
     p = Pool(8)
-    v_path = args.video_path
+    v_path = args.video_dir
     # path = Path("/root/personality/datasets/chalearn2021/train/lego_train")
     path = Path(v_path)
     i = 0
@@ -277,8 +273,12 @@ if __name__ == "__main__":
     for video in tqdm(video_pts):
         i += 1
         video_path = str(video)
-        parent_dir = Path(video).parent
-        p.apply_async(long_time_task, args=(video_path, parent_dir))
+        if args.output_dir is not None:
+            saved_dir = args.output_dir
+        else:
+            saved_dir = Path(video).parent
+        p.apply_async(long_time_task, args=(video_path, saved_dir))
+        # frame_extract(video_path=video_path, save_dir=saved_dir, resize=(256, 256), transform=crop_to_square)
     print('Waiting for all subprocesses done...')
     p.close()
     p.join()

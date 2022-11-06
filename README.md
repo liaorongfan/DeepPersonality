@@ -67,29 +67,27 @@ containing 100 videos within which 60 for training, 20 for validation and 20 for
 **[dataset preparation](datasets/README.md).**
 
 
-
-
-
-
-
-
-## Reproducing reported experiments
+## Experiments
+### Reproducing reported experiments
 We employ a build-from-config manner to conduct an experiment. After setting up the environments and preparing the data needed,
 we can have a quick start by the following command line:
 ```shell
 # cd DeepPersonality # top directory 
-script/run_exp.py --config path/to/config.yaml 
+script/run_exp.py --config path/to/exp_config.yaml 
 ```
-For example:
+For quick start with [tiny ChaLearn 2016 dataset](https://drive.google.com/file/d/1S87nJFLz9ygzw2Ep_rJUXzzWFfdz15an/view?usp=sharing),
+if you prepare the data by the instructions in above section, the following command will launch an experiment for `bimodal-resnet18 model`.
 ```shell
 # cd DeepPersonality # top directory
-script/run_exp.py --config config/unified_frame_images/01_deep_bimodal_regression.yaml
+script/run_exp.py --config config/demo/bimodal_resnet18.yaml
 ```
 For detailed usage or arguments description, please reference **[command line interface file](docs/Command_line_interface.md)**.
 
+For quick start demonstration, please find the **[Colab Notebook]()**
 
 
-## Developing new personality computing models
+
+### Developing new personality computing models
 We use config-pipe line files and registration mechanism to organize our experiments. If user want to add their own 
 models or algorithms into this program please reference the **[Notebook tutorials]()**.
 
@@ -119,6 +117,8 @@ models or algorithms into this program please reference the **[Notebook tutorial
 - 2022/10/17 - Paper submission and make project publicly available.
 
 ## To Be Updated
-- [ ] Detailed Data prepare pipeline description
-- [ ] Pip install
+
+[//]: # (- [ ] Detailed Data prepare pipeline description)
+- [ ] test Pip install
 - [ ] Description of adding new models
+- [ ] Notebook tutorials

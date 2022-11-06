@@ -26,7 +26,7 @@ class WaveProcessor(VideoData):
 
     def __getitem__(self, idx):
         wav_file_path = self.aud_file_ls[idx]
-        video_name = os.path.basename(wav_file_path).replace(".wav", "")
+        video_name = os.path.basename(wav_file_path)  # .replace(".wav", "")
         if self.mode == "librosa":
             self.librosa_extract(wav_file_path, video_name)
         elif self.mode == "logfbank":

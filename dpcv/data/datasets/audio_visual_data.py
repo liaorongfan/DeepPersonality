@@ -50,7 +50,9 @@ class AudioVisualData(VideoData):
     def get_wave_data(self, idx):
 
         img_dir_path = self.img_dir_ls[idx]
-        wav_path = img_dir_path.replace("image_data", "voice_data/voice_librosa") + ".wav.npy"
+        # wav_path = img_dir_path.replace("image_data", "voice_data/voice_librosa") + ".wav.npy"
+        video_name = os.path.basename(img_dir_path)
+        wav_path = os.path.join(self.data_root, self.audio_dir, f"{video_name}.wav.npy")
         wav_ft = np.load(wav_path)
         try:
             n = np.random.randint(0, len(wav_ft) - 50176)
