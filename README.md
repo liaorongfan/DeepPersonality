@@ -83,7 +83,7 @@ script/run_exp.py --config config/demo/bimodal_resnet18.yaml
 ```
 For detailed usage or arguments description, please reference **[command line interface file](docs/Command_line_interface.md)**.
 
-For quick start demonstration, please find the **[Colab Notebook]()**
+For quick start demonstration, please find the **[Colab Notebook](https://colab.research.google.com/drive/1QgISDUbLN0UFFK78e5Zmwcyfn8xtpr3o?usp=sharing)**
 
 
 
