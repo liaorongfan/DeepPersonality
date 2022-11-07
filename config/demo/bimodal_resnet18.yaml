@@ -6,6 +6,9 @@ DATA:
   TRAIN_AUD_DATA: "ChaLearn2016_tiny/voice_data/voice_librosa/train_data"
   VALID_AUD_DATA: "ChaLearn2016_tiny/voice_data/voice_librosa/valid_data"
   TEST_AUD_DATA: "ChaLearn2016_tiny/voice_data/voice_librosa/test_data"
+  TRAIN_LABEL_DATA: "ChaLearn2016_tiny/annotation/annotation_training.pkl"
+  VALID_LABEL_DATA: "ChaLearn2016_tiny/annotation/annotation_validation.pkl"
+  TEST_LABEL_DATA: "ChaLearn2016_tiny/annotation/annotation_test.pkl"
 DATA_LOADER:
   NAME: "bimodal_resnet_data_loader"
   TRANSFORM: "standard_frame_transform"
