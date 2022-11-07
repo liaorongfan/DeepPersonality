@@ -94,7 +94,8 @@ models or algorithms into this program please reference the **[Notebook tutorial
 
 
 
-## Papers from which the models are reproduced
+## Papers 
+From which the models are reproduced
 
 - Deep bimodal regression of apparent personality traits from short video sequences
 - Bi-modal first impressions recognition using temporally ordered deep audio and stochastic visual features
@@ -119,6 +120,7 @@ models or algorithms into this program please reference the **[Notebook tutorial
 ## To Be Updated
 
 [//]: # (- [ ] Detailed Data prepare pipeline description)
-- [ ] test Pip install
+- [ ] Test Pip install
 - [ ] Description of adding new models
+- [ ] Model zoo
 - [ ] Notebook tutorials
