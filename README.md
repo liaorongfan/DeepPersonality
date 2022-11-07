@@ -114,6 +114,17 @@ From which the models are reproduced
 - Video action transformer network
 
 
+## Citation
+
+If you use our code for a publication, please kindly cite it as:
+@article{liao2022open,
+  title={An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition},
+  author={Liao, Rongfan and Song, Siyang and Gunes, Hatice},
+  journal={arXiv preprint arXiv:2210.09138},
+  year={2022}
+}
+
+
 ## History
 - 2022/10/17 - Paper submission and make project publicly available.
 
