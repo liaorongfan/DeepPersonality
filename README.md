@@ -84,11 +84,11 @@ script/run_exp.py --config config/demo/bimodal_resnet18.yaml
 Detailed arguments description are presented in  **[command line interface file](docs/Command_line_interface.md)**.
 
 
-For quick start demonstration, please find the Colab Notebook:
+For quick start demonstration, please find the Notebook:
 **[QuickStart](https://colab.research.google.com/drive/1QgISDUbLN0UFFK78e5Zmwcyfn8xtpr3o?usp=sharing)**
 ![](https://colab.research.google.com/assets/colab-badge.svg)
 
-For experiments start from raw video processing, please find this Colab Notebook:
+For experiments start from raw video processing, please find this Notebook:
 **[StartFromDataProcessing](https://colab.research.google.com/drive/1_YThB_O1nO4y9zK6AHOUEx-a2zb_ba9y?usp=sharing)**
 ![](https://colab.research.google.com/assets/colab-badge.svg)
 
