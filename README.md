@@ -81,11 +81,13 @@ if you prepare the data by the instructions in above section, the following comm
 # cd DeepPersonality # top directory
 script/run_exp.py --config config/demo/bimodal_resnet18.yaml
 ```
-For detailed usage or arguments description, please reference **[command line interface file](docs/Command_line_interface.md)**.
+Detailed arguments description are presented in  **[command line interface file](docs/Command_line_interface.md)**.
 
-For quick start demonstration, please find the **[Colab Notebook](https://colab.research.google.com/drive/1QgISDUbLN0UFFK78e5Zmwcyfn8xtpr3o?usp=sharing)**
+For quick start demonstration, please find the Colab Notebook:
+**[DeepPersonality_QuickStart](https://colab.research.google.com/drive/1QgISDUbLN0UFFK78e5Zmwcyfn8xtpr3o?usp=sharing)**
 
-
+For experiments start from raw video processing, please find this Colab Notebook:
+**[DeepPersonality_FromDataProcessing](https://colab.research.google.com/drive/1_YThB_O1nO4y9zK6AHOUEx-a2zb_ba9y?usp=sharing)**
 
 ### Developing new personality computing models
 We use config-pipe line files and registration mechanism to organize our experiments. If user want to add their own 
