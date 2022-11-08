@@ -129,23 +129,20 @@ class ExpRunner:
                 self.data_loader["test"], self.model
             )
             self.logger.info("mse: {} mean: {}".format(mse[0], mse[1]))
-            self.latex_info(mse[0], mse[1])
         else:
             ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(
                 self.data_loader["full_test"], self.model
             )
         self.logger.info("acc: {} mean: {}".format(ocean_acc, ocean_acc_avg))
-        self.latex_info(ocean_acc, ocean_acc_avg)  # a helper for latex table
 
         if cfg.COMPUTE_PCC:
             pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label)
             self.logger.info(f"pcc: {pcc_dict} mean: {pcc_mean}")
-            self.latex_info(pcc_dict, pcc_mean)
 
         if cfg.COMPUTE_CCC:
             ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label)
             self.logger.info(f"ccc: {ccc_dict} mean: {ccc_mean}")
-            self.latex_info(ccc_dict, ccc_mean)
+
         if cfg.SAVE_DATASET_OUTPUT:
             os.makedirs(cfg.SAVE_DATASET_OUTPUT, exist_ok=True)
             torch.save(dataset_output, os.path.join(cfg.SAVE_DATASET_OUTPUT, "pred.pkl"))
@@ -155,18 +152,6 @@ class ExpRunner:
     def run(self):
         self.train()
         self.test()
-
-    @staticmethod
-    def latex_info(metric, mean):
-        latex_tab = ""
-        if isinstance(metric, dict):
-            for k, v in metric.items():
-                latex_tab += str(v) + " & "
-        else:
-            for v in metric:
-                latex_tab += str(np.round(v, 4)) + " & "
-        latex_tab += str(mean)
-        print(latex_tab)
 
     def log_cfg_info(self):
         """
