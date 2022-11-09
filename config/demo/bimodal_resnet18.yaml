@@ -28,5 +28,5 @@ SOLVER:
   MILESTONE: [100, 200]
 TRAIN:
   TRAINER: "BiModalTrainer"
-  MAX_EPOCH: 300
+  MAX_EPOCH: 30
   OUTPUT_DIR: "results/demo/unified_frame_images/03_bimodal_resnet"
