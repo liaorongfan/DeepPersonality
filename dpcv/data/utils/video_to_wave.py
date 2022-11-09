@@ -102,11 +102,11 @@ def chalearn21_audio_process(dir_path):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="ffmpeg audio extraction")
-    parser.add_argument("-v", "--video-path", default=None, type=str, help="path to video directory")
+    parser.add_argument("-v", "--video-dir", default=None, type=str, help="path to video directory")
     parser.add_argument("-o", "--output-dir", default=None, type=str, help="path to save processed videos")
     args = parser.parse_args()
 
     # dir_path = "/home/rongfan/05-personality_traits/DeepPersonality/datasets/chalearn2021/test/talk_test"
     # chalearn21_audio_extract_ffmpeg(dir_path)
     # chalearn21_audio_process(dir_path)
-    audio_extract_ffmpeg(dir_path=args.video_path, output_dir=args.output_dir)
+    audio_extract_ffmpeg(dir_path=args.video_dir, output_dir=args.output_dir)
