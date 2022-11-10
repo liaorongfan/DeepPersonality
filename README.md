@@ -94,7 +94,9 @@ For experiments start from raw video processing, please find this Notebook:
 
 ### Developing new personality computing models
 We use config-pipe line files and registration mechanism to organize our experiments. If user want to add their own 
-models or algorithms into this program please reference the **[Notebook tutorials]()**.
+models or algorithms into this program please reference the 
+**[TrainYourModel](https://colab.research.google.com/drive/1lB3B0C9LgZ6NmZmsdblRKcfiY6nWoEcI#scrollTo=VxnwB3wJ28W5)**![](https://colab.research.google.com/assets/colab-badge.svg)
+
 
 
 
