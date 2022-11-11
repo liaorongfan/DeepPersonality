@@ -95,10 +95,29 @@ For experiments start from raw video processing, please find this Notebook:
 ### Developing new personality computing models
 We use config-pipe line files and registration mechanism to organize our experiments. If user want to add their own 
 models or algorithms into this program please reference the 
-**[TrainYourModel](https://colab.research.google.com/drive/1lB3B0C9LgZ6NmZmsdblRKcfiY6nWoEcI#scrollTo=VxnwB3wJ28W5)**![](https://colab.research.google.com/assets/colab-badge.svg)
+**[TrainYourModel](https://colab.research.google.com/drive/1lB3B0C9LgZ6NmZmsdblRKcfiY6nWoEcI?usp=sharing)**![](https://colab.research.google.com/assets/colab-badge.svg)
 
 
+# Models
 
+| Model                                                                       |    Modal    |                                                           ChaLearn2016 cfgs                                                           | ChaLearn2016 weights | ChaLearn2021 cfgs | ChaLearn2021 weights |
+|-----------------------------------------------------------------------------|:-----------:|:-------------------------------------------------------------------------------------------------------------------------------------:|:--------------------:|:-----------------:|:--------------------:|
+| [DAN](dpcv/modeling/networks/dan.py)                                        |   visual    |                                  [cfg](config/unified_frame_images/01_deep_bimodal_regression.yaml)                                   |                      |                   |                      |
+| [CAM-DAN<sup>+](dpcv/modeling/networks/interpret_dan.py)                    |   visual    |                                       [cfg](config/unified_frame_images/06_interpret_cnn.yaml)                                        |                      |                   |                      |
+| [ResNet](dpcv/modeling/module/resnet_tv.py)                                 |   visual    |                                  [cfg](config/unified_frame_images/03_bimodal_resnet18_visual.yaml)                                   |                      |                   |                      |
+| [HRNet](dpcv/modeling/networks/hr_net_cls.py)                               |   visual    |            [cfg_fra](config/unified_frame_images/09_hrnet.yaml) , [cfg_fac](config/unified_face_images/02_hrnet_face.yaml)            |                      |                   |                      |
+| [SENet](dpcv/modeling/networks/se_net.py)                                   |   visual    |            [cfg_fra](config/unified_frame_images/08_senet.yaml) , [cfg_fac](config/unified_face_images/01_senet_face.yaml)            |                      |                   |                      |
+| [3D-ResNet](dpcv/modeling/networks/resnet_3d.py)                            |   visual    |      [cfg_fra](config/unified_frame_images/11_resnet50_3d.yaml) , [cfg_fac](config/unified_face_images/04_resnet50_3d_face.yaml)      |                      |                   |                      |
+| [Slow-Fast](dpcv/modeling/networks/slow_fast.py)                            |   visual    |        [cfg_fra](config/unified_frame_images/12_slow_fast.yaml) , [cfg_fac](config/unified_face_images/05_slow_fast_face.yaml)        |                      |                   |                      |
+| [TPN](dpcv/modeling/networks/TSN2D.py)                                      |   visual    |              [cfg_fra](config/unified_frame_images/13_tpn.yaml) , [cfg_fac](config/unified_face_images/06_tpn_face.yaml)              |                      |                   |                      |
+| [Swin-Transformer](dpcv/modeling/networks/swin_transformer.py)              |   visual    | [cfg_fra](config/unified_frame_images/10_swin_transformer.yaml) , [cfg_fac](config/unified_face_images/03_swin_transformer_face.yaml) |                      |                   |                      |
+| [VAT](dpcv/modeling/networks/video_action_transformer.py)                   |   visual    |              [cfg_fra](config/unified_frame_images/14_vat.yaml) , [cfg_fac](config/unified_face_images/07_vat_face.yaml)              |                      |                   |                      |
+| [Interpret Audio CNN](dpcv/modeling/networks/audio_interpretability_net.py) |    audio    |                                      [cfg](config/unified_frame_images/07_interpret_audio.yaml)                                       |                      |                   |                      |
+| [Bi-modal CNN-LSTM](dpcv/modeling/networks/bi_modal_lstm.py)                | audiovisual |                                        [cfg](config/unified_frame_images/02_bimodal_lstm.yaml)                                        |                      |                   |                      |
+| [Bi-modal ResNet](dpcv/modeling/networks/audio_visual_residual.py)          | audiovisual |                                      [cfg](config/unified_frame_images/03_bimodal_resnet18.yaml)                                      |                      |                   |                      |
+| [PersEmoN](dpcv/modeling/networks/sphereface_net.py)                        | audiovisual |                                          [cfg](config/unified_frame_images/05_persemon.yaml)                                          |                      |                   |                      |
+| [CRNet](dpcv/modeling/networks/cr_net.py)                                   | audiovisual |                                           [cfg](config/unified_frame_images/04_crnet.yaml)                                            |                      |                   |                      |
+| [Amb-Fac](dpcv/modeling/networks/multi_modal_pred_net.py)                   | audiovisual |  [cfg_fra](config/unified_frame_images/15_multi_modal_pred.yaml), [cfg_fac](config/unified_face_images/8_multi_modal_pred_face.yaml)  |                      |                   |                      |
 
 
 ## Papers 
