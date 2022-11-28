@@ -66,8 +66,10 @@ For quick start and demonstration, we provide a
 containing 100 videos within which 60 for training, 20 for validation and 20 for test. Please find the process methods in 
 **[dataset preparation](datasets/README.md).**
 
+For your convenience, we provide the processed **[face image frames dataset](https://drive.google.com/drive/folders/1UQQVQt5DZxgQPVI1seNbsqiPE436I06K?usp=share_link)** for Chalearn 2016 
+since that dataset is publicly available, which indicates we can make our processed data open to the community.
 
-## Experiments
+## Experiments![](https://colab.research.google.com/assets/colab-badge.svg)
 ### Reproducing reported experiments
 We employ a build-from-config manner to conduct an experiment. After setting up the environments and preparing the data needed,
 we can have a quick start by the following command line:
@@ -84,18 +86,18 @@ script/run_exp.py --config config/demo/bimodal_resnet18.yaml
 Detailed arguments description are presented in  **[command line interface file](docs/Command_line_interface.md)**.
 
 
-For quick start demonstration, please find the Notebook:
+For quick start demonstration, please find the Colab Notebook:
 **[QuickStart](https://colab.research.google.com/drive/1QgISDUbLN0UFFK78e5Zmwcyfn8xtpr3o?usp=sharing)**
-![](https://colab.research.google.com/assets/colab-badge.svg)
 
-For experiments start from raw video processing, please find this Notebook:
+
+For experiments start from raw video processing, please find this Colab Notebook:
 **[StartFromDataProcessing](https://colab.research.google.com/drive/1_YThB_O1nO4y9zK6AHOUEx-a2zb_ba9y?usp=sharing)**
-![](https://colab.research.google.com/assets/colab-badge.svg)
+
 
 ### Developing new personality computing models
 We use config-pipe line files and registration mechanism to organize our experiments. If user want to add their own 
-models or algorithms into this program please reference the 
-**[TrainYourModel](https://colab.research.google.com/drive/1lB3B0C9LgZ6NmZmsdblRKcfiY6nWoEcI?usp=sharing)**![](https://colab.research.google.com/assets/colab-badge.svg)
+models or algorithms into this program please reference the Colab Notebook
+**[TrainYourModel](https://colab.research.google.com/drive/1lB3B0C9LgZ6NmZmsdblRKcfiY6nWoEcI?usp=sharing)**
 
 
 # Models
@@ -106,7 +108,7 @@ models or algorithms into this program please reference the
 | [CAM-DAN<sup>+](dpcv/modeling/networks/interpret_dan.py)                    |   visual    |                                        [cfg](config/unified_frame_images/06_interpret_cnn.yaml)                                        |                                                     [weight](https://drive.google.com/file/d/1EvHIb0Bfk2mYqUlcpB8kFEVLSAFTHYd2/view?usp=sharing)                                                     |
 | [ResNet](dpcv/modeling/module/resnet_tv.py)                                 |   visual    |                                   [cfg](config/unified_frame_images/03_bimodal_resnet18_visual.yaml)                                   |                                                     [weight](https://drive.google.com/file/d/1qEuFFGlLYdwweDgIVcsrG1_VEjbABsOw/view?usp=sharing)                                                     |
 | [HRNet](dpcv/modeling/networks/hr_net_cls.py)                               |   visual    |            [cfg-frame](config/unified_frame_images/09_hrnet.yaml)/[cfg-face](config/unified_face_images/02_hrnet_face.yaml)            | [weight-frame](https://drive.google.com/file/d/1xkYWFz9gGWdtwaezQGsiojsZjHH7l-Uh/view?usp=sharing)/[weight-face](https://drive.google.com/file/d/1V-oVJU3GbMeWR5sEQvDpd36GAmeZQQXX/view?usp=sharing) |
-| [SENet](dpcv/modeling/networks/se_net.py)                                   |   visual    |            [cfg-frame](config/unified_frame_images/08_senet.yaml)/[cfg-face](config/unified_face_images/01_senet_face.yaml)            |                                                                                                     [weight]()                                                                                       |
+| [SENet](dpcv/modeling/networks/se_net.py)                                   |   visual    |            [cfg-frame](config/unified_frame_images/08_senet.yaml)/[cfg-face](config/unified_face_images/01_senet_face.yaml)            |                                                                                              [weight]()                                                                                              |
 | [3D-ResNet](dpcv/modeling/networks/resnet_3d.py)                            |   visual    |      [cfg-frame](config/unified_frame_images/11_resnet50_3d.yaml)/[cfg-face](config/unified_face_images/04_resnet50_3d_face.yaml)      |                                                                                              [weight]()                                                                                              |
 | [Slow-Fast](dpcv/modeling/networks/slow_fast.py)                            |   visual    |        [cfg-frame](config/unified_frame_images/12_slow_fast.yaml)/[cfg-face](config/unified_face_images/05_slow_fast_face.yaml)        |                                                                                              [weight]()                                                                                              |
 | [TPN](dpcv/modeling/networks/TSN2D.py)                                      |   visual    |              [cfg-frame](config/unified_frame_images/13_tpn.yaml)/[cfg-face](config/unified_face_images/06_tpn_face.yaml)              |                                                                                              [weight]()                                                                                              |
@@ -116,7 +118,7 @@ models or algorithms into this program please reference the
 | [Bi-modal CNN-LSTM](dpcv/modeling/networks/bi_modal_lstm.py)                | audiovisual |                                        [cfg](config/unified_frame_images/02_bimodal_lstm.yaml)                                         |                                                                                              [weight]()                                                                                              |
 | [Bi-modal ResNet](dpcv/modeling/networks/audio_visual_residual.py)          | audiovisual |                                      [cfg](config/unified_frame_images/03_bimodal_resnet18.yaml)                                       |                                                                                              [weight]()                                                                                              |
 | [PersEmoN](dpcv/modeling/networks/sphereface_net.py)                        | audiovisual |                                          [cfg](config/unified_frame_images/05_persemon.yaml)                                           |                                                                                              [weight]()                                                                                              |
-| [CRNet](dpcv/modeling/networks/cr_net.py)                                   | audiovisual |                                            [cfg](config/unified_frame_images/04_crnet.yaml)                                            |                                                                                              [weight]()                                                                                              |
+| [CRNet](dpcv/modeling/networks/cr_net.py)                                   | audiovisual |                                            [cfg](config/unified_frame_images/04_crnet.yaml)                                            |                                                     [weight](https://drive.google.com/file/d/1iNIJxIuW3XTKW_w48RoddY7-ZIKwGf7z/view?usp=sharing)                                                     |
 | [Amb-Fac](dpcv/modeling/networks/multi_modal_pred_net.py)                   | audiovisual | [cfg-frame](config/unified_frame_images/15_multi_modal_pred.yaml), [cfg-face](config/unified_face_images/8_multi_modal_pred_face.yaml) |                                                                                              [weight]()                                                                                              |
 
 
