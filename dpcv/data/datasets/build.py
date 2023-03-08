@@ -18,10 +18,9 @@ def build_dataloader(cfg):
                 "test": dataloader(cfg, dataset, mode="test"),
             }
         else:
-             data_loader_dicts = {
+            data_loader_dicts = {
                 "test": dataloader(cfg, dataset, mode="test"),
             }
-
 
     else:
         if not cfg.TEST.TEST_ONLY:
