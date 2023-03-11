@@ -23,7 +23,7 @@ plot
 /docs/tmp
 # ingore output data
 output/
-results/
+/results
 results_second_stage_tp
 results_second_stage
 results_true_personality
@@ -74,3 +74,4 @@ model_ts*.txt
 .vscode
 _darcs
 
+/datasets/ChaLearn2016_tiny
