@@ -15,6 +15,7 @@ datasets/missed_files.txt
 datasets/*.txt
 datasets/annotation
 datasets/va_data
+datasets/chalearn2021
 pretrained/
 mlruns/
 /snippet
