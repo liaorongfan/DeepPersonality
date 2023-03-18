@@ -689,6 +689,34 @@ def true_personality_crnet_audio_dataloader(cfg, mode):
 
 
 @DATA_LOADER_REGISTRY.register()
+def all_true_personality_crnet_audio_dataloader(cfg, mode):
+    from torch.utils.data.dataset import ConcatDataset
+
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 1
+
+    datasets = []
+    for session in ["ghost", "animal", "talk", "lego"]:
+        dataset = CRNetAudioTruePersonality(
+            data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,  # "talk"
+        )
+        datasets.append(dataset)
+    concat_dataset = ConcatDataset(datasets)
+    data_loader = DataLoader(
+        dataset=concat_dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=num_worker,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
 def true_personality_persemon_dataloader(cfg, mode):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
