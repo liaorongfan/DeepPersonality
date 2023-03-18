@@ -228,6 +228,45 @@ def tpn_true_per_data_loader(cfg, mode="train"):
     return data_loader
 
 
+@DATA_LOADER_REGISTRY.register()
+def all_tpn_true_per_data_loader(cfg, mode="train"):
+    from torch.utils.data.dataset import ConcatDataset
+
+    spatial_transform = build_transform_spatial(cfg)
+    temporal_transform = [TemporalRandomCrop(16)]
+    # temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
+    temporal_transform = TemporalCompose(temporal_transform)
+
+    data_cfg = cfg.DATA
+    if data_cfg.TYPE == "face":
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"face_{x}.jpg")
+    else:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
+
+    datasets = []
+    for session in ["ghost", "animal", "talk", "lego"]:
+        data_set = TPNTruePerData(
+            data_root=data_cfg.ROOT,
+            data_split=mode,
+            task=session,
+            data_type=data_cfg.TYPE,
+            video_loader=video_loader,
+            spa_trans=spatial_transform,
+            tem_trans=temporal_transform,
+        )
+        datasets.append(data_set)
+    conca_dataset = ConcatDataset(datasets)
+
+    shuffle = True if mode == "train" else False
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset=conca_dataset,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=loader_cfg.NUM_WORKERS,
+    )
+    return data_loader
+
 if __name__ == "__main__":
     import os
     from dpcv.config.tpn_cfg import cfg
