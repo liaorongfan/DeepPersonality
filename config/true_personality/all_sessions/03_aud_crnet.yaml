@@ -1,6 +1,6 @@
 DATA:
   ROOT: "datasets/chalearn2021"
-  SESSION: "animal"
+  SESSION: "all"
 DATA_LOADER:
   NAME: "all_true_personality_crnet_audio_dataloader"
   TRAIN_BATCH_SIZE: 2

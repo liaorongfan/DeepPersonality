@@ -1,9 +1,9 @@
 DATA:
   ROOT: "datasets/extracted_feature_tp"
-  SESSION: "ghost"
+  SESSION: "all"
   TYPE: "audio"
 DATA_LOADER:
-  NAME: "multi_modal_data_loader"
+  NAME: "all_multi_modal_data_loader"
   TRAIN_BATCH_SIZE: 32
   NUM_WORKERS: 0
 MODEL:
@@ -21,4 +21,4 @@ SOLVER:
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 500
-  OUTPUT_DIR: "results_true_personality/audio_ghost/06_multi_modal_pred"
+  OUTPUT_DIR: "results_true_personality/audio_all/06_multi_modal_pred"
