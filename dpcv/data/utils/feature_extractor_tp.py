@@ -71,6 +71,7 @@ class TPExtractVisualFeatureData:
                         example = vggish_input.wavfile_to_examples(file_path)
                         feat = self.model.forward(
                             example.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+                            # example
                         )
 
                         sample = {
@@ -84,16 +85,21 @@ class TPExtractVisualFeatureData:
 if __name__ == "__main__":
     from dpcv.data.transforms.transform import set_transform_op
 
-    os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
-    task = "talk"
-    type = "frame"
+    os.chdir("/root/DeepPersonality")
+    # task = "talk"
+    type = "face"
+    data_root = "datasets/chalearn2021"
+
 
     transform = set_transform_op()
-    extractor = TPExtractVisualFeatureData(
-        data_root="datasets/chalearn2021",
-        data_type=type,
-        task=task,
-        trans=transform,
-        save_to=f"datasets/extracted_feature_tp/{task}",
-    )
-    extractor.extract_and_save_feat()
+
+    for task in ["animal", "talk", "lego", "ghost"]:
+        save_dir = f"/hy-tmp/exptract_feature_tp/{task}"
+        extractor = TPExtractVisualFeatureData(
+            data_root=data_root,
+            data_type=type,
+            task=task,
+            trans=transform,
+            save_to=save_dir,
+        )
+        extractor.extract_and_save_feat()
