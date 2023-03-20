@@ -166,7 +166,7 @@ def multi_modal_visual_model(cfg):
 
 @NETWORK_REGISTRY.register()
 def multi_modal_audio_model(cfg):
-    if cfg.DATA.SESSION in ["talk", "animal", "ghost", "lego"]:
+    if cfg.DATA.SESSION in ["talk", "animal", "ghost", "lego", "all"]:
         dim = cfg.MODEL.SPECTRUM_CHANNEL * 128
         use_sigmoid = False
     else:
