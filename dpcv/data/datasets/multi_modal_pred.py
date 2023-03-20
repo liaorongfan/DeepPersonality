@@ -95,6 +95,55 @@ def multi_modal_data_loader(cfg, mode="train"):
     return data_loader
 
 
+@DATA_LOADER_REGISTRY.register()
+def all_multi_modal_data_loader(cfg, mode="train"):
+    from torch.utils.data.dataset import ConcatDataset
+
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+    shuffle = cfg.DATA_LOADER.SHUFFLE
+
+
+    datasets = []
+    for session in ["ghost", "animal", "talk", "lego"]:
+        if mode == "train":
+            data_set = MultiModalData(
+                data_root=cfg.DATA.ROOT,
+                split="train",
+                mode=cfg.DATA.TYPE,
+                session=session,
+                spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+            )
+        elif mode == "valid":
+            data_set = MultiModalData(
+                data_root=cfg.DATA.ROOT,
+                split="valid",
+                mode=cfg.DATA.TYPE,
+                session=session,
+                spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+            )
+        else:
+            shuffle = False
+            data_set = MultiModalData(
+                data_root=cfg.DATA.ROOT,
+                split="test",
+                mode=cfg.DATA.TYPE,
+                session=session,
+                spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+            )
+        datasets.append(data_set)
+    concat_dataset = ConcatDataset(datasets)
+    data_loader = DataLoader(
+        dataset=concat_dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
+
+
+
 if __name__ == "__main__":
     # test setting
     import os; os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
