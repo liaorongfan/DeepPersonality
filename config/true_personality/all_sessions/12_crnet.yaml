@@ -20,4 +20,4 @@ SOLVER:
 TRAIN:
   TRAINER: "CRNetTrainer2"
   MAX_EPOCH: 4
-  OUTPUT_DIR: "results_true_personality/unified_frame_images_all/12_crnet"
+  OUTPUT_DIR: "results_true_personality/unified_face_images_all/12_crnet"
