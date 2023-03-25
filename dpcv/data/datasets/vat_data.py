@@ -193,6 +193,7 @@ def all_true_per_vat_data_loader(cfg, mode="train"):
 
 
     datasets = []
+    # for session in ["ghost"]:
     for session in ["ghost", "animal", "talk", "lego"]:
         data_set = VATTruePerData(
             data_root=data_cfg.ROOT,  # "datasets/chalearn2021",
@@ -202,6 +203,7 @@ def all_true_per_vat_data_loader(cfg, mode="train"):
             video_loader=video_loader,
             spa_trans=spatial_transform,
             tem_trans=temporal_transform,
+            traits=data_cfg.TRAITS
         )
         datasets.append(data_set)
     concat_dataset = ConcatDataset(datasets)
