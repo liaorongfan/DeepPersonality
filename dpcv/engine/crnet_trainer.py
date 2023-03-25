@@ -309,8 +309,8 @@ class CRNetTrainer2(BiModalTrainer):
             traits = data_loader.dataset.traits
         ocean_mse_dict, ocean_acc_dict = {}, {}
         for i, k in enumerate(traits):
-            ocean_mse_dict[keys[i]] = np.round(ocean_mse[i], 4)
-            ocean_acc_dict[keys[i]] = np.round(ocean_acc[i], 4)
+            ocean_mse_dict[keys[k]] = np.round(ocean_mse[i], 4)
+            ocean_acc_dict[keys[k]] = np.round(ocean_acc[i], 4)
         return ocean_acc_avg, ocean_acc, dataset_output, dataset_label, (ocean_mse_dict, ocean_mse_mean_rand)
 
     def full_test(self, data_loader, model):
