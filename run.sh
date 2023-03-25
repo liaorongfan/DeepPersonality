@@ -17,3 +17,12 @@ python script/run_exp.py -c config/true_personality/single_trait/C/03_aud_crnet.
 python script/run_exp.py -c config/true_personality/single_trait/E/03_aud_crnet.yaml
 python script/run_exp.py -c config/true_personality/single_trait/A/03_aud_crnet.yaml
 python script/run_exp.py -c config/true_personality/single_trait/N/03_aud_crnet.yaml
+
+
+python script/run_exp.py -c config/true_personality/single_trait/O/06_multi_modal_pred_audio.yaml
+python script/run_exp.py -c config/true_personality/single_trait/C/06_multi_modal_pred_audio.yaml
+python script/run_exp.py -c config/true_personality/single_trait/E/06_multi_modal_pred_audio.yaml
+python script/run_exp.py -c config/true_personality/single_trait/A/06_multi_modal_pred_audio.yaml
+python script/run_exp.py -c config/true_personality/single_trait/N/06_multi_modal_pred_audio.yaml
+
+

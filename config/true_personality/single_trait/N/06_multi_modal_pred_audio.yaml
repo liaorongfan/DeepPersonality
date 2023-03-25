@@ -1,0 +1,26 @@
+DATA:
+  ROOT: "datasets/extracted_feature_tp"
+  SESSION: "all"
+  TYPE: "audio"
+  TRAITS: "N"
+DATA_LOADER:
+  NAME: "all_multi_modal_data_loader"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "multi_modal_audio_model"
+  SPECTRUM_CHANNEL: 80
+  NUM_CLASS: 1
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [300, 400]
+TRAIN:
+  TRAINER: "MultiModalTrainer"
+  MAX_EPOCH: 100
+  OUTPUT_DIR: "results_true_personality/audio_N/06_multi_modal_pred"
