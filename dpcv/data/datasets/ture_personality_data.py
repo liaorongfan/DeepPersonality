@@ -25,9 +25,13 @@ def norm(aud_ten):
 
 class Chalearn21FrameData(Dataset):
 
+    TRAITS_ID = {
+        "O": 0, "C": 1, "E": 2, "A": 3, "N": 4,
+    }
+
     def __init__(
             self, data_root, data_split, task, data_type="frame",
-            even_downsample=2000, trans=None, segment=False
+            even_downsample=2000, trans=None, segment=False, traits="OCEAN",
     ):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
@@ -53,6 +57,7 @@ class Chalearn21FrameData(Dataset):
         if not data_type == "audio":
             self.all_images = self.assemble_images()
         self.trans = trans
+        self.traits = [self.TRAITS_ID[t] for t in traits]
 
     def __len__(self):
         return len(self.all_images)
@@ -71,7 +76,8 @@ class Chalearn21FrameData(Dataset):
             if self.trans:
                 img_ls = [self.trans(img) for img in img_ls]
             img = torch.stack(img_ls, dim=0)
-
+        if len(self.traits) != 5:
+           label = label[self.traits] 
         return {"image": img, "label": torch.as_tensor(label, dtype=torch.float32)}
 
     def get_ocean_label(self, img_file):
@@ -529,6 +535,7 @@ def all_true_personality_dataloader(cfg, mode):
     shuffle = False if mode in ["valid", "test", "full_test"] else True
     transform = build_transform_spatial(cfg)
     datasets = []
+    # for session in ["ghost",]:
     for session in ["ghost", "animal", "talk", "lego"]:
 
         dataset = Chalearn21FrameData(
@@ -537,6 +544,7 @@ def all_true_personality_dataloader(cfg, mode):
             task=session,  
             data_type=cfg.DATA.TYPE,
             trans=transform,
+            traits=cfg.DATA.TRAITS,
         )
         datasets.append(dataset)
     conca_datasets = ConcatDataset(datasets)

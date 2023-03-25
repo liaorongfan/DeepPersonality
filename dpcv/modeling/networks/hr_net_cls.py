@@ -553,6 +553,7 @@ def hr_net_model(cfg=None, **kwargs):
 @NETWORK_REGISTRY.register()
 def hr_net_true_personality(cfg=None, **kwargs):
     config = hr_net_cfg
+    config.MODEL.NUM_CLASSES = cfg.MODEL.NUM_CLASS
     model = HighResolutionNet(config, normalize_output=False, **kwargs)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model

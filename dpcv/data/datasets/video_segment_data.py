@@ -101,8 +101,12 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
     """ Dataloader for 3d models, (3d_resnet, slow-fast, tpn, vat)
 
     """
-    def __init__(self, data_root, data_split, task, data_type, video_loader, spa_trans=None, tem_trans=None):
-        super().__init__(data_root, data_split, task, data_type, even_downsample=2000, trans=None, segment=True)
+    def __init__(
+        self, data_root, data_split, task, data_type, video_loader, spa_trans=None, tem_trans=None, traits="OCEAN",
+    ):
+        super().__init__(
+            data_root, data_split, task, data_type, even_downsample=2000, trans=None, segment=True, traits=traits,
+        )
         self.loader = video_loader
         self.spa_trans = spa_trans
         self.tem_trans = tem_trans
@@ -110,6 +114,8 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
     def __getitem__(self, index):
         img = self.get_image_data(index)
         label = self.get_image_label(index)
+        if len(self.traits) != 5:
+            label = label[self.traits]
         return {"image": img, "label": torch.as_tensor(label, dtype=torch.float32)}
 
     def __len__(self):

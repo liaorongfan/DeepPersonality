@@ -135,9 +135,10 @@ class BiModalTrainer(object):
         self.tb_writer.add_scalar("test_acc", ocean_acc_avg_rand)
         keys = ["O", "C", "E", "A", "N"]
         ocean_mse_dict, ocean_acc_dict = {}, {}
-        for i, k in enumerate(keys):
-            ocean_mse_dict[k] = np.round(ocean_mse[i], 4)
-            ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
+        # for i, k in enumerate(keys):
+        for i, _ in enumerate(ocean_acc):
+            ocean_mse_dict[keys[i]] = np.round(ocean_mse[i], 4)
+            ocean_acc_dict[keys[i]] = np.round(ocean_acc[i], 4)
 
         return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label, (ocean_mse_dict, ocean_mse_mean_rand)
 
