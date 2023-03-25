@@ -303,7 +303,10 @@ class CRNetTrainer2(BiModalTrainer):
 
         ocean_mse_mean_rand = np.round(ocean_mse_mean, 4)
         keys = ["O", "C", "E", "A", "N"]
-        traits = self.cfg.DATA.TRAITS
+        try:
+            traits = data_loader.dataset.datasets[0].traits
+        except:
+            traits = data_loader.dataset.traits
         ocean_mse_dict, ocean_acc_dict = {}, {}
         for i, k in enumerate(traits):
             ocean_mse_dict[keys[i]] = np.round(ocean_mse[i], 4)
