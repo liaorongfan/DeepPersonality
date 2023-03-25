@@ -153,9 +153,10 @@ class CRNet2(nn.Module):
 
 
 class CRNetAud(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes=5):
         super(CRNetAud, self).__init__()
-        self.train_guider_epo = 30  # default train 50 epochs for classification guidence
+        self.num_classes = num_classes
+        self.train_guider_epo = 1  # default train 50 epochs for classification guidence
         self.train_regressor = False
         self.audio_branch = AudioVisualResNet(
             in_channels=1, init_stage=AudInitStage,
@@ -164,7 +165,7 @@ class CRNetAud(nn.Module):
             out_spatial=(1, 4)
         )
 
-        self.wav_cls_guide = nn.Conv2d(512, 20, (1, 4))
+        self.wav_cls_guide = nn.Conv2d(512, 4 * self.num_classes, (1, 4))
         self.out_map = nn.Linear(512, 1)
 
     def set_train_classifier_epo(self, epo):
@@ -178,7 +179,7 @@ class CRNetAud(nn.Module):
         # ---- first training stage class guide -----
         wav_cls = self.wav_cls_guide(aud_feature)
 
-        wav_cls = wav_cls.view(wav_cls.size(0), 5, -1)
+        wav_cls = wav_cls.view(wav_cls.size(0), self.num_classes, -1)
         cls_guide = wav_cls  # torch.stack([wav_cls], dim=-1).mean(dim=-1).squeeze()
         if not self.train_regressor:
             return wav_cls
@@ -284,7 +285,7 @@ def crnet_model(cfg=None):
 
 @NETWORK_REGISTRY.register()
 def get_crnet_aud_model(cfg):
-    cr_net_aud = CRNetAud()
+    cr_net_aud = CRNetAud(num_classes=cfg.MODEL.NUM_CLASS)
     return cr_net_aud.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 

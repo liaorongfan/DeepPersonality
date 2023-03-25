@@ -273,6 +273,7 @@ class CRNetTrainer2(BiModalTrainer):
         )
 
     def test(self, data_loader, model):
+        num_classes = model.num_classes
         model.eval()
         model.set_train_regressor()
         mse_func = torch.nn.MSELoss(reduction="none")
@@ -297,15 +298,16 @@ class CRNetTrainer2(BiModalTrainer):
             ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
             ocean_mse_mean = ocean_mse.mean()
             ocean_acc_avg = ocean_acc.mean()
-            dataset_output = torch.stack(output_list, dim=0).view(-1, 5).numpy()
-            dataset_label = torch.stack(label_list, dim=0).view(-1, 5).numpy()
+            dataset_output = torch.stack(output_list, dim=0).view(-1, num_classes).numpy()
+            dataset_label = torch.stack(label_list, dim=0).view(-1, num_classes).numpy()
 
         ocean_mse_mean_rand = np.round(ocean_mse_mean, 4)
         keys = ["O", "C", "E", "A", "N"]
+        traits = self.cfg.DATA.TRAITS
         ocean_mse_dict, ocean_acc_dict = {}, {}
-        for i, k in enumerate(keys):
-            ocean_mse_dict[k] = np.round(ocean_mse[i], 4)
-            ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
+        for i, k in enumerate(traits):
+            ocean_mse_dict[keys[i]] = np.round(ocean_mse[i], 4)
+            ocean_acc_dict[keys[i]] = np.round(ocean_acc[i], 4)
         return ocean_acc_avg, ocean_acc, dataset_output, dataset_label, (ocean_mse_dict, ocean_mse_mean_rand)
 
     def full_test(self, data_loader, model):

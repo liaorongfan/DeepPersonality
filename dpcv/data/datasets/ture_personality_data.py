@@ -150,8 +150,14 @@ class Chalearn21FrameData(Dataset):
 
 
 class Chlearn21AudioData(Chalearn21FrameData):
-    def __init__(self, data_root, data_split, task, sample_len=244832, suffix_type="npy", data_type="audio"):
-        super().__init__(data_root, data_split, task, data_type=data_type, segment=True)
+    def __init__(
+        self, data_root, data_split, task, 
+        sample_len=244832, 
+        suffix_type="npy", 
+        data_type="audio", 
+        traits="OCEAN"
+    ):
+        super().__init__(data_root, data_split, task, data_type=data_type, segment=True, traits=traits)
         self.sample_len = sample_len
         self.suffix = suffix_type
 
@@ -323,14 +329,17 @@ class Chalearn21CRNetData(Chalearn21FrameData):
 
 class CRNetAudioTruePersonality(Chlearn21AudioData):
 
-    def __init__(self, data_root, data_split, task, sample_len=244832):
-        super().__init__(data_root, data_split, task, sample_len)
+    def __init__(self, data_root, data_split, task, sample_len=244832, traits="OCEAN"):
+        super().__init__(data_root, data_split, task, sample_len, traits=traits)
 
     def __getitem__(self, idx):
         img_dir = self.img_dir_ls[idx]
         aud_data = self.sample_audio_data(img_dir)
         aud_label = self.get_ocean_label(img_dir)
         label_cls = self.cls_encode(aud_label)
+        if not len(self.traits) == 5:
+            aud_label = aud_label[self.traits]
+            label_cls = label_cls[self.traits]
         return {
             "aud_data": torch.as_tensor(aud_data, dtype=torch.float32),
             "aud_label": torch.as_tensor(aud_label, dtype=torch.float32),
@@ -707,11 +716,13 @@ def all_true_personality_crnet_audio_dataloader(cfg, mode):
     num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 1
 
     datasets = []
+    # for session in ["ghost"]:
     for session in ["ghost", "animal", "talk", "lego"]:
         dataset = CRNetAudioTruePersonality(
             data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
             data_split=mode,
             task=session,  # "talk"
+            traits=cfg.DATA.TRAITS,
         )
         datasets.append(dataset)
     concat_dataset = ConcatDataset(datasets)
