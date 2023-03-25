@@ -8,7 +8,11 @@ from .build import DATA_LOADER_REGISTRY
 
 class MultiModalData:
 
-    def __init__(self, data_root, split, mode, session, spectrum_channel=15):
+    TRAITS_ID = {
+        "O": 0, "C": 1, "E": 2, "A": 3, "N": 4,
+    }
+
+    def __init__(self, data_root, split, mode, session, spectrum_channel=15, traits="OCEAN"):
         assert session in ["none", "talk", "animal", "lego", "ghost"], \
             "session should be in one of ['none', 'talk', 'animal', 'ghost'] or 'none'"
         self.data_root = data_root
@@ -17,6 +21,7 @@ class MultiModalData:
         self.session = session
         self.spectrum_channel = spectrum_channel
         self.sample_ls = self.get_data_ls(split, mode)
+        self.traits = [self.TRAITS_ID[t] for t in traits]
 
     def __getitem__(self, idx):
         sample = self.sample_ls[idx]
@@ -32,6 +37,9 @@ class MultiModalData:
                     temp = torch.zeros(15, 128, dtype=feature.dtype)
                     temp[: sample_len, :] = feature
                     sample["feature"] = temp
+            label = sample["label"]
+            if not len(self.traits) == 5:
+                sample["label"] = label[self.traits]
 
         # data, label = sample["data"], sample["label"]
         return sample
@@ -105,6 +113,7 @@ def all_multi_modal_data_loader(cfg, mode="train"):
 
 
     datasets = []
+    # for session in ["ghost"]:
     for session in ["ghost", "animal", "talk", "lego"]:
         if mode == "train":
             data_set = MultiModalData(
@@ -113,6 +122,7 @@ def all_multi_modal_data_loader(cfg, mode="train"):
                 mode=cfg.DATA.TYPE,
                 session=session,
                 spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+                traits=cfg.DATA.TRAITS
             )
         elif mode == "valid":
             data_set = MultiModalData(
@@ -121,6 +131,7 @@ def all_multi_modal_data_loader(cfg, mode="train"):
                 mode=cfg.DATA.TYPE,
                 session=session,
                 spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+                traits=cfg.DATA.TRAITS
             )
         else:
             shuffle = False
@@ -130,6 +141,7 @@ def all_multi_modal_data_loader(cfg, mode="train"):
                 mode=cfg.DATA.TYPE,
                 session=session,
                 spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+                traits=cfg.DATA.TRAITS
             )
         datasets.append(data_set)
     concat_dataset = ConcatDataset(datasets)

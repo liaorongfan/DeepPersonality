@@ -172,7 +172,7 @@ def multi_modal_audio_model(cfg):
     else:
         dim = 15 * 128
         use_sigmoid = True
-    model = AudioFCNet(dim, spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL, use_sigmoid=use_sigmoid)
+    model = AudioFCNet(dim, out_dim=cfg.MODEL.NUM_CLASS, spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL, use_sigmoid=use_sigmoid)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 
