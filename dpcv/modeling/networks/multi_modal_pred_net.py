@@ -159,7 +159,7 @@ class AudioFCNet(nn.Module):
 
 @NETWORK_REGISTRY.register()
 def multi_modal_visual_model(cfg):
-    model = VisualFCNet(6144)
+    model = VisualFCNet(6144, out_dim=cfg.MODEL.NUM_CLASS)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 

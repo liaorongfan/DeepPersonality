@@ -274,7 +274,6 @@ class Chalearn21CRNetData(Chalearn21FrameData):
 
         label = self.get_ocean_label(img_file)
         label_cls_encode = self.cls_encode(label)
-
         wav = self.get_wave_data(img_file)
         if self.trans:
             img = self.trans["frame"](img)
@@ -282,6 +281,9 @@ class Chalearn21CRNetData(Chalearn21FrameData):
 
         wav = torch.as_tensor(wav, dtype=img.dtype)
         label = torch.as_tensor(label, dtype=img.dtype)
+        if not len(self.traits) == 5:
+            label = label[self.traits]
+            label_cls_encode = label_cls_encode[self.traits]
         return {"glo_img": img, "loc_img": loc_img, "wav_aud": wav,
                 "reg_label": label, "cls_label": label_cls_encode}
 
@@ -665,12 +667,14 @@ def all_true_personality_crnet_dataloader(cfg, mode):
     num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 1
 
     datasets = []
-    for session in ["talk", "lego", "ghost", "animal"]:
+    for session in ["ghost"]:
+    # for session in ["talk", "lego", "ghost", "animal"]:
         dataset = Chalearn21CRNetData(
             data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
             data_split=mode,
             task=session,  # "talk"
             trans=transforms,
+            traits=cfg.DATA.TRAITS
         )
         datasets.append(dataset)
     
