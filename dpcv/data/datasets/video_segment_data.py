@@ -102,10 +102,13 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
 
     """
     def __init__(
-        self, data_root, data_split, task, data_type, video_loader, spa_trans=None, tem_trans=None, traits="OCEAN",
+        self, data_root, data_split, task, data_type, video_loader, 
+        spa_trans=None, tem_trans=None, 
+        traits="OCEAN", visual_clip=-1,
     ):
         super().__init__(
-            data_root, data_split, task, data_type, even_downsample=2000, trans=None, segment=True, traits=traits,
+            data_root, data_split, task, data_type, even_downsample=2000, trans=None, segment=True, 
+            traits=traits, visual_clip=visual_clip,
         )
         self.loader = video_loader
         self.spa_trans = spa_trans
@@ -163,11 +166,12 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
         frame_indices = [int(Path(path).stem[6:]) for path in img_path_ls]
         return frame_indices
 
-    @staticmethod
-    def list_face_frames(img_dir):
+    def list_face_frames(self, img_dir):
         img_path_ls = glob.glob(f"{img_dir}/*.jpg")
         img_path_ls = sorted(img_path_ls, key=lambda x: int(Path(x).stem[5:]))
         frame_indices = [int(Path(path).stem[5:]) for path in img_path_ls]
+        if self.visual_clip > 0:
+            frame_indices = frame_indices[: self.visual_clip]
         return frame_indices
 
 

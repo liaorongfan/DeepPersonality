@@ -21,6 +21,8 @@ __C.DATA.ROOT = "datasets"
 __C.DATA.TYPE = "frame"
 __C.DATA.SESSION = "talk"
 __C.DATA.TRAITS = "OCEAN"
+__C.DATA.VISUAL_CLIP = -1
+__C.DATA.AUDIO_CLIP = -1.
 
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"

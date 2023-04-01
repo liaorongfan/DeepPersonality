@@ -31,7 +31,10 @@ class Chalearn21FrameData(Dataset):
 
     def __init__(
             self, data_root, data_split, task, data_type="frame",
-            even_downsample=2000, trans=None, segment=False, traits="OCEAN",
+            even_downsample=2000, trans=None, segment=False,
+            traits="OCEAN",
+            visual_clip=-1,
+            audio_clip=-1.0,
     ):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
@@ -39,6 +42,8 @@ class Chalearn21FrameData(Dataset):
         self.data_split = data_split
         self.task = task
         self.type = data_type
+        self.visual_clip = visual_clip
+        self.audio_clip = audio_clip
         self.data_dir = opt.join(data_root, data_split, f"{task}_{data_split}")
         self.sessions = os.listdir(self.data_dir)
         self.sample_size = even_downsample
@@ -109,8 +114,15 @@ class Chalearn21FrameData(Dataset):
             imgs = sorted(imgs, key=lambda x: int(Path(x).stem[5:]))
 
         # evenly sample to self.sample_size frames
-        separate = np.linspace(0, len(imgs), self.sample_size, endpoint=False, dtype=np.int16)
+        if self.visual_clip > 0:
+            if len(imgs) < self.visual_clip:
+                separate = np.arange(len(imgs))
+            else:
+                separate = np.arange(self.visual_clip)
+        else:
+            separate = np.linspace(0, len(imgs), self.sample_size, endpoint=False, dtype=np.int16)
         # index = random.choice(separate)
+        
         selected_imgs = [imgs[idx] for idx in separate]
         # that will cost too much memory on disk
         # label = self.parse_label(selected_imgs[1])
@@ -155,11 +167,15 @@ class Chlearn21AudioData(Chalearn21FrameData):
         sample_len=244832, 
         suffix_type="npy", 
         data_type="audio", 
-        traits="OCEAN"
+        traits="OCEAN",
+        audio_clip=-1.0,
     ):
-        super().__init__(data_root, data_split, task, data_type=data_type, segment=True, traits=traits)
+        super().__init__(
+            data_root, data_split, task, data_type=data_type, segment=True, traits=traits, audio_clip=audio_clip,
+        )
         self.sample_len = sample_len
         self.suffix = suffix_type
+        self.audio_clip = audio_clip
 
     def __len__(self):
         return len(self.img_dir_ls)
@@ -178,10 +194,15 @@ class Chlearn21AudioData(Chalearn21FrameData):
         aud_file = opt.join(self.data_dir, f"{img_dir}.{self.suffix}")
         aud_data = np.load(aud_file)
         data_len = aud_data.shape[-1]
+        if self.audio_clip > 0:
+            data_len = int(data_len * self.audio_clip)
+            if data_len < self.sample_len:
+                data_len = self.sample_len - 1
         start = np.random.randint(data_len - self.sample_len)
         end = start + self.sample_len
-        return aud_data[:, :, start: end]
-
+        sample = aud_data[:, :, start: end]
+        return sample
+    
     def get_ocean_label(self, img_dir):
         *_, session, part = img_dir.split("/")
         part = part.replace(self.task_mark, "T")
@@ -331,8 +352,8 @@ class Chalearn21CRNetData(Chalearn21FrameData):
 
 class CRNetAudioTruePersonality(Chlearn21AudioData):
 
-    def __init__(self, data_root, data_split, task, sample_len=244832, traits="OCEAN"):
-        super().__init__(data_root, data_split, task, sample_len, traits=traits)
+    def __init__(self, data_root, data_split, task, sample_len=244832, traits="OCEAN", audio_clip=-1):
+        super().__init__(data_root, data_split, task, sample_len, traits=traits, audio_clip=audio_clip)
 
     def __getitem__(self, idx):
         img_dir = self.img_dir_ls[idx]
@@ -527,6 +548,7 @@ def true_personality_dataloader(cfg, mode):
         task=cfg.DATA.SESSION,  # "talk"
         data_type=cfg.DATA.TYPE,
         trans=transform,
+        visual_clip=cfg.DATA.VISUAL_CLIP,
     )
     data_loader = DataLoader(
         dataset=dataset,
@@ -699,6 +721,7 @@ def true_personality_crnet_audio_dataloader(cfg, mode):
         data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
         data_split=mode,
         task=cfg.DATA.SESSION,  # "talk"
+        audio_clip=cfg.DATA.AUDIO_CLIP,
     )
     data_loader = DataLoader(
         dataset=dataset,

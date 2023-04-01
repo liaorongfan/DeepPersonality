@@ -162,6 +162,7 @@ def true_per_vat_data_loader(cfg, mode="train"):
         video_loader=video_loader,
         spa_trans=spatial_transform,
         tem_trans=temporal_transform,
+        visual_clip=data_cfg.VISUAL_CLIP
     )
 
     shuffle = True if mode == "train" else False
