@@ -87,14 +87,14 @@ if __name__ == "__main__":
 
     os.chdir("/root/DeepPersonality")
     # task = "talk"
-    type = "face"
+    type = "audio"
     data_root = "datasets/chalearn2021"
 
 
     transform = set_transform_op()
 
     for task in ["animal", "talk", "lego", "ghost"]:
-        save_dir = f"/hy-tmp/exptract_feature_tp/{task}"
+        save_dir = f"/hy-tmp/exptract_feature_tp_short/{task}"
         extractor = TPExtractVisualFeatureData(
             data_root=data_root,
             data_type=type,
