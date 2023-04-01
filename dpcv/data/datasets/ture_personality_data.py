@@ -317,6 +317,10 @@ class Chalearn21CRNetData(Chalearn21FrameData):
             aud_file = f"{dir_name}.npy"
         aud_data = np.load(aud_file)
         data_len = aud_data.shape[-1]
+        if self.audio_clip > 0:
+            data_len = int(data_len * self.audio_clip)
+            if data_len < self.sample_len: 
+                data_len = self.sample_len - 1
         start = np.random.randint(data_len - self.sample_len)
         end = start + self.sample_len
         return aud_data[:, :, start: end]
@@ -668,6 +672,8 @@ def true_personality_crnet_dataloader(cfg, mode):
         data_split=mode,
         task=cfg.DATA.SESSION,  # "talk"
         trans=transforms,
+        visual_clip=cfg.DATA.VISUAL_CLIP, 
+        audio_clip=cfg.DATA.AUDIO_CLIP,
     )
     data_loader = DataLoader(
         dataset=dataset,
