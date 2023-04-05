@@ -680,6 +680,7 @@ def true_personality_crnet_dataloader(cfg, mode):
         batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
         shuffle=shuffle,
         num_workers=0,
+        drop_last=cfg.DATA_LOADER.DROP_LAST,
     )
     return data_loader
 
