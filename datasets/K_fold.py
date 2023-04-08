@@ -17,10 +17,12 @@ class FoldingChalearn21Dataset:
             video.split("/")[-1] 
             for video in glob.glob(f"{self.data_root}/*/[^0-9]*")
         ]
+        self.replacable_option = []
         self.test_folds, self.trainval_folds = self.split_folds()
         self.train_folds, self.valid_folds = self.split_trainval_folds()
+        print("finish dataset folding")
 
-    def split_folds(self):
+    def analysis_dataset(self):
 
         sub_list = list(
             itertools.chain(
@@ -44,25 +46,37 @@ class FoldingChalearn21Dataset:
                 uni_optional.append(video)
             elif (sub2 in sub_appear_once) and (sub1 not in sub_appear_multi):
                 uni_optional.append(video)
-           
-        self.replacable_option = uni_optional
 
         bi_optional = []
         for sub in sub_appear_twice:
             for video in self.dialog_video_id_ls:
                 sub1, sub2 = video[:3], video[3:]
-                if (sub1 == sub) and (sub2 not in sub_appear_multi):
+                # if (sub1 == sub) and (sub2 not in sub_appear_multi):
+                #     bi_optional.append(video)
+                # elif (sub2 == sub) and (sub1 not in sub_appear_multi):
+                #     bi_optional.append(video)
+                if (sub1 == sub):
                     bi_optional.append(video)
-                elif (sub2 == sub) and (sub1 not in sub_appear_multi):
+                elif (sub2 == sub):
                     bi_optional.append(video)
         bi_optional = list(set(bi_optional))
+        return uni_optional, bi_optional
 
-        test_split_folds = []
-        splits = list(range(0, len(bi_optional), 11))
+    def separate_options(self, options, step=11):
+
+        split_folds = []
+        splits = list(range(0, len(options), step))
         for i in range(len(splits) - 1):
             fold_k_stat = splits[i]
             fold_k_end = splits[i + 1]
-            test_split_folds.append(bi_optional[fold_k_stat: fold_k_end])
+            split_folds.append(options[fold_k_stat: fold_k_end])
+        return split_folds
+
+    def split_folds(self):
+        uni_optional, bi_optional = self.analysis_dataset()
+
+        self.replacable_option = uni_optional
+        test_split_folds = self.separate_options(bi_optional)
 
         varified_test_folds, varified_trainval_folds = [], []
         for test_fold in test_split_folds:
@@ -115,7 +129,7 @@ class FoldingChalearn21Dataset:
             trainval_fold.append(it) 
 
             replaced_one = random.choice(optional)
-            self.replacable_option.remove(replaced_one)
+            # self.replacable_option.remove(replaced_one)
             test_fold.append(replaced_one)
             trainval_fold.remove(replaced_one)
         
