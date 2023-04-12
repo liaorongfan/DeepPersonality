@@ -41,7 +41,7 @@ class FoldingChalearn21Dataset:
             sub_appear_three, sub_appear_twice,
         )
         video_to_remove_for_4 = self.produce_subjects_show_4_times(
-            all_video_ids, sub_appear_four, sub_appear_three,
+            all_video_ids, sub_appear_four, sub_appear_three, sub_appear_twice,
         )
 
         video_to_remove = video_to_remove_for_4 + video_to_remove_for_5
@@ -84,6 +84,25 @@ class FoldingChalearn21Dataset:
             sub_appear_twice, sub_appear_once,
         )
 
+    def find_subs(self, sub_ls, all_video_ids):
+        # for sub in all_video_ids:
+        sub_ls_info = {}
+        for sub in sub_ls:
+            sub_video_ls, sub_chain_ls = [], []
+            for video in all_video_ids:
+                if video[:3] == sub:
+                    sub_video_ls.append(video)
+                    sub_chain_ls.append(video[3:])
+                elif video[3:] == sub:
+                    sub_video_ls.append(video)
+                    sub_chain_ls.append(video[:3])
+        
+            sub_ls_info[sub] = {
+                "video": sub_video_ls, "related": sub_chain_ls
+            }
+        return sub_ls_info
+            
+
     def produce_subjects_show_5_times(
         self, 
         all_video_ids, 
@@ -92,72 +111,67 @@ class FoldingChalearn21Dataset:
     ):
         video_to_remove = []
         # videos form which a subjects appeared 5 times 
-        video_sub_five = {}
-        for sub in sub_appear_five:
-            sub_five = []
-            for video in all_video_ids:
-                if video[:3] == sub or video[3:] == sub:
-                    sub_five.append(video)
-            related_sub = [video.replace(sub, "") for video in sub_five]
-            video_sub_five[sub] = {"video": sub_five, "related": related_sub}
+        video_sub_5 = self.find_subs(sub_appear_five, all_video_ids)
         
         # subjects both appeared in 5 times and 4 times in the video datasets
-        chain_five_four = {}
-        for k, v in video_sub_five.items():
-            chain_sub = list(set(v["related"]) & set(sub_appear_four))
-            chain_five_four[k] = chain_sub
-        # those high frequent showing up subjects should be removed for folding
-        for sub, relate in chain_five_four.items():
+        chain_5_to_4 = self.find_chain_sub(video_sub_5, sub_appear_four)
+
+        for sub, relate in chain_5_to_4.items():
             for rel in relate:
                 video_to_remove.append((sub, rel))
         
         # subjects both appeared in 5 times and 3 times in the video datasets
-        chain_five_three = {}
-        for k, v in video_sub_five.items():
-            chain_sub = list(set(v["related"]) & set(sub_appear_three))
-            chain_five_three[k] = chain_sub
+        chain_5_to_3 = self.find_chain_sub(video_sub_5, sub_appear_three)
+
         # those high frequent showing up subjects should be removed for folding
-        for sub, relate in chain_five_three.items():
+        for sub, relate in chain_5_to_3.items():
+            for rel in relate:
+                video_to_remove.append((sub, rel))
+        # subjects both appeared in 5 times and 3 times in the video datasets
+        chain_5_to_2 = self.find_chain_sub(video_sub_5, sub_appear_twice)
+        for sub, relate in chain_5_to_2.items():
             for rel in relate:
                 video_to_remove.append((sub, rel))
         # used to check whether all the subjects which show up 5 times
-        # being add to remove
-        remained_sub_five = list(
-            set(video_sub_five.keys()) - set([video[0] for video in video_to_remove])
+        remained_sub_5 = list(
+            set(video_sub_5.keys()) - set([video[0] for video in video_to_remove])
         )
 
-        # subjects both appeared in 5 times and 3 times in the video datasets
-        chain_five_twice = {}
-        for k, v in video_sub_five.items():
-            chain_sub = list(set(v["related"]) & set(sub_appear_twice))
-            chain_five_twice[k] = chain_sub
-
-        if len(remained_sub_five) > 0:
-            for idx, sub in enumerate(remained_sub_five):
-                video_to_remove.append((sub, video_sub_five[sub]["related"][idx]))  
+        if len(remained_sub_5) > 0:
+            for sub in remained_sub_5:
+                video_to_remove.append((sub, chain_5_to_2[sub][0]))  
         
         return video_to_remove
 
-    def produce_subjects_show_4_times(self,all_video_ids, sub_appear_four, sub_appear_three):
+    def find_chain_sub(self, sub_info_dt, sub_ls):
+        chain_info_dt = {}
+        for k, v in sub_info_dt.items():
+            chain_sub = list(set(v["related"]) & set(sub_ls))
+            chain_info_dt[k] = chain_sub
+        return chain_info_dt
+
+
+
+    def produce_subjects_show_4_times(self,all_video_ids, sub_appear_four, sub_appear_three, sub_appear_twice):
         video_to_remove = []
         # videos form which a subjects appeared 4 times 
-        video_sub_four = {}
-        for sub in sub_appear_four:
-            sub_four = []
-            for video in all_video_ids:
-                if video[:3] == sub or video[3:] == sub:
-                    sub_four.append(video)
-            related_sub = [video.replace(sub, "") for video in sub_four]
-            video_sub_four[sub] = {"video": sub_four, "related": related_sub}
-
-        chain_four_three = {}
-        for k, v in video_sub_four.items():
-            chain_sub = list(set(v["related"]) & set(sub_appear_three))
-            chain_four_three[k] = chain_sub
+        video_sub_four = self.find_subs(sub_appear_four, all_video_ids)
+        chain_4_to_3 = self.find_chain_sub(video_sub_four, sub_appear_three)
         # those high frequent showing up subjects should be removed for folding
-        for sub, relate in chain_four_three.items():
+        for sub, relate in chain_4_to_3.items():
             for rel in relate:
                 video_to_remove.append((sub, rel))
+
+        
+        chain_4_to_2 = self.find_chain_sub(video_sub_four, sub_appear_twice)
+
+        remained_sub_four = list(
+            set(video_sub_four.keys()) - set([video[0] for video in video_to_remove])
+        )
+        if len(remained_sub_four) > 0:
+            for sub in remained_sub_four:
+                video_to_remove.append((sub, chain_4_to_2[sub][0])) 
+
         return video_to_remove
 
     def separate_options(self, options, step=11):
@@ -172,190 +186,155 @@ class FoldingChalearn21Dataset:
 
     def split_folds(self):
 
-        _, sub_appear_four, sub_appear_three, \
-        sub_appear_twice, sub_appear_once = self.statistic_dataset(self.dialog_video_id_ls)
+        _, sub_appear_4, sub_appear_3, \
+        sub_appear_2, sub_appear_1 = self.statistic_dataset(self.dialog_video_id_ls)
         dialog_video_id_ls = self.dialog_video_id_ls.copy()
 
         options_dt = {}
-        options_4_dt, dialog_video_id_ls = self.select_video_by_show_up_times(
-            dialog_video_id_ls, sub_appear_four,
-        ) 
-        options_dt.update(options_4_dt)
-        keys_4 = list(options_4_dt.keys())
-        # print()
+
         options_3_dt, dialog_video_id_ls = self.select_video_by_show_up_times(
-            dialog_video_id_ls, sub_appear_three,
+            dialog_video_id_ls, sub_appear_3,
         )
-        options_dt.update(options_3_dt)
-        keys_3 = list(options_3_dt.keys())
+
         options_2_dt, dialog_video_id_ls = self.select_video_by_show_up_times(
-            dialog_video_id_ls, sub_appear_twice,
+            dialog_video_id_ls, sub_appear_2,
         )
-        options_dt.update(options_2_dt)
-        keys_2 = list(options_2_dt.keys())
+
         options_1_dt, dialog_video_id_ls = self.select_video_by_show_up_times(
-            dialog_video_id_ls, sub_appear_once,
+            dialog_video_id_ls, sub_appear_1,
         )
-        options_dt.update(options_1_dt)
-        keys_1 = list(options_1_dt.keys())
+
 
         all_video_ls = self.dialog_video_id_ls.copy()
         video_folds_finder  = [{} for _ in range(10)]
         video_folds_lists = []
 
-        for i, sub in enumerate(keys_4):
-            video_folds_finder[i].update({sub:options_4_dt[sub]})
-            video_folds_finder[i].update({keys_3[i]: options_3_dt[keys_3[i]]})
-            options_4_dt.pop(sub)
-            options_3_dt.pop(keys_3[i])
-            options_dt.pop(sub)
-            options_dt.pop(keys_3[i])
+        # for i, sub in enumerate(keys_4):
+        #     video_folds_finder[i].update({sub:options_4_dt[sub]})
+        #     video_folds_finder[i].update({keys_3[i]: options_3_dt[keys_3[i]]})
+        #     options_4_dt.pop(sub)
+        #     options_3_dt.pop(keys_3[i])
+        #     options_dt.pop(sub)
+        #     options_dt.pop(keys_3[i])
 
         # video_folds_ls[0].append()
         # all_video_ls = list(set(all_video_ls) - set(options_4_ls))
-        for one_fold in video_folds_finder[:4]:
-            tmp = {}
-            for sub in one_fold.keys():
-                one_fold_retrive = [video.replace(sub, "") for video in one_fold[sub]]
-                for retrive in one_fold_retrive:
-                    value = options_dt.pop(retrive, [])
-                    tmp.update({retrive: value})
-                    value_len = len(value)
-                    if value_len == 3:
-                        options_3_dt.pop(retrive, [])
-                    elif value_len == 2:
-                        options_2_dt.pop(retrive, [])
-                    elif value_len == 1:
-                        options_1_dt.pop(retrive, [])
-                    else:
-                        print(f">>> Empty list {retrive}")
-                    # options_dt.pop(retrive, [])
+        # for one_fold in video_folds_finder[:4]:
+        #     tmp = {}
+        #     for sub in one_fold.keys():
+        #         one_fold_retrive = [video.replace(sub, "") for video in one_fold[sub]]
+        #         for retrive in one_fold_retrive:
+        #             value = options_dt.pop(retrive, [])
+        #             tmp.update({retrive: value})
+        #             value_len = len(value)
+        #             if value_len == 3:
+        #                 options_3_dt.pop(retrive, [])
+        #             elif value_len == 2:
+        #                 options_2_dt.pop(retrive, [])
+        #             elif value_len == 1:
+        #                 options_1_dt.pop(retrive, [])
+        #             else:
+        #                 print(f">>> Empty list {retrive}")
+        #             # options_dt.pop(retrive, [])
                     
-            # one_fold = one_fold_retrive[0]
-            one_fold.update(tmp)
-            one_fold_list = []
+        #     # one_fold = one_fold_retrive[0]
+        #     one_fold.update(tmp)
+        #     one_fold_list = []
 
-            for video_ls in one_fold.values():
-                one_fold_list.extend(video_ls)
-            one_fold_list = list(set(one_fold_list))
-            video_folds_lists.append(one_fold_list)
+        #     for video_ls in one_fold.values():
+        #         one_fold_list.extend(video_ls)
+        #     one_fold_list = list(set(one_fold_list))
+        #     video_folds_lists.append(one_fold_list)
 
-            all_video_ls = list(set(all_video_ls) - set(one_fold_list))
+        #     all_video_ls = list(set(all_video_ls) - set(one_fold_list))
 
-        keys_3 = list(options_3_dt.keys())
-        for i, idx in enumerate(range(4, 8)):
-            i = i * 2
-            tmp = {
-                keys_3[i]: options_3_dt[keys_3[i]],
-                keys_3[i + 1]: options_3_dt[keys_3[i + 1]],
-                # keys_3[i + 2]: options_3_dt[keys_3[i + 2]],
-            }
-            video_folds_finder[idx].update(tmp)
-            options_3_dt.pop(keys_3[i], [])
-            options_3_dt.pop(keys_3[i + 1], [])
-            # options_3_dt.pop(keys_3[i + 2], [])
+        # keys_3 = list(options_3_dt.keys())
+        # for i, idx in enumerate(range(4, 8)):
+        #     i = i * 2
+        #     tmp = {
+        #         keys_3[i]: options_3_dt[keys_3[i]],
+        #         keys_3[i + 1]: options_3_dt[keys_3[i + 1]],
+        #         # keys_3[i + 2]: options_3_dt[keys_3[i + 2]],
+        #     }
+        #     video_folds_finder[idx].update(tmp)
+        #     options_3_dt.pop(keys_3[i], [])
+        #     options_3_dt.pop(keys_3[i + 1], [])
+        #     # options_3_dt.pop(keys_3[i + 2], [])
         
-        for one_fold in video_folds_finder[4: 8]:
-            tmp = {}
-            for sub in one_fold.keys():
-                one_fold_retrive = [video.replace(sub, "") for video in one_fold[sub]]
-                for retrive in one_fold_retrive:
-                    value = options_dt.pop(retrive, [])
-                    tmp.update({retrive: value})
-                    value_len = len(value)
-                    if value_len == 3:
-                        options_3_dt.pop(retrive, [])
-                    elif value_len == 2:
-                        options_2_dt.pop(retrive, [])
-                    elif value_len == 1:
-                        options_1_dt.pop(retrive, [])
-                    else:
-                        print(f">>> Empty list {retrive}")
-            one_fold.update(tmp)
-            one_fold_list = []
+        # for one_fold in video_folds_finder[4: 8]:
+        #     tmp = {}
+        #     for sub in one_fold.keys():
+        #         one_fold_retrive = [video.replace(sub, "") for video in one_fold[sub]]
+        #         for retrive in one_fold_retrive:
+        #             value = options_dt.pop(retrive, [])
+        #             tmp.update({retrive: value})
+        #             value_len = len(value)
+        #             if value_len == 3:
+        #                 options_3_dt.pop(retrive, [])
+        #             elif value_len == 2:
+        #                 options_2_dt.pop(retrive, [])
+        #             elif value_len == 1:
+        #                 options_1_dt.pop(retrive, [])
+        #             else:
+        #                 print(f">>> Empty list {retrive}")
+        #     one_fold.update(tmp)
+        #     one_fold_list = []
 
-            for video_ls in one_fold.values():
-                one_fold_list.extend(video_ls)
-            one_fold_list = list(set(one_fold_list))
-            video_folds_lists.append(one_fold_list)
+        #     for video_ls in one_fold.values():
+        #         one_fold_list.extend(video_ls)
+        #     one_fold_list = list(set(one_fold_list))
+        #     video_folds_lists.append(one_fold_list)
 
-        keys_2 = list(options_2_dt.keys())
-        for i, idx in enumerate(range(8, 10)):
-            i = i * 6
-            tmp = {
-                keys_2[i]: options_2_dt[keys_2[i]],
-                keys_2[i + 1]: options_2_dt[keys_2[i + 1]],
-                keys_2[i + 2]: options_2_dt[keys_2[i + 2]],
-                keys_2[i + 3]: options_2_dt[keys_2[i + 3]],
-                keys_2[i + 4]: options_2_dt[keys_2[i + 4]],
-                keys_2[i + 5]: options_2_dt[keys_2[i + 5]],
-            }
-            video_folds_finder[idx].update(tmp)
-            options_2_dt.pop(keys_2[i], [])
-            options_2_dt.pop(keys_2[i + 1],[])
-            options_2_dt.pop(keys_2[i + 2],[])
-            options_2_dt.pop(keys_2[i + 3],[])
-            options_2_dt.pop(keys_2[i + 4],[])
-            options_2_dt.pop(keys_2[i + 5],[])
+        # keys_2 = list(options_2_dt.keys())
+        # for i, idx in enumerate(range(8, 10)):
+        #     i = i * 6
+        #     tmp = {
+        #         keys_2[i]: options_2_dt[keys_2[i]],
+        #         keys_2[i + 1]: options_2_dt[keys_2[i + 1]],
+        #         keys_2[i + 2]: options_2_dt[keys_2[i + 2]],
+        #         keys_2[i + 3]: options_2_dt[keys_2[i + 3]],
+        #         keys_2[i + 4]: options_2_dt[keys_2[i + 4]],
+        #         keys_2[i + 5]: options_2_dt[keys_2[i + 5]],
+        #     }
+        #     video_folds_finder[idx].update(tmp)
+        #     options_2_dt.pop(keys_2[i], [])
+        #     options_2_dt.pop(keys_2[i + 1],[])
+        #     options_2_dt.pop(keys_2[i + 2],[])
+        #     options_2_dt.pop(keys_2[i + 3],[])
+        #     options_2_dt.pop(keys_2[i + 4],[])
+        #     options_2_dt.pop(keys_2[i + 5],[])
         
-        for one_fold in video_folds_finder[8: 10]:
-            tmp = {}
-            for sub in one_fold.keys():
-                one_fold_retrive = [video.replace(sub, "") for video in one_fold[sub]]
-                for retrive in one_fold_retrive:
-                    value = options_dt.pop(retrive, [])
-                    tmp.update({retrive: value})
-                    value_len = len(value)
-                    if value_len == 3:
-                        options_3_dt.pop(retrive, [])
-                    elif value_len == 2:
-                        options_2_dt.pop(retrive, [])
-                    elif value_len == 1:
-                        options_1_dt.pop(retrive, [])
-                    else:
-                        print(f">>> Empty list {retrive}")
-            one_fold.update(tmp)
-            one_fold_list = []
+        # for one_fold in video_folds_finder[8: 10]:
+        #     tmp = {}
+        #     for sub in one_fold.keys():
+        #         one_fold_retrive = [video.replace(sub, "") for video in one_fold[sub]]
+        #         for retrive in one_fold_retrive:
+        #             value = options_dt.pop(retrive, [])
+        #             tmp.update({retrive: value})
+        #             value_len = len(value)
+        #             if value_len == 3:
+        #                 options_3_dt.pop(retrive, [])
+        #             elif value_len == 2:
+        #                 options_2_dt.pop(retrive, [])
+        #             elif value_len == 1:
+        #                 options_1_dt.pop(retrive, [])
+        #             else:
+        #                 print(f">>> Empty list {retrive}")
+        #     one_fold.update(tmp)
+        #     one_fold_list = []
 
-            for video_ls in one_fold.values():
-                one_fold_list.extend(video_ls)
-            one_fold_list = list(set(one_fold_list))
-            video_folds_lists.append(one_fold_list)
-        print(video_folds_lists)
-        filed_folds_lists = []
-        for idx in [2, 8, 9]:
-            filed_folds_lists.append(video_folds_lists[idx])
+        #     for video_ls in one_fold.values():
+        #         one_fold_list.extend(video_ls)
+        #     one_fold_list = list(set(one_fold_list))
+        #     video_folds_lists.append(one_fold_list)
+        # print(video_folds_lists)
+        # filed_folds_lists = []
+        # for idx in [2, 8, 9]:
+            # filed_folds_lists.append(video_folds_lists[idx])
         
         # one_fold_related = [video.replace(one_fold_retrive[0][0], "") for video in one_fold]
         # for sub in one_fold_related:
         #     one_fold.append(options_dt[sub])
-        # relate_sub = [video.replace()]
-
-
-
-
-
-
-
-
-
-        print()
-        # self.replacable_option = uni_optional
-        # test_split_folds = self.separate_options(bi_optional)
-
-        # varified_test_folds, varified_trainval_folds = [], []
-        # for test_fold in test_split_folds:
-        #     trainval_fold = [
-        #         video for video in self.dialog_video_id_ls 
-        #         if video not in test_fold
-        #     ]
-        #     test_fold, trainval_fold = self.varify_subject_independence(
-        #         test_fold, trainval_fold
-        #     )
-        #     varified_test_folds.append(test_fold)
-        #     varified_trainval_folds.append(trainval_fold)
-
-        # return varified_test_folds, varified_trainval_folds
 
     def register_subjects(self, sub, all_dialog_videos=[], sub_info_dt=defaultdict(dict)):
 
@@ -374,7 +353,7 @@ class FoldingChalearn21Dataset:
             sub_info_dt[sub].update({"video": sub_video_ls, "chain": sub_chain_ls})
         else:
             print(f"{sub} has registered")
-        print()
+        # print()
         all_dialog_videos =  [video for video in all_dialog_videos if video not in sub_video_ls]
 
         for chain_sub in sub_chain_ls:
@@ -382,20 +361,17 @@ class FoldingChalearn21Dataset:
 
         return sub_info_dt, all_dialog_videos
     
-    # def find_subjects(self,sub, all_dialog_videos, sub_info_dt):
-
-
-
-
     def select_video_by_show_up_times(self, dialog_video_id_ls, sub_appear_times):
-        options_info_dt = collections.defaultdict(dict)  # map sub: video relations
+        # options_info_dt = collections.defaultdict(dict)  # map sub: video relations
+        sub_info_dt_ls = []
         for sub in sub_appear_times:
             # collect videos related to this subject
-            sub_info_dt, dialog_video_id_ls = self.register_subjects(sub, dialog_video_id_ls)
-
+            sub_info_dt = defaultdict(dict)
+            sub_info_dt, dialog_video_id_ls = self.register_subjects(sub, dialog_video_id_ls, sub_info_dt)
+            sub_info_dt_ls.append(sub_info_dt)
 
         # dialog_video_id_ls = list(set(dialog_video_id_ls) - set(options_ls))
-        return sub_info_dt, dialog_video_id_ls
+        return sub_info_dt_ls, dialog_video_id_ls
 
     def split_train_folds(self):
         pass
