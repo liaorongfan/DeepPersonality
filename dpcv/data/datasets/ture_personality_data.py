@@ -38,7 +38,7 @@ class Chalearn21FrameData(Dataset):
     ):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
-        self.session_id, self.parts_personality = self.load_annotation(task, data_split)
+        self.session_id, self.parts_personality = self.load_annotation(task)
         self.data_split = data_split
         self.task = task
         self.type = data_type
@@ -95,16 +95,18 @@ class Chalearn21FrameData(Dataset):
         participant_trait = np.array([float(v) for v in participant_trait.values()])
         return participant_trait
 
-    def load_annotation(self, task, data_split):
-        session_id_path = opt.join(self.ann_dir, f"sessions_{data_split}_id.json")
-        with open(session_id_path, "r") as fo:
-            session_id = json.load(fo)
-
-        parts_personality = opt.join(self.ann_dir, f"parts_{data_split}_personality.json")
-        with open(parts_personality, "r") as fo:
-            parts_personality = json.load(fo)
-
-        return session_id, parts_personality
+    def load_annotation(self, task):
+        all_session_id, all_parts_personality = {}, {}
+        for data_split in ["train", "valid", "test"]:
+            session_id_path = opt.join(self.ann_dir, f"sessions_{data_split}_id.json")
+            with open(session_id_path, "r") as fo:
+                session_id = json.load(fo)
+            all_session_id.update(session_id)
+            parts_personality = opt.join(self.ann_dir, f"parts_{data_split}_personality.json")
+            with open(parts_personality, "r") as fo:
+                parts_personality = json.load(fo)
+            all_parts_personality.update(parts_personality)
+        return all_session_id, all_parts_personality
 
     def sample_img(self, img_dir):
         imgs = glob.glob(opt.join(self.data_dir, img_dir, "*.jpg"))

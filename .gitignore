@@ -16,6 +16,7 @@ datasets/*.txt
 datasets/annotation
 datasets/va_data
 datasets/chalearn2021
+datasets/chalearn21_fold_*
 pretrained/
 mlruns/
 /snippet

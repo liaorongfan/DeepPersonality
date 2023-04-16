@@ -19,6 +19,7 @@ step 7 : set test metric
 __C.DATA = CfgNode()
 __C.DATA.ROOT = "datasets"
 __C.DATA.TYPE = "frame"
+__C.DATA.FEATURE_ROOT = ""
 __C.DATA.SESSION = "talk"
 __C.DATA.TRAITS = "OCEAN"
 __C.DATA.VISUAL_CLIP = -1
