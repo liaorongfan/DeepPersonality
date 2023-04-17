@@ -1,14 +1,15 @@
 DATA:
-  ROOT: "datasets/chalearn21_fold_0"
+  ROOT: "datasets/chalearn21_fold_1"
   FEATURE_ROOT: "datasets/extracted_feature_tp"
   SESSION: "all"
-  TYPE: "face"
+  TYPE: "audio"
 DATA_LOADER:
   NAME: "all_fold_multi_modal_data_loader"
-  TRAIN_BATCH_SIZE: 128
+  TRAIN_BATCH_SIZE: 32
   NUM_WORKERS: 0
 MODEL:
-  NAME: "multi_modal_visual_model"
+  NAME: "multi_modal_audio_model"
+  SPECTRUM_CHANNEL: 80
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -17,8 +18,8 @@ SOLVER:
   LR_INIT: 0.01
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [15, 18]
+  MILESTONE: [300, 400]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 10
-  OUTPUT_DIR: "results_true_personality/fold_0/14_multi_modal_pred"
+  MAX_EPOCH: 500
+  OUTPUT_DIR: "results_true_personality/fold_1/06_multi_modal_pred"

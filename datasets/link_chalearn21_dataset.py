@@ -102,7 +102,7 @@ if __name__ == "__main__":
     # )
     link_folding = LinkFolding(
         source_data_root="/hy-tmp",
-        dest_data_root="/root/DeepPersonality/datasets/chalearn21_fold_0",
+        dest_data_root="/root/DeepPersonality/datasets/chalearn21_fold_1",
         folding_file="config/folds/10_fold_video_id_ls.txt",
     )
-    link_folding.setup_one_fold_dataset(0)
+    link_folding.setup_one_fold_dataset(1)
