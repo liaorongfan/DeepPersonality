@@ -9,12 +9,14 @@ import torch
 
 @DATA_LOADER_REGISTRY.register()
 class AudioData(VideoData):
-    def __init__(self, data_root, aud_dir, label_file):
+    def __init__(self, data_root, aud_dir, label_file, num_videos=-1):
         super().__init__(
             data_root, img_dir=None, audio_dir=aud_dir, label_file=label_file,
             parse_img_dir=False,
             parse_aud_dir=True,
         )
+        if num_videos > 0:
+            self.aud_file_ls = self.aud_file_ls[: num_videos]
 
     def __getitem__(self, index):
         aud_data = self.get_wave_data(index)
@@ -148,17 +150,20 @@ class VoiceLibrosaSwinTransformer(AudioData):
 @DATA_LOADER_REGISTRY.register()
 def build_audio_loader(cfg, dataset_cls, mode="train"):
     shuffle = cfg.DATA_LOADER.SHUFFLE
+    batch_size = cfg.DATA_LOADER.TRAIN_BATCH_SIZE
     if mode == "train":
         dataset = dataset_cls(
             cfg.DATA.ROOT,
             cfg.DATA.TRAIN_AUD_DATA,
             cfg.DATA.TRAIN_LABEL_DATA,
+            cfg.DATA.TRAIN_NUM_VIDEOS,
         )
     elif mode == "valid":
         dataset = dataset_cls(
             cfg.DATA.ROOT,
             cfg.DATA.VALID_AUD_DATA,
             cfg.DATA.VALID_LABEL_DATA,
+            cfg.DATA.VALID_NUM_VIDEOS,
         )
         shuffle = False
     elif mode == "test":
@@ -166,14 +171,16 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.ROOT,
             cfg.DATA.TEST_AUD_DATA,
             cfg.DATA.TEST_LABEL_DATA,
+            cfg.DATA.TEST_NUM_VIDEOS,
         )
         shuffle = False
+        batch_size = cfg.DATA_LOADER.TEST_BATCH_SIZE
     else:
         raise ValueError("mode must be one of 'train' or 'valid' or test' ")
 
     data_loader = DataLoader(
         dataset,
-        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        batch_size=batch_size,
         shuffle=shuffle,
         drop_last=cfg.DATA_LOADER.DROP_LAST,
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
