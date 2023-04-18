@@ -1,5 +1,5 @@
 DATA:
-  ROOT: "datasets/chalearn21_fold_3"
+  ROOT: "datasets/chalearn21_fold_4"
   SESSION: "all"
 DATA_LOADER:
   NAME: "all_true_personality_crnet_audio_dataloader"
@@ -18,4 +18,4 @@ SOLVER:
 TRAIN:
   TRAINER: "CRNetAudTrainer"
   MAX_EPOCH: 80
-  OUTPUT_DIR: "results_true_personality/fold_3/03_aud_crnet"
+  OUTPUT_DIR: "results_true_personality/fold_4/03_aud_crnet"

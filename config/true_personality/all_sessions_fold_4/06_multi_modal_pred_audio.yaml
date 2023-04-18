@@ -1,5 +1,5 @@
 DATA:
-  ROOT: "datasets/chalearn21_fold_2"
+  ROOT: "datasets/chalearn21_fold_4"
   FEATURE_ROOT: "datasets/extracted_feature_tp"
   SESSION: "all"
   TYPE: "audio"
@@ -22,4 +22,4 @@ SOLVER:
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 300
-  OUTPUT_DIR: "results_true_personality/fold_2/06_multi_modal_pred"
+  OUTPUT_DIR: "results_true_personality/fold_4/06_multi_modal_pred"
