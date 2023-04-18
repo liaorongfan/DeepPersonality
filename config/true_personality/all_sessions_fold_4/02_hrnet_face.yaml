@@ -1,0 +1,25 @@
+DATA:
+  ROOT: "datasets/chalearn21_fold_4"
+  SESSION: "all"
+  TYPE: "face"
+DATA_LOADER:
+  NAME: "all_true_personality_dataloader"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "hr_net_true_personality"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.01
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [1, 2]
+TRAIN:
+  TRAINER: "ImageModalTrainer"
+  MAX_EPOCH: 3
+  LOG_INTERVAL: 50
+  OUTPUT_DIR: "results_true_personality/fold_4/02_hrnet"
