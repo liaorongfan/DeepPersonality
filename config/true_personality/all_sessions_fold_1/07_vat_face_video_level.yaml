@@ -20,6 +20,6 @@ SOLVER:
   MILESTONE: [20, 25]
 TRAIN:
   TRAINER: "ImageModalTrainer"
-  MAX_EPOCH: 30
+  MAX_EPOCH: 10
   LOG_INTERVAL: 10
   OUTPUT_DIR: "results_true_personality/fold_1/07_vat_video_level"

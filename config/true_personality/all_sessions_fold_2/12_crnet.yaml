@@ -1,5 +1,5 @@
 DATA:
-  ROOT: "datasets/chalearn21_fold_0"
+  ROOT: "datasets/chalearn21_fold_2"
   SESSION: "all"
 DATA_LOADER:
   NAME: "all_true_personality_crnet_dataloader"
@@ -19,5 +19,5 @@ SOLVER:
   MILESTONE: [80, 90]
 TRAIN:
   TRAINER: "CRNetTrainer2"
-  MAX_EPOCH: 4
-  OUTPUT_DIR: "results_true_personality/fold_0/12_crnet"
+  MAX_EPOCH: 3
+  OUTPUT_DIR: "results_true_personality/fold_2/12_crnet"

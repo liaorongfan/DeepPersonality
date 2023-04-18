@@ -1,5 +1,5 @@
 DATA:
-  ROOT: "datasets/chalearn21_fold_0"
+  ROOT: "datasets/chalearn21_fold_2"
   FEATURE_ROOT: "datasets/extracted_feature_tp"
   SESSION: "all"
   TYPE: "face"
@@ -21,4 +21,4 @@ SOLVER:
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 10
-  OUTPUT_DIR: "results_true_personality/fold_0/14_multi_modal_pred"
+  OUTPUT_DIR: "results_true_personality/fold_2/14_multi_modal_pred"

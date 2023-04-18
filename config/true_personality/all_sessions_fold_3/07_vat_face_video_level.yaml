@@ -1,5 +1,5 @@
 DATA:
-  ROOT: "datasets/chalearn21_fold_0"
+  ROOT: "datasets/chalearn21_fold_3"
   SESSION: "all"
   TYPE: "face"
 DATA_LOADER:
@@ -20,6 +20,6 @@ SOLVER:
   MILESTONE: [20, 25]
 TRAIN:
   TRAINER: "ImageModalTrainer"
-  MAX_EPOCH: 30
+  MAX_EPOCH: 10
   LOG_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/fold_0/07_vat_video_level"
+  OUTPUT_DIR: "results_true_personality/fold_3/07_vat_video_level"

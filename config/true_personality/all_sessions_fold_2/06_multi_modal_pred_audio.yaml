@@ -1,5 +1,5 @@
 DATA:
-  ROOT: "datasets/chalearn21_fold_0"
+  ROOT: "datasets/chalearn21_fold_2"
   FEATURE_ROOT: "datasets/extracted_feature_tp"
   SESSION: "all"
   TYPE: "audio"
@@ -21,5 +21,5 @@ SOLVER:
   MILESTONE: [300, 400]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 500
-  OUTPUT_DIR: "results_true_personality/fold_0/06_multi_modal_pred"
+  MAX_EPOCH: 300
+  OUTPUT_DIR: "results_true_personality/fold_2/06_multi_modal_pred"
