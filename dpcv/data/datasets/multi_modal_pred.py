@@ -14,7 +14,7 @@ class MultiModalData:
     }
 
     def __init__(self, data_root, split, mode, session, spectrum_channel=15, traits="OCEAN", 
-        visual_clip=-1.0, audio_clip=-1.0,
+        visual_clip=-1.0, audio_clip=-1.0, num_videos=-1,
     ):
         assert session in ["none", "talk", "animal", "lego", "ghost"], \
             "session should be in one of ['none', 'talk', 'animal', 'ghost'] or 'none'"
@@ -26,6 +26,8 @@ class MultiModalData:
         self.visual_clip = visual_clip
         self.audio_clip = audio_clip
         self.sample_ls = self.get_data_ls(split, mode)
+        if num_videos > 0:
+            self.sample_ls = self.sample_ls[: num_videos]
         self.traits = [self.TRAITS_ID[t] for t in traits]
 
     def __getitem__(self, idx):
@@ -185,8 +187,6 @@ class FoldMultiModalData:
         return sample
 
 
-
-
 @DATA_LOADER_REGISTRY.register()
 def multi_modal_data_loader(cfg, mode="train"):
 
@@ -203,6 +203,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
             visual_clip=cfg.DATA.VISUAL_CLIP,
             audio_clip=cfg.DATA.AUDIO_CLIP,
+            num_videos=cfg.DATA.TRAIN_NUM_VIDEOS,
         )
     elif mode == "valid":
         data_set = MultiModalData(
@@ -213,6 +214,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
             visual_clip=cfg.DATA.VISUAL_CLIP,
             audio_clip=cfg.DATA.AUDIO_CLIP,
+            num_videos=cfg.DATA.VALID_NUM_VIDEOS,
         )
     else:
         shuffle = False
@@ -224,6 +226,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
             visual_clip=cfg.DATA.VISUAL_CLIP,
             audio_clip=cfg.DATA.AUDIO_CLIP,
+            num_videos=cfg.DATA.TEST_NUM_VIDEOS,
         )
 
     data_loader = DataLoader(

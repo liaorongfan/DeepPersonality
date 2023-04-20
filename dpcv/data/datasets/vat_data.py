@@ -89,6 +89,7 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            data_cfg.TRAIN_NUM_VIDEOS,
         )
     elif mode == "valid":
         data_set = VATData(
@@ -98,6 +99,7 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            data_cfg.VALID_NUM_VIDEOS,
         )
     elif mode == "trainval":
         data_set = VATData(
@@ -127,6 +129,7 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            data_cfg.TEST_NUM_VIDEOS,
         )
 
     loader_cfg = cfg.DATA_LOADER

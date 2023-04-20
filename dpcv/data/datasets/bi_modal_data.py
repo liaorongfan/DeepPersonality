@@ -10,7 +10,16 @@ from random import shuffle
 
 class VideoData(Dataset):
     """base class for bi-modal input data"""
-    def __init__(self, data_root, img_dir, label_file, audio_dir=None, parse_img_dir=True, parse_aud_dir=False):
+
+    TRAITS_ID = {
+        "O": 0, "C": 1, "E": 2, "A": 3, "N": 4,
+    }
+
+    def __init__(
+        self, data_root, img_dir, label_file,
+        audio_dir=None, parse_img_dir=True, parse_aud_dir=False,
+        traits="OCEAN",
+    ):
         self.data_root = data_root
         self.img_dir = img_dir
         self.audio_dir = audio_dir
@@ -19,6 +28,8 @@ class VideoData(Dataset):
             self.img_dir_ls = self.parse_data_dir(img_dir)  # every directory name indeed a video
         if parse_aud_dir:
             self.aud_file_ls = self.parse_data_dir(audio_dir)
+
+        self.traits = [self.TRAITS_ID[t] for t in traits]
 
     def parse_data_dir(self, data_dir):
         """

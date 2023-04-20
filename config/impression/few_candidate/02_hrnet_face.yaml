@@ -1,0 +1,16 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data_face"
+  TRAIN_NUM_VIDEOS: 232
+  VALID_IMG_DATA: "image_data/valid_data_face"
+  VALID_NUM_VIDEOS: 36
+  TEST_IMG_DATA: "image_data/test_data_face"
+  TEST_NUM_VIDEOS: 22
+DATA_LOADER:
+  NAME: "single_frame_data_loader"
+  TRANSFORM: "face_image_x2_transform"
+  TRAIN_BATCH_SIZE: 4
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "hr_net_model"
+TRAIN:
+  OUTPUT_DIR: "results/few_videos/02_hrnet_face"

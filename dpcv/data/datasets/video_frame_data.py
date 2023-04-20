@@ -11,9 +11,17 @@ from .build import DATA_LOADER_REGISTRY
 
 
 class SingleFrameData(VideoData):
-    def __init__(self, data_root, img_dir, label_file, trans=None):
+
+    TRAITS_ID = {
+        "O": 0, "C": 1, "E": 2, "A": 3, "N": 4,
+    }
+
+    def __init__(self, data_root, img_dir, label_file, trans=None, number_vdieo=-1, traits="OCEAN"):
         super().__init__(data_root, img_dir, label_file)
         self.trans = trans
+        if number_vdieo > 0:
+            self.img_dir_ls = self.img_dir_ls[:number_vdieo]
+        self.traits = [self.TRAITS_ID[t] for t in traits]
 
     def __getitem__(self, index):
         img = self.get_image_data(index)
@@ -138,6 +146,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TRAIN_IMG_DATA,
             cfg.DATA.TRAIN_LABEL_DATA,
             transform,
+            cfg.DATA.TRAIN_NUM_VIDEOS,
         )
     elif mode == "valid":
         data_set = SingleFrameData(
@@ -145,6 +154,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.VALID_IMG_DATA,
             cfg.DATA.VALID_LABEL_DATA,
             transform,
+            cfg.DATA.VALID_NUM_VIDEOS,
         )
         shuffle = False
     elif mode == "trainval":
@@ -153,6 +163,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TRAINVAL_IMG_DATA,
             cfg.DATA.TRAINVAL_LABEL_DATA,
             transform,
+            cfg.DATA.TRAIN_NUM_VIDEOS,
         )
     elif mode == "full_test":
         return AllSampleFrameData(
@@ -167,6 +178,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TEST_IMG_DATA,
             cfg.DATA.TEST_LABEL_DATA,
             transform,
+            cfg.DATA.TEST_NUM_VIDEOS,
         )
         shuffle = False
 

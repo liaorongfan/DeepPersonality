@@ -13,11 +13,19 @@ from dpcv.data.transforms.build import build_transform_spatial
 
 
 class CRNetData(VideoData):
-    def __init__(self, data_root, img_dir, face_img_dir, audio_dir, label_file, transform=None, sample_size=100):
+    def __init__(
+        self,
+        data_root, img_dir, face_img_dir, audio_dir,
+        label_file, transform=None,
+        sample_size=100,
+        num_videos=-1,
+    ):
         super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
         self.sample_size = sample_size
         self.face_img_dir_ls = self.get_face_img_dir(face_img_dir)
+        if num_videos > 0:
+            self.img_dir_ls = self.img_dir_ls[: num_videos]
 
     def get_face_img_dir(self, face_img_dir):
         dir_ls = os.listdir(os.path.join(self.data_root, face_img_dir))
@@ -220,6 +228,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TRAIN_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
+            num_videos=data_cfg.TRAIN_NUM_VIDEOS,
         )
     elif mode == "valid":
         dataset = CRNetData(
@@ -229,6 +238,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.VALID_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.VALID_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
+            num_videos=data_cfg.VALID_NUM_VIDEOS,
         )
     elif mode == "full_test":
         return AllFrameCRNetData(
@@ -247,6 +257,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TEST_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
+            num_videos=data_cfg.TEST_NUM_VIDEOS,
         )
     loader_cfg = cfg.DATA_LOADER
     data_loader = DataLoader(

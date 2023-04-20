@@ -29,16 +29,19 @@ __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
 __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
 __C.DATA.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
+__C.DATA.TRAIN_NUM_VIDEOS = -1
 
 __C.DATA.VALID_IMG_DATA = "image_data/valid_data"
 __C.DATA.VALID_IMG_FACE_DATA = "image_data/valid_data_face"
 __C.DATA.VALID_AUD_DATA = "raw_voice/validationData"
 __C.DATA.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
+__C.DATA.VALID_NUM_VIDEOS = -1
 
 __C.DATA.TEST_IMG_DATA = "image_data/test_data"
 __C.DATA.TEST_IMG_FACE_DATA = "image_data/test_data_face"
 __C.DATA.TEST_AUD_DATA = "raw_voice/testData"
 __C.DATA.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
+__C.DATA.TEST_NUM_VIDEOS = -1
 
 __C.DATA.VA_ROOT = "datasets"
 __C.DATA.VA_DATA = "va_data/cropped_aligned"
@@ -52,6 +55,7 @@ __C.DATA_LOADER.DATASET = ""
 __C.DATA_LOADER.TRANSFORM = "standard_frame_transform"
 __C.DATA_LOADER.TRAIN_BATCH_SIZE = 32
 __C.DATA_LOADER.VALID_BATCH_SIZE = 32
+__C.DATA_LOADER.TEST_BATCH_SIZE = 32
 __C.DATA_LOADER.NUM_WORKERS = 4
 __C.DATA_LOADER.SHUFFLE = True
 __C.DATA_LOADER.DROP_LAST = True
