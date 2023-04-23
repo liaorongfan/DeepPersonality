@@ -23,4 +23,4 @@ SOLVER:
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 50
-  OUTPUT_DIR: "results/unified_face_images/8_multi_modal_pred"
+  OUTPUT_DIR: "results/few_videos/8_multi_modal_pred"

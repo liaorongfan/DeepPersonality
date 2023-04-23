@@ -33,7 +33,7 @@ def read_folding_file(file):
 
 class LinkFolding:
 
-    def __init__(self,source_data_root, dest_data_root, folding_file) -> None:
+    def __init__(self, source_data_root, dest_data_root, folding_file) -> None:
         self.data_root = source_data_root
         self.dest_data_root = dest_data_root
         self.folding_file = folding_file
