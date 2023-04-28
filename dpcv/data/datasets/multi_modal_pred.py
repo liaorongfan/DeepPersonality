@@ -75,7 +75,6 @@ class MultiModalData:
         return data_ls_sample
 
 
-
 class FoldMultiModalData:
 
     TRAITS_ID = {
@@ -88,6 +87,7 @@ class FoldMultiModalData:
         split, mode, session, 
         spectrum_channel=15,
         traits="OCEAN",
+
     ):
         self.source_data_root = source_data_root
         self.ext_data_root = ext_data_root
@@ -185,6 +185,98 @@ class FoldMultiModalData:
 
         # data, label = sample["data"], sample["label"]
         return sample
+
+
+class FoldMultiModalImpressionData:
+    TRAITS_ID = {
+        "O": 0, "C": 1, "E": 2, "A": 3, "N": 4,
+    }
+
+    def __init__(
+            self,
+            source_data_root, ext_data_root,
+            split, mode,
+            spectrum_channel=15,
+            traits="OCEAN",
+
+    ):
+        self.source_data_root = source_data_root
+        self.ext_data_root = ext_data_root
+        self.split = split
+        self.mode = mode
+        self.spectrum_channel = spectrum_channel
+        self.all_feat_data_dt = self.get_all_video_feat_dict()
+        self.data_dir = self.get_data_dir()
+        self.fold_video_ls = list(sorted(glob.glob(f"{self.data_dir}/*")))
+        # self.sub_video_features = []
+        # if not mode == "audio":
+        self.traits = [self.TRAITS_ID[t] for t in traits]
+        # print()
+
+    def get_data_dir(self):
+        if self.mode == "face":
+            data_dir = opt.join(self.source_data_root, "image_data", f"{self.split}_data_face")
+        elif self.mode == "frame":
+            data_dir = opt.join(self.source_data_root, "image_data", f"{self.split}_data")
+        else:
+            data_dir = opt.join(self.source_data_root, "voice_data", "voice_librosa", f"{self.split}_data")
+        return data_dir
+
+    def get_all_video_feat_dict(self):
+        data_dir_ls = []
+        for split in ["train", "valid", "test"]:
+            if self.mode == "face":
+                data_dir = f"{split}_face"
+            elif self.mode == "frame":
+                data_dir = f"{split}_frame"
+            else:
+                data_dir = f"{split}_audio"
+            data_dir_ls.append(
+                opt.join(self.ext_data_root, data_dir)
+            )
+        all_feature_data = []
+        for path in data_dir_ls:
+            all_feature_data.extend(
+                # list(sorted(Path(path).rglob("*.pkl")))
+                list(glob.glob(f"{path}/*"))
+            )
+
+        feature_data_dt = {
+            opt.basename(feat).replace(".pkl", ""): feat
+            for feat in all_feature_data
+        }
+        return feature_data_dt
+
+    def __len__(self):
+
+        return len(self.fold_video_ls)
+
+    def __getitem__(self, idx):
+        # sub_video = self.fold_sub_video_ls[idx]
+        # sample = self.get_sample_feature(sub_video)
+        sample = self.fold_video_ls[idx]
+        sample = self.get_feat_sample(sample)
+        sample = torch.load(sample)
+        if self.mode == "audio":
+            feature = sample["feature"]
+            sample_len = len(feature)
+            if sample_len < 15:
+                temp = torch.zeros(15, 128, dtype=feature.dtype)
+                temp[: sample_len, :] = feature
+                sample["feature"] = temp
+            label = sample["label"]
+            if not len(self.traits) == 5:
+                sample["label"] = label[self.traits]
+
+        # data, label = sample["data"], sample["label"]
+        return sample
+
+    def get_feat_sample(self, sample):
+        name = os.path.basename(sample)
+        if self.mode == "audio":
+            name = name.replace(".npy", "").replace(".wav", "")
+        feat_sample = self.all_feat_data_dt[name]
+        return feat_sample
 
 
 @DATA_LOADER_REGISTRY.register()
@@ -297,7 +389,6 @@ def all_fold_multi_modal_data_loader(cfg, mode="train"):
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
     shuffle = cfg.DATA_LOADER.SHUFFLE
 
-
     datasets = []
     # for session in ["ghost"]:
     for session in ["ghost", "animal", "talk", "lego"]:
@@ -342,6 +433,52 @@ def all_fold_multi_modal_data_loader(cfg, mode="train"):
     )
     return data_loader
 
+
+@DATA_LOADER_REGISTRY.register()
+def fold_multi_modal_impression_data_loader(cfg, mode="train"):
+    from torch.utils.data.dataset import ConcatDataset
+
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+    shuffle = cfg.DATA_LOADER.SHUFFLE
+
+    datasets = []
+    # for session in ["ghost"]:
+    if mode == "train":
+        data_set = FoldMultiModalImpressionData(
+            source_data_root=cfg.DATA.ROOT,
+            ext_data_root=cfg.DATA.FEATURE_ROOT,
+            split="train",
+            mode=cfg.DATA.TYPE,
+            spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+            # traits=cfg.DATA.TRAITS
+        )
+    elif mode == "valid":
+        data_set = FoldMultiModalImpressionData(
+            source_data_root=cfg.DATA.ROOT,
+            ext_data_root=cfg.DATA.FEATURE_ROOT,
+            split="valid",
+            mode=cfg.DATA.TYPE,
+            spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+            # traits=cfg.DATA.TRAITS
+        )
+    else:
+        shuffle = False
+        data_set = FoldMultiModalImpressionData(
+            source_data_root=cfg.DATA.ROOT,
+            ext_data_root=cfg.DATA.FEATURE_ROOT,
+            split="test",
+            mode=cfg.DATA.TYPE,
+            spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+            # traits=cfg.DATA.TRAITS
+        )
+    data_loader = DataLoader(
+        dataset=data_set,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
 
 
 
