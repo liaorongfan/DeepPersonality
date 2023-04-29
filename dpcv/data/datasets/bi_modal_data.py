@@ -5,6 +5,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 import pickle
 import os
+from collections import defaultdict
 from random import shuffle
 
 
@@ -18,11 +19,18 @@ class VideoData(Dataset):
     def __init__(
         self, data_root, img_dir, label_file,
         audio_dir=None, parse_img_dir=True, parse_aud_dir=False,
-        traits="OCEAN",
+        traits="OCEAN", fold=True, config=None,
     ):
         self.data_root = data_root
         self.img_dir = img_dir
         self.audio_dir = audio_dir
+        if fold:
+            self.fold = fold
+            label_file = [
+                "annotation/annotation_training.pkl",
+                "annotation/annotation_validation.pkl",
+                "annotation/annotation_test.pkl",
+            ]
         self.annotation = self.parse_annotation(label_file)
         if parse_img_dir:
             self.img_dir_ls = self.parse_data_dir(img_dir)  # every directory name indeed a video
@@ -55,15 +63,18 @@ class VideoData(Dataset):
             args:(srt / list[str, str]) annotation file path
         """
         if isinstance(label_file, list):
-            assert len(label_file) == 2, "only support join train and validation data"
+            # assert len(label_file) == 2, "only support join train and validation data"
             anno_list = []
             for label_i in label_file:
                 label_path = os.path.join(self.data_root, label_i)
                 with open(label_path, "rb") as f:
                     anno_list.append(pickle.load(f, encoding="latin1"))
+            new_dict = defaultdict(dict)
             for key in anno_list[0].keys():
-                anno_list[0][key].update(anno_list[1][key])
-            annotation = anno_list[0]
+                for ann in anno_list:
+                    new_dict[key].update(ann[key])
+                # anno_list[0][key].update(anno_list[1][key])
+            annotation = new_dict
         else:
             label_path = os.path.join(self.data_root, label_file)
             with open(label_path, "rb") as f:

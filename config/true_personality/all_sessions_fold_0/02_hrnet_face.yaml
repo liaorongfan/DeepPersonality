@@ -6,7 +6,7 @@ DATA_LOADER:
   NAME: "all_true_personality_dataloader"
   TRANSFORM: "standard_frame_transform"
   TRAIN_BATCH_SIZE: 64
-  NUM_WORKERS: 8
+  NUM_WORKERS: 0
 MODEL:
   NAME: "hr_net_true_personality"
 LOSS:
