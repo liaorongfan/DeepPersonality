@@ -18,6 +18,8 @@ datasets/va_data
 datasets/chalearn2021
 datasets/chalearn21_fold_*
 datasets/folds
+datasets/extracted_feature_tp
+datasets/extracted_feature_impression
 pretrained/
 mlruns/
 /snippet

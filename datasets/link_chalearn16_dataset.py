@@ -165,5 +165,8 @@ if __name__ == "__main__":
     #     "/hy-tmp/animal/animal_test/008105", 
     #     "/root/DeepPersonality/datasets/chalearn21_fold_1/xxx"
     # )
-    link_folding = LinkChalearn16Folding()
-    link_folding.setup_one_fold_dataset(0)
+    link_folding = LinkChalearn16Folding(
+        source_data_root="/root/DeepPersonality/datasets",
+        dest_data_root="datasets/folds/fold_1",
+    )
+    link_folding.setup_one_fold_dataset(1)
