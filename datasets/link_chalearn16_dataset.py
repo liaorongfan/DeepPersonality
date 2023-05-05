@@ -167,6 +167,6 @@ if __name__ == "__main__":
     # )
     link_folding = LinkChalearn16Folding(
         source_data_root="/root/DeepPersonality/datasets",
-        dest_data_root="datasets/folds/fold_1",
+        dest_data_root="datasets/folds/fold_3",
     )
-    link_folding.setup_one_fold_dataset(1)
+    link_folding.setup_one_fold_dataset(3)
