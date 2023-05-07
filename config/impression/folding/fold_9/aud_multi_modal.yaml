@@ -1,0 +1,24 @@
+DATA:
+  ROOT: "datasets/folds/fold_9"
+  FEATURE_ROOT: "datasets/extracted_feature_impression"
+  TYPE: "audio"
+DATA_LOADER:
+  NAME: "fold_multi_modal_impression_data_loader"
+  TRAIN_BATCH_SIZE: 128
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "multi_modal_audio_model"
+  SPECTRUM_CHANNEL: 15
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [300, 400]
+TRAIN:
+  TRAINER: "MultiModalTrainer"
+  MAX_EPOCH: 300
+  OUTPUT_DIR: "results/folds/fold_9/aud_multi_modal_pred"
