@@ -32,6 +32,22 @@ def standard_frame_transform():
 
 
 @TRANSFORM_REGISTRY.register()
+def strong_frame_transform():
+    import torchvision.transforms as transforms
+    transforms = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomHorizontalFlip(0.5),
+        transforms.RandomRotation(15),
+        transforms.ColorJitter(brightness=0.5),
+        transforms.RandomCrop((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    return transforms
+
+
+
+@TRANSFORM_REGISTRY.register()
 def face_image_transform():
     import torchvision.transforms as transforms
     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
