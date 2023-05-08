@@ -11,7 +11,7 @@ DATA:
 DATA_LOADER:
   NAME: "crnet_data_loader"
   TRANSFORM: "crnet_frame_face_transform"
-  TRAIN_BATCH_SIZE: 32
+  TRAIN_BATCH_SIZE: 8
   NUM_WORKERS: 0
 MODEL:
   NAME: "crnet_model"
