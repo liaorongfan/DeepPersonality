@@ -167,13 +167,3 @@ if __name__ == "__main__":
     # x = torch.randn(2, 3, 244, 244).cuda()
     # y = model(x)
     # print(y, y.shape)
-
-"""
-questions:
-    1) concatenate or add ,if add more weights saved
-    2) hidden layers 50176 --> 1024 --> 5, mapping efficient
-    3) L2 norm vs batch norm
-    4) dropout or not
-    5) freeze batch norm or not when training 
-    6) pre-trained models from imagenet or face-net 
-"""

@@ -135,17 +135,19 @@ def make_data_loader(cfg, mode="train"):
 
 @DATA_LOADER_REGISTRY.register()
 def single_frame_data_loader(cfg, mode="train"):
+    from dpcv.data.transforms.transform import standard_frame_transform
 
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
     shuffle = cfg.DATA_LOADER.SHUFFLE
-    transform = build_transform_spatial(cfg)
+    training_transform = build_transform_spatial(cfg)
+    standard_transform = standard_frame_transform()
     if mode == "train":
         data_set = SingleFrameData(
             cfg.DATA.ROOT,
             cfg.DATA.TRAIN_IMG_DATA,
             cfg.DATA.TRAIN_LABEL_DATA,
-            transform,
+            training_transform,
             cfg.DATA.TRAIN_NUM_VIDEOS,
         )
     elif mode == "valid":
@@ -153,7 +155,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.ROOT,
             cfg.DATA.VALID_IMG_DATA,
             cfg.DATA.VALID_LABEL_DATA,
-            transform,
+            standard_transform,
             cfg.DATA.VALID_NUM_VIDEOS,
         )
         shuffle = False
@@ -162,7 +164,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.ROOT,
             cfg.DATA.TRAINVAL_IMG_DATA,
             cfg.DATA.TRAINVAL_LABEL_DATA,
-            transform,
+            training_transform,
             cfg.DATA.TRAIN_NUM_VIDEOS,
         )
     elif mode == "full_test":
@@ -170,14 +172,14 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.ROOT,
             cfg.DATA.TEST_IMG_DATA,
             cfg.DATA.TEST_LABEL_DATA,
-            transform,
+            standard_transform,
         )
     else:
         data_set = SingleFrameData(
             cfg.DATA.ROOT,
             cfg.DATA.TEST_IMG_DATA,
             cfg.DATA.TEST_LABEL_DATA,
-            transform,
+            standard_transform,
             cfg.DATA.TEST_NUM_VIDEOS,
         )
         shuffle = False
