@@ -18,8 +18,11 @@ class VideoFrameSegmentData(VideoData):
     """ Dataloader for 3d models, (3d_resnet, slow-fast, tpn, vat)
 
     """
-    def __init__(self, data_root, img_dir, label_file, video_loader, spa_trans=None, tem_trans=None, num_videos=-1):
-        super().__init__(data_root, img_dir, label_file)
+    def __init__(
+        self, data_root, img_dir, label_file, video_loader, spa_trans=None, tem_trans=None,
+        num_videos=-1, traits="OCEAN",
+    ):
+        super().__init__(data_root, img_dir, label_file, traits=traits)
         self.loader = video_loader
         if num_videos > 0:
             self.img_dir_ls = self.img_dir_ls[: num_videos]

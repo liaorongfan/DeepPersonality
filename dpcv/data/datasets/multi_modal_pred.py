@@ -44,9 +44,10 @@ class MultiModalData:
                     temp = torch.zeros(15, 128, dtype=feature.dtype)
                     temp[: sample_len, :] = feature
                     sample["feature"] = temp
+                    
+        if not len(self.traits) == 5:
             label = sample["label"]
-            if not len(self.traits) == 5:
-                sample["label"] = label[self.traits]
+            sample["label"] = label[self.traits]
 
         # data, label = sample["data"], sample["label"]
         return sample
@@ -296,6 +297,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             visual_clip=cfg.DATA.VISUAL_CLIP,
             audio_clip=cfg.DATA.AUDIO_CLIP,
             num_videos=cfg.DATA.TRAIN_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
         )
     elif mode == "valid":
         data_set = MultiModalData(
@@ -307,6 +309,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             visual_clip=cfg.DATA.VISUAL_CLIP,
             audio_clip=cfg.DATA.AUDIO_CLIP,
             num_videos=cfg.DATA.VALID_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
         )
     else:
         shuffle = False
@@ -319,6 +322,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             visual_clip=cfg.DATA.VISUAL_CLIP,
             audio_clip=cfg.DATA.AUDIO_CLIP,
             num_videos=cfg.DATA.TEST_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
         )
 
     data_loader = DataLoader(

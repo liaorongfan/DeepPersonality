@@ -9,11 +9,12 @@ import torch
 
 @DATA_LOADER_REGISTRY.register()
 class AudioData(VideoData):
-    def __init__(self, data_root, aud_dir, label_file, num_videos=-1):
+    def __init__(self, data_root, aud_dir, label_file, num_videos=-1, traits="OCEAN"):
         super().__init__(
             data_root, img_dir=None, audio_dir=aud_dir, label_file=label_file,
             parse_img_dir=False,
             parse_aud_dir=True,
+            traits=traits,
         )
         if num_videos > 0:
             self.aud_file_ls = self.aud_file_ls[: num_videos]
@@ -22,6 +23,8 @@ class AudioData(VideoData):
         aud_data = self.get_wave_data(index)
         aud_data = self.transform(aud_data)
         label = self.get_ocean_label(index)
+        if not len(self.traits) == 5:
+            label = label[self.traits]
         sample = {
             "aud_data": aud_data,
             "aud_label": label,
@@ -108,6 +111,9 @@ class VoiceCRNetData(AudioData):
         aud_data = self.transform(aud_data)
         label = self.get_ocean_label(index)
         label_cls = torch.as_tensor(CRNetData.cls_encode(label), dtype=torch.float32)
+        if len(self.traits) != 5:
+            label = label[self.traits]
+            label_cls = label[self.traits]
         return {
             "aud_data": aud_data,
             "aud_label": label,
@@ -157,6 +163,7 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.TRAIN_AUD_DATA,
             cfg.DATA.TRAIN_LABEL_DATA,
             cfg.DATA.TRAIN_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
         )
     elif mode == "valid":
         dataset = dataset_cls(
@@ -164,6 +171,7 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.VALID_AUD_DATA,
             cfg.DATA.VALID_LABEL_DATA,
             cfg.DATA.VALID_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
         )
         shuffle = False
     elif mode == "test":
@@ -172,6 +180,7 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.TEST_AUD_DATA,
             cfg.DATA.TEST_LABEL_DATA,
             cfg.DATA.TEST_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
         )
         shuffle = False
         batch_size = cfg.DATA_LOADER.TEST_BATCH_SIZE

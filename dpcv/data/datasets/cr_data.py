@@ -19,8 +19,9 @@ class CRNetData(VideoData):
         label_file, transform=None,
         sample_size=100,
         num_videos=-1,
+        traits="OCEAN",
     ):
-        super().__init__(data_root, img_dir, label_file, audio_dir)
+        super().__init__(data_root, img_dir, label_file, audio_dir, traits=traits)
         self.transform = transform
         self.sample_size = sample_size
         self.face_img_dir_ls = self.get_face_img_dir(face_img_dir)
@@ -43,6 +44,10 @@ class CRNetData(VideoData):
         wav_aud = torch.as_tensor(wav_aud, dtype=glo_img.dtype)
         anno_score = torch.as_tensor(anno_score, dtype=glo_img.dtype)
         anno_cls_encode = torch.as_tensor(anno_cls_encode)
+
+        if len(self.traits) != 5:
+            anno_score = anno_score[self.traits]
+            anno_cls_encode = anno_cls_encode[self.traits]
 
         sample = {
             "glo_img": glo_img, "loc_img": loc_img, "wav_aud": wav_aud,
@@ -229,6 +234,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
             num_videos=data_cfg.TRAIN_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
         )
     elif mode == "valid":
         dataset = CRNetData(
@@ -239,6 +245,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.VALID_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
             num_videos=data_cfg.VALID_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
         )
     elif mode == "full_test":
         return AllFrameCRNetData(
@@ -248,6 +255,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TEST_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
+            traits=data_cfg.TRAITS,
         )
     else:
         dataset = CRNetData(
@@ -258,6 +266,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
             num_videos=data_cfg.TEST_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
         )
     loader_cfg = cfg.DATA_LOADER
     data_loader = DataLoader(

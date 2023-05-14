@@ -17,6 +17,9 @@ class TPNData(VideoFrameSegmentData):
 
         img = self.get_image_data(index)
         label = self.get_ocean_label(index)
+        label = torch.as_tensor(label)
+        if len(self.traits) != 5:
+            label = label[self.traits]
         return {"image": img, "label": torch.as_tensor(label)}
 
     def _loading(self, path, frame_indices):
@@ -144,6 +147,7 @@ def tpn_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            traits=data_cfg.TRAITS,
         )
     elif mode == "valid":
         data_set = TPNData(
@@ -153,6 +157,7 @@ def tpn_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            traits=data_cfg.TRAITS,
         )
     elif mode == "trainval":
         data_set = TPNData(
@@ -162,6 +167,7 @@ def tpn_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            traits=data_cfg.TRAITS,
         )
     elif mode == "full_test":
         temporal_transform = [TemporalDownsample(length=100), TemporalEvenCropDownsample(16, 6)]
@@ -173,6 +179,7 @@ def tpn_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            traits=data_cfg.TRAITS,
         )
     else:
         data_set = TPNData(
@@ -182,6 +189,7 @@ def tpn_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            traits=data_cfg.TRAITS,
         )
 
     loader_cfg = cfg.DATA_LOADER

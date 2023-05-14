@@ -90,6 +90,7 @@ def vat_data_loader(cfg, mode="train"):
             spatial_transform,
             temporal_transform,
             data_cfg.TRAIN_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
         )
     elif mode == "valid":
         data_set = VATData(
@@ -100,6 +101,7 @@ def vat_data_loader(cfg, mode="train"):
             spatial_transform,
             temporal_transform,
             data_cfg.VALID_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
         )
     elif mode == "trainval":
         data_set = VATData(
@@ -109,6 +111,7 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            traits=data_cfg.TRAITS,
         )
     elif mode == "full_test":
         temporal_transform = [TemporalDownsample(length=100), TemporalEvenCropDownsample(16, 6)]
@@ -120,6 +123,7 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            traits=data_cfg.TRAITS,
         )
     else:
         data_set = VATData(
@@ -130,6 +134,7 @@ def vat_data_loader(cfg, mode="train"):
             spatial_transform,
             temporal_transform,
             data_cfg.TEST_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
         )
 
     loader_cfg = cfg.DATA_LOADER

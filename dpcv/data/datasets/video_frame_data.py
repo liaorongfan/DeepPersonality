@@ -26,11 +26,12 @@ class SingleFrameData(VideoData):
     def __getitem__(self, index):
         img = self.get_image_data(index)
         label = self.get_ocean_label(index)
-
+        label = torch.as_tensor(label)
         if self.trans:
             img = self.trans(img)
-
-        return {"image": img, "label": torch.as_tensor(label)}
+        if len(self.traits) != 5:
+            label = label[self.traits]
+        return {"image": img, "label": label}
 
     def get_image_data(self, index):
         img_dir = self.img_dir_ls[index]
@@ -149,6 +150,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TRAIN_LABEL_DATA,
             training_transform,
             cfg.DATA.TRAIN_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS
         )
     elif mode == "valid":
         data_set = SingleFrameData(
@@ -157,6 +159,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.VALID_LABEL_DATA,
             standard_transform,
             cfg.DATA.VALID_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS
         )
         shuffle = False
     elif mode == "trainval":
@@ -166,6 +169,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TRAINVAL_LABEL_DATA,
             training_transform,
             cfg.DATA.TRAIN_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS
         )
     elif mode == "full_test":
         return AllSampleFrameData(
@@ -173,6 +177,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TEST_IMG_DATA,
             cfg.DATA.TEST_LABEL_DATA,
             standard_transform,
+            traits=cfg.DATA.TRAITS
         )
     else:
         data_set = SingleFrameData(
@@ -181,6 +186,7 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.TEST_LABEL_DATA,
             standard_transform,
             cfg.DATA.TEST_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS
         )
         shuffle = False
 
