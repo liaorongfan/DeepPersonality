@@ -122,7 +122,7 @@ def dan_model(cfg):
 
     if cfg.MODEL.PRETRAIN:
         print("load pretained model weights")
-        pretrained_dict = torch.load("../pre_trained_weights/vgg16_bn-6c64b313.pth")
+        pretrained_dict = torch.load("./pre_trained_weights/vgg16_bn-6c64b313.pth")
         model_dict = dan.state_dict()
         # 1. filter out unnecessary keys -------------------------------------------------------------------------------
         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}

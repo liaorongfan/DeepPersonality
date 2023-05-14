@@ -9,6 +9,7 @@ DATA_LOADER:
   NUM_WORKERS: 8
 MODEL:
   NAME: "dan_model"
+  PRETRAIN: True
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -17,8 +18,8 @@ SOLVER:
   LR_INIT: 0.05
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [200, 250]
+  MILESTONE: [100, 300, 400]
 TRAIN:
   TRAINER: "ImageModalTrainer"
-  MAX_EPOCH: 300
+  MAX_EPOCH: 500
   OUTPUT_DIR: "results/unified_frame_images/02_deep_bimodal_reproduce"
