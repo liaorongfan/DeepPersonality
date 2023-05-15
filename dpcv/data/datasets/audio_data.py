@@ -113,7 +113,7 @@ class VoiceCRNetData(AudioData):
         label_cls = torch.as_tensor(CRNetData.cls_encode(label), dtype=torch.float32)
         if len(self.traits) != 5:
             label = label[self.traits]
-            label_cls = label[self.traits]
+            label_cls = label_cls[self.traits]
         return {
             "aud_data": aud_data,
             "aud_label": label,
