@@ -8,7 +8,7 @@ import numpy as np
 
 class FoldDataCollect:
 
-    def __init__(self, data_root="results_true_personality/folds_tp"):
+    def __init__(self, data_root="results/folds_ip"):
         self.data_root = data_root
         self.models = os.listdir(f"{self.data_root}/fold_0")
         self.log_files = collect_files(data_root)
@@ -20,14 +20,16 @@ class FoldDataCollect:
     def print_model_info(self):
         for model in self.models:
             mean = str(self.model_folds_statistic[model]["mean"])
-            mean = mean.strip("[").strip("]").replace(",", "&")
-            
+            mean = mean.strip("[").strip("]").replace(",", " &")
+            mean_ave = eval(mean.replace("&", "+")) / 5
+
             std = str(self.model_folds_statistic[model]["std"])
-            std = std.strip("[").strip("]").replace(",", "&")
-            
+            std = std.strip("[").strip("]").replace(",", " &")
+            std_ave = eval(std.replace("&", "+")) / 5
+
             print(model, "\n", "\t")
-            print("\t", f"mean: {mean}") 
-            print("\t", f"std: {std}") 
+            print("\t", f"mean: {mean} & {np.round(mean_ave, 4)}")
+            print("\t", f"std: {std} & {np.round(std_ave, 4)}")
     
     def folds_data_statistic(self):
         model_statistic = defaultdict(dict)
