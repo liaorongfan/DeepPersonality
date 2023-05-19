@@ -12,7 +12,7 @@ datasets/raw_voice
 datasets/chalearn
 datasets/102flowers
 datasets/missed_files.txt
-datasets/*.txt
+# datasets/*.txt
 datasets/annotation
 datasets/va_data
 datasets/chalearn2021

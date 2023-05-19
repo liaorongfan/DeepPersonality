@@ -1,0 +1,10 @@
+chalearn21
+    train: num_videos: 232, subjects: 99
+    valid: num_videos: 36, subjects: 20
+    test:  num_videos: 22, subjects: 15
+
+chalearn16
+    train: num_videos: 6000, subjects: 2624
+    valid: num_videos: 2000, subjects: 1484
+    test:  num_videos: 2000, subjects: 1455
+    
