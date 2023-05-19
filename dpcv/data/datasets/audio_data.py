@@ -9,7 +9,7 @@ import torch
 
 @DATA_LOADER_REGISTRY.register()
 class AudioData(VideoData):
-    def __init__(self, data_root, aud_dir, label_file, num_videos=-1, traits="OCEAN"):
+    def __init__(self, data_root, aud_dir, label_file, num_videos=-1, traits="OCEAN", specify_videos=None):
         super().__init__(
             data_root, img_dir=None, audio_dir=aud_dir, label_file=label_file,
             parse_img_dir=False,
@@ -18,6 +18,19 @@ class AudioData(VideoData):
         )
         if num_videos > 0:
             self.aud_file_ls = self.aud_file_ls[: num_videos]
+        
+        if specify_videos is not None:
+            self.aud_file_ls = self.select_aud_files(specify_videos)
+
+    def select_aud_files(self, specify_videos):
+        with open(specify_videos, 'r') as fo:
+            videos = ["{}.wav.npy".format(line.strip("\n")) for line in fo.readlines()]
+        videos_path = [
+            os.path.join(self.data_root, self.audio_dir, vid) for vid in videos
+        ]
+
+        return videos_path
+   
 
     def __getitem__(self, index):
         aud_data = self.get_wave_data(index)
@@ -164,6 +177,7 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.TRAIN_LABEL_DATA,
             cfg.DATA.TRAIN_NUM_VIDEOS,
             traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.TRAIN_SPECIFY_VIDEOS,
         )
     elif mode == "valid":
         dataset = dataset_cls(
@@ -172,6 +186,7 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.VALID_LABEL_DATA,
             cfg.DATA.VALID_NUM_VIDEOS,
             traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.VALID_SPECIFY_VIDEOS,
         )
         shuffle = False
     elif mode == "test":
@@ -181,6 +196,7 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.TEST_LABEL_DATA,
             cfg.DATA.TEST_NUM_VIDEOS,
             traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.TEST_SPECIFY_VIDEOS,
         )
         shuffle = False
         batch_size = cfg.DATA_LOADER.TEST_BATCH_SIZE

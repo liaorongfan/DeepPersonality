@@ -1,0 +1,33 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data"
+  TRAIN_SPECIFY_VIDEOS: "datasets/chalearn16_few_candidates/chalearn16_few_candidates_train.txt"
+  VALID_IMG_DATA: "image_data/valid_data"
+  VALID_SPECIFY_VIDEOS: "datasets/chalearn16_few_candidates/chalearn16_few_candidates_valid.txt"
+  TEST_IMG_DATA: "image_data/test_data"
+  TEST_SPECIFY_VIDEOS: "datasets/chalearn16_few_candidates/chalearn16_few_candidates_test.txt"
+  TRAIN_IMG_FACE_DATA: "image_data/train_data_face"
+  VALID_IMG_FACE_DATA: "image_data/valid_data_face"
+  TEST_IMG_FACE_DATA: "image_data/test_data_face"
+  TRAIN_AUD_DATA: "voice_data/voice_librosa/train_data"
+  VALID_AUD_DATA: "voice_data/voice_librosa/valid_data"
+  TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
+DATA_LOADER:
+  NAME: "crnet_data_loader"
+  TRANSFORM: "crnet_frame_face_transform"
+  TRAIN_BATCH_SIZE: 4
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "crnet_model"
+LOSS:
+  NAME: "crnet_loss_func"
+SOLVER:
+  NAME: "crnet_solver"
+  SCHEDULER: "crnet_multi_step_scale"
+  LR_INIT: 0.002
+  WEIGHT_DECAY: 0.005
+  MOMENTUM: 0.9
+  MILESTONE: [80, 90]
+TRAIN:
+  TRAINER: "CRNetTrainer2"
+  MAX_EPOCH: 80
+  OUTPUT_DIR: "results/few_subjects/04_crnet"

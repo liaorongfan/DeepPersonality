@@ -28,18 +28,21 @@ __C.DATA.AUDIO_CLIP = -1.
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
 __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
+__C.DATA.TRAIN_SPECIFY_VIDEOS = ""
 __C.DATA.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
 __C.DATA.TRAIN_NUM_VIDEOS = -1
 
 __C.DATA.VALID_IMG_DATA = "image_data/valid_data"
 __C.DATA.VALID_IMG_FACE_DATA = "image_data/valid_data_face"
 __C.DATA.VALID_AUD_DATA = "raw_voice/validationData"
+__C.DATA.VALID_SPECIFY_VIDEOS = ""
 __C.DATA.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
 __C.DATA.VALID_NUM_VIDEOS = -1
 
 __C.DATA.TEST_IMG_DATA = "image_data/test_data"
 __C.DATA.TEST_IMG_FACE_DATA = "image_data/test_data_face"
 __C.DATA.TEST_AUD_DATA = "raw_voice/testData"
+__C.DATA.TEST_SPECIFY_VIDEOS = ""
 __C.DATA.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
 __C.DATA.TEST_NUM_VIDEOS = -1
 
