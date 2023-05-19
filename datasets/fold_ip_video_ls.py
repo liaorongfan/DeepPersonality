@@ -33,8 +33,8 @@ class FoldChalearn16:
             video_num_dt[name] += 1
 
         max_len = max(video_num_dt.values())
-        len_matrix = [[] for _ in range(6)]
-        for i in range(6):
+        len_matrix = [[] for _ in range(max_len)]
+        for i in range(max_len):
             l_th = i + 1
             tmp = [k for k, v in video_num_dt.items() if v == l_th]
             len_matrix[i].extend(tmp)
