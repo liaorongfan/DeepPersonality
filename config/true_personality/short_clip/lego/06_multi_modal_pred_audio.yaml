@@ -1,15 +1,14 @@
 DATA:
-  ROOT: "datasets/extracted_feature_tp"
+  ROOT: "datasets/extracted_feature_tp_short_m"
   SESSION: "lego"
   TYPE: "audio"
-  AUDIO_CLIP: 0.2
 DATA_LOADER:
   NAME: "multi_modal_data_loader"
   TRAIN_BATCH_SIZE: 32
   NUM_WORKERS: 0
 MODEL:
   NAME: "multi_modal_audio_model"
-  SPECTRUM_CHANNEL: 80
+  SPECTRUM_CHANNEL: 7
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -21,5 +20,5 @@ SOLVER:
   MILESTONE: [300, 400]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 500
-  OUTPUT_DIR: "results_true_personality/shor_clip/lego/06_multi_modal_pred"
+  MAX_EPOCH: 50
+  OUTPUT_DIR: "results_true_personality/short_clip_m/lego/06_multi_modal_pred"
