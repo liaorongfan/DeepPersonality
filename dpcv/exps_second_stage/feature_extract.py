@@ -1,11 +1,11 @@
 import os
 from dpcv.checkpoint.save import load_model
 from dpcv.config.default_config_opt import cfg, cfg_from_file
-from dpcv.data.datasets.feature_extract_dataset import (
+from dpcv.data.datasets.feature_extract_dataset_ip import (
     setup_dataloader, setup_crnet_dataloader,
     setup_persemon_dataloader, setup_bimodal_resnet_dataloader,
 )
-from dpcv.data.datasets.feature_extract_true_personality_dataset import (
+from dpcv.data.datasets.feature_extract_dataset_tp import (
     set_true_personality_dataloader,
     set_audiovisual_true_personality_dataloader,
     set_persemon_true_personality_dataloader,
@@ -107,10 +107,11 @@ if __name__ == "__main__":
     # )
 
     # deep_bimodal_regression feature extract
-    feature_extract(
-        cfg_file="config/unified_frame_images/01_deep_bimodal_regression.yaml",
-        model_weight="results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl",
-        data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/deep_bimodal_reg_extract",
-    )
+    # feature_extract(
+    #     cfg_file="config/true_personality/all_sessions/02_hrnet_face.yaml",
+    #     model_weight="results_true_personality/all_sesstion/unified_face_images_all/02_hrnet/03-14_08-56/checkpoint_1.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/model_output_features/02_hrnet_face",
+    # )
+    pass
 

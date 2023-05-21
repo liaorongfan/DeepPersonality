@@ -113,7 +113,7 @@ def resnet101_visual_feature_extractor(pretrained=True, **kwargs):
 
 class VisualFCNet(nn.Module):
 
-    def __init__(self, input_dim, out_dim=5, use_sigmoid=True):
+    def __init__(self, input_dim, out_dim=5, use_sigmoid=True, return_feature=False):
         super().__init__()
         self.fc = nn.Sequential(
             nn.Linear(input_dim, 512),
@@ -123,21 +123,26 @@ class VisualFCNet(nn.Module):
         self.dropout = nn.Dropout()
         self.sigmoid = nn.Sigmoid()
         self.use_sigmoid = use_sigmoid
+        self.return_feature = return_feature
 
     def forward(self, x):
         x = self.dropout(x)
-        x = self.fc(x)
+        f = self.fc[0](x)
+        x = self.fc[1:](f)
         x = x.mean(dim=1)
         if self.use_sigmoid:
-            return self.sigmoid(x)
+            x = self.sigmoid(x)
+        if self.return_feature:
+            return x, f
         return x
 
 
 class AudioFCNet(nn.Module):
 
-    def __init__(self, input_dim, out_dim=5, spectrum_channel=15, use_sigmoid=True):
+    def __init__(self, input_dim, out_dim=5, spectrum_channel=15, use_sigmoid=True, return_feature=False):
         super().__init__()
         self.spectrum_channel = spectrum_channel
+        self.return_feature = return_feature
         self.fc = nn.Sequential(
             nn.Linear(input_dim, 1024),
             nn.ReLU(),
@@ -149,17 +154,21 @@ class AudioFCNet(nn.Module):
         self.use_sigmoid = use_sigmoid
 
     def forward(self, x):
-        x = x.view(-1, self.spectrum_channel * 128)
+        x = x.reshape(-1, self.spectrum_channel * 128)
         x = (x - x.mean()) / x.std()
-        x = self.fc(x)
+        f = self.fc[:-2](x)
+        x = self.fc[-2:](f)
+
         if self.use_sigmoid:
-            return self.sigmoid(x)
+            x = self.sigmoid(x)
+        if self.return_feature:
+            return x, f
         return x
 
 
 @NETWORK_REGISTRY.register()
 def multi_modal_visual_model(cfg):
-    model = VisualFCNet(6144, out_dim=cfg.MODEL.NUM_CLASS)
+    model = VisualFCNet(6144, out_dim=cfg.MODEL.NUM_CLASS, return_feature=cfg.MODEL.RETURN_FEATURE)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 
@@ -172,7 +181,12 @@ def multi_modal_audio_model(cfg):
     else:
         dim = 15 * 128
         use_sigmoid = True
-    model = AudioFCNet(dim, out_dim=cfg.MODEL.NUM_CLASS, spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL, use_sigmoid=use_sigmoid)
+    model = AudioFCNet(
+        dim, out_dim=cfg.MODEL.NUM_CLASS, 
+        spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL, 
+        use_sigmoid=use_sigmoid,
+        return_feature=cfg.MODEL.RETURN_FEATURE,
+    )
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 

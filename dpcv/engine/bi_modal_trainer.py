@@ -312,26 +312,21 @@ class VATTrainer(BiModalTrainer):
         with torch.no_grad():
             for idx, data in enumerate(tqdm(data_set)):
                 inputs, label = self.full_test_data_fmt(data)
-                # mini_batch = 64
-                out_ls, feat_ls = [], []
-                
+                out, feat = 0, 0
                 if model.return_feature:
                     out, feat = model(*inputs)
-                    out_ls.append(out.cpu())
-                    feat_ls.append(feat.cpu())
+                    out, feat = out.cpu(), feat.cpu()
                 else:
                     out = model(*inputs)
-                    out_ls.append(out.cpu())
-                    feat_ls.append(torch.tensor([0]))
+                    out = out.cpu()
                     
-            out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
-            video_extract = {
-                "video_frames_pred": out_pred,
-                "video_frames_feat": out_feat,
-                "video_label": label.cpu()
-            }
-            save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
-            torch.save(video_extract, save_to_file)
+                video_extract = {
+                    "video_frames_pred": out,
+                    "video_frames_feat": feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
 
 
 
@@ -344,6 +339,33 @@ class MultiModalTrainer(BiModalTrainer):
         for k, v in data.items():
             data[k] = v.to(self.device)
         inputs, labels = data["feature"], data["label"]
+        return (inputs,), labels
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                out, feat = 0, 0
+                if model.return_feature:
+                    out, feat = model(*inputs)
+                    out, feat = out.cpu(), feat.cpu()
+                else:
+                    out = model(*inputs).cpu()
+             
+                video_extract = {
+                    "video_frames_pred": out,
+                    "video_frames_feat": feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+    def full_test_data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feature"][None], data["label"]
         return (inputs,), labels
 
 

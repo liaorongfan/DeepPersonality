@@ -1,3 +1,4 @@
+from typing import Any
 from .ture_personality_data import Chalearn21FrameData, Chalearn21PersemonData
 from dpcv.data.transforms.build import build_transform_spatial
 import glob
@@ -11,6 +12,7 @@ from PIL import Image
 from PIL import ImageFile
 from dpcv.data.datasets.video_segment_data import TruePersonalityVideoFrameSegmentData
 from dpcv.data.datasets.ture_personality_data import Chalearn21FrameData
+from dpcv.data.datasets.multi_modal_pred import MultiModalData
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
@@ -317,6 +319,31 @@ class VATTPData(Chalearn21FrameData):
         return img_path_ls
 
 
+class ExtMultiModalData(MultiModalData):
+
+    def __getitem__(self, idx):
+        sample = self.sample_ls[idx]
+        sample = torch.load(sample)
+        if self.mode == "audio":
+            feature = sample["feature"]
+            if self.session in ["talk", "animal", "lego", "ghost"]:
+                temp = feature[:self.spectrum_channel]
+                sample["feature"] = temp
+            else:
+                sample_len = len(feature)
+                if sample_len < 15:
+                    temp = torch.zeros(15, 128, dtype=feature.dtype)
+                    temp[: sample_len, :] = feature
+                    sample["feature"] = temp
+                    
+        if not len(self.traits) == 5:
+            label = sample["label"]
+            sample["label"] = label[self.traits]
+        label = torch.as_tensor(sample["label"])
+        sample["label"] = label
+        # data, label = sample["data"], sample["label"]
+        return sample
+
 def set_true_personality_dataloader(cfg, mode):
     transform = build_transform_spatial(cfg)
     data_set = AllSampleTruePersonalityData(
@@ -383,10 +410,8 @@ def set_persemon_true_personality_dataloader(cfg, mode):
 def set_vat_tp_dataloader(cfg, mode):
     from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample
     from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
-    from dpcv.data.datasets.common import VideoLoader
 
     spatial_transform = build_transform_spatial(cfg)
-    # temporal_transform = [TemporalRandomCrop(16)]
     temporal_transform = [TemporalDownsample(length=1600)]
     temporal_transform = TemporalCompose(temporal_transform)
 
@@ -401,3 +426,19 @@ def set_vat_tp_dataloader(cfg, mode):
         visual_clip=data_cfg.VISUAL_CLIP
     )
     return data_set
+
+def set_multi_modal_pred_tp_dataloader(cfg, mode):
+
+    data_set = ExtMultiModalData(
+        data_root=cfg.DATA.ROOT,
+        split=mode,
+        mode=cfg.DATA.TYPE,
+        session=cfg.DATA.SESSION,
+        spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
+        visual_clip=cfg.DATA.VISUAL_CLIP,
+        audio_clip=cfg.DATA.AUDIO_CLIP,
+        num_videos=cfg.DATA.TRAIN_NUM_VIDEOS,
+        traits=cfg.DATA.TRAITS,
+    )
+    return data_set
+
