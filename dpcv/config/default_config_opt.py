@@ -18,6 +18,7 @@ step 7 : set test metric
 # ------------------------------------------- step 1 : dataset config node ---------------------------------------------
 __C.DATA = CfgNode()
 __C.DATA.ROOT = "datasets"
+__C.DATA.ANN_DIR = ""
 __C.DATA.TYPE = "frame"
 __C.DATA.FEATURE_ROOT = ""
 __C.DATA.SESSION = "talk"
@@ -74,6 +75,7 @@ __C.MODEL.PRETRAIN = False
 __C.MODEL.NUM_CLASS = 5
 __C.MODEL.SPECTRUM_CHANNEL = 50
 __C.MODEL.RETURN_FEATURE = False
+__C.MODEL.INPUT_DIM = 1024
 
 # ------------------------------------------ step 4 : loss config node -------------------------------------------------
 __C.LOSS = CfgNode()

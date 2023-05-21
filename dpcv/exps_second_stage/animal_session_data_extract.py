@@ -92,13 +92,13 @@ if __name__ == "__main__":
     #     return_feat=True,
     # )
 
-    feature_extract_true_personality(
-        cfg_file="config/true_personality/all_sessions/07_vat_face_video_level.yaml",
-        model_weight="results_true_personality/all_sesstion/unified_face_images_all/07_vat_video_level/03-16_10-42/checkpoint_1.pkl",
-        data_loader=set_vat_tp_dataloader,
-        output_dir="datasets/model_output_features/07_vat_face_video_level",
-        return_feat=True,
-    ) 
+    # feature_extract_true_personality(
+    #     cfg_file="config/true_personality/all_sessions/07_vat_face_video_level.yaml",
+    #     model_weight="results_true_personality/all_sesstion/unified_face_images_all/07_vat_video_level/03-16_10-42/checkpoint_1.pkl",
+    #     data_loader=set_vat_tp_dataloader,
+    #     output_dir="datasets/model_output_features/07_vat_face_video_level",
+    #     return_feat=True,
+    # ) 
 
     # feature_extract_true_personality(
     #     cfg_file="config/true_personality/all_sessions/14_multi_modal_pred_face.yaml",
@@ -108,10 +108,10 @@ if __name__ == "__main__":
     #     return_feat=True,
     # )
 
-    # feature_extract_true_personality(
-    #     cfg_file="config/true_personality/all_sessions/06_multi_modal_pred_audio.yaml",
-    #     model_weight="results_true_personality/all_sesstion/audio_all/06_multi_modal_pred/03-19_15-44/checkpoint_1.pkl",
-    #     data_loader=set_multi_modal_pred_tp_dataloader,
-    #     output_dir="datasets/model_output_features/06_multi_modal_pred_audio",
-    #     return_feat=True,
-    # )
+    feature_extract_true_personality(
+        cfg_file="config/true_personality/all_sessions/06_multi_modal_pred_audio.yaml",
+        model_weight="results_true_personality/all_sesstion/audio_all/06_multi_modal_pred/03-19_15-44/checkpoint_1.pkl",
+        data_loader=set_multi_modal_pred_tp_dataloader,
+        output_dir="datasets/model_output_features/06_multi_modal_pred_audio",
+        return_feat=True,
+    )

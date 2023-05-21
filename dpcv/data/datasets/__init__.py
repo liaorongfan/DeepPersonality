@@ -12,5 +12,6 @@ from .second_stage_dataset import statistic_data_loader, second_stage_data
 from .ture_personality_data import true_personality_dataloader
 from .slow_fast_data_true_personality import true_per_slow_fast_data_loader
 from .multi_modal_pred import multi_modal_data_loader
+from .meta_fusing_data import metadata_fuse_modal_data_loader
 
 

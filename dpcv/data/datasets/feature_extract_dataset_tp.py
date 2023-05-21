@@ -344,6 +344,7 @@ class ExtMultiModalData(MultiModalData):
         # data, label = sample["data"], sample["label"]
         return sample
 
+
 def set_true_personality_dataloader(cfg, mode):
     transform = build_transform_spatial(cfg)
     data_set = AllSampleTruePersonalityData(
@@ -426,6 +427,7 @@ def set_vat_tp_dataloader(cfg, mode):
         visual_clip=data_cfg.VISUAL_CLIP
     )
     return data_set
+
 
 def set_multi_modal_pred_tp_dataloader(cfg, mode):
 

@@ -329,6 +329,17 @@ class VATTrainer(BiModalTrainer):
                 torch.save(video_extract, save_to_file)
 
 
+@TRAINER_REGISTRY.register()
+class MetaDataTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feat_meta"], data["video_label"]
+        return (inputs,), labels.repeat(1000,1)
+
 
 @TRAINER_REGISTRY.register()
 class MultiModalTrainer(BiModalTrainer):
