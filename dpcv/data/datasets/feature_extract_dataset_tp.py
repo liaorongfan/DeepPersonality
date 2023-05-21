@@ -2,12 +2,15 @@ from .ture_personality_data import Chalearn21FrameData, Chalearn21PersemonData
 from dpcv.data.transforms.build import build_transform_spatial
 import glob
 import torch
+import os
 import os.path as opt
 from pathlib import Path
 import numpy as np
 import random
 from PIL import Image
 from PIL import ImageFile
+from dpcv.data.datasets.video_segment_data import TruePersonalityVideoFrameSegmentData
+from dpcv.data.datasets.ture_personality_data import Chalearn21FrameData
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
@@ -193,12 +196,134 @@ class AllSampleCRNetTruePersonalityData(AllSampleTruePersonalityData):
         return one_hot_cls
 
 
+class AllSapleCRNetAudTPDate(AllSampleCRNetTruePersonalityData):
+
+    def __getitem__(self, idx):
+        img_obj_ls, img_file_ls = self.get_sample_frames(idx)
+        # loc_img_ls = [self.get_loc_img(img_file) for img_file in img_file_ls]
+
+        wav = self.get_wave_data(img_file_ls[0])
+        wav = torch.as_tensor(wav, dtype=torch.float32)
+
+        img_label = self.get_ocean_label(img_file_ls[0])
+        img_label = torch.as_tensor(img_label, dtype=torch.float32)
+        # label_cls_encode = self.cls_encode(img_label)
+        # if self.trans:
+        #     img_obj_ls = [self.trans["frame"](img) for img in img_obj_ls]
+        #     loc_img_ls = [self.trans["face"](img) for img in loc_img_ls]
+
+        sample = {
+            # "glo_img": img_obj_ls,
+            # "loc_img": loc_img_ls,
+            "wav_aud": wav,
+            "reg_label": img_label,
+        }
+        return sample    
+
+
+class VATTPData(Chalearn21FrameData):
+
+    def __init__(
+        self, data_root, data_split, task, data_type,
+        spa_trans=None, tem_trans=None, 
+        traits="OCEAN", visual_clip=-1,
+        time_step=16,
+    ):
+        super().__init__(
+            data_root, data_split, task, data_type, even_downsample=1600, trans=None, segment=True, 
+            traits=traits, visual_clip=visual_clip,
+        )
+        self.spa_trans = spa_trans
+        self.tem_trans = tem_trans
+        self.time_step = time_step
+        self.training_samples = self.assemble_images_segments()
+    
+    def assemble_images(self):
+        # overwirt father methods 
+        return []
+    
+    def assemble_images_segments(self):
+        sample = []
+        for video in self.img_dir_ls:
+            all_images_path = self.frame_sample(video)
+            label = self.get_image_label(video)
+            for step in range(0, int(self.sample_size / self.time_step)):
+                start, end = step * self.time_step, (step + 1) * self.time_step
+                img_seg = all_images_path[start: end]
+                sample.append({"image_segment": img_seg, "label": label})
+                start = step
+            # all_images_path = np.array(all_images_path
+        return sample
+
+    @staticmethod
+    def loader(img_lst):
+        video = []
+        for pat in img_lst:
+            if os.path.exists(pat):
+                video.append(Image.open(pat))
+        return video
+
+
+    def _loading(self, img_lst):
+        clip = self.loader(img_lst)
+        if self.spa_trans is not None:
+            clip = [self.spa_trans(img) for img in clip]
+        clip = torch.stack(clip, 0)
+        return clip
+    
+    def __getitem__(self, index):
+        img_lst, label = self.training_samples[index].values()
+        img_ten = self._loading(img_lst)
+        if len(self.traits) != 5:
+            label = label[self.traits]
+        return {"all_images": img_ten, "label": torch.as_tensor(label, dtype=torch.float32)}
+
+    def __len__(self):
+        return len(self.training_samples)
+
+
+    def get_image_label(self, img_dir):
+        # img_dir = self.img_dir_ls[index]
+        session, part = img_dir.split("/")
+        if self.type == "face":
+            part = part.replace("_face", "")
+        part = part.replace(self.task_mark, "T")
+        participant_id = self.session_id[str(int(session))][part]
+        participant_trait = self.parts_personality[participant_id]
+        participant_trait = np.array([float(v) for v in participant_trait.values()])
+        return participant_trait
+
+
+    def get_image_data(self, index):
+        img_dir = self.img_dir_ls[index]
+        imgs = self.frame_sample(img_dir)
+        return imgs
+
+    def frame_sample(self, img_dir):
+        img_dir = os.path.join(self.data_dir, img_dir)
+        all_images = self.list_frames(img_dir)
+        if self.tem_trans is not None:
+            all_images = self.tem_trans(all_images)
+        # imgs = self._loading(img_dir, frame_indices)
+        return all_images
+
+    @staticmethod
+    def list_frames(img_dir):
+        img_path_ls = glob.glob(f"{img_dir}/*.jpg")
+        if "face" in img_dir:
+            img_path_ls = sorted(img_path_ls, key=lambda x: int(Path(x).stem[5:]))
+        else:
+            img_path_ls = sorted(img_path_ls, key=lambda x: int(Path(x).stem[6:]))
+        return img_path_ls
+
+
 def set_true_personality_dataloader(cfg, mode):
     transform = build_transform_spatial(cfg)
     data_set = AllSampleTruePersonalityData(
         data_root=cfg.DATA.ROOT,
         data_split=mode,
         task=cfg.DATA.SESSION,
+        data_type=cfg.DATA.TYPE,
         trans=transform,
     )
     return data_set
@@ -226,6 +351,17 @@ def set_crnet_true_personality_dataloader(cfg, mode):
     return data_set
 
 
+def set_crnet_aud_true_personality_dataloader(cfg, mode):
+    transform = build_transform_spatial(cfg)
+    data_set = AllSapleCRNetAudTPDate(
+        data_root=cfg.DATA.ROOT,
+        data_split=mode,
+        task=cfg.DATA.SESSION,
+        trans=transform,
+    )
+    return data_set
+
+
 def set_persemon_true_personality_dataloader(cfg, mode):
 
     transforms = build_transform_spatial(cfg)
@@ -244,3 +380,24 @@ def set_persemon_true_personality_dataloader(cfg, mode):
     return persemon_dataset
 
 
+def set_vat_tp_dataloader(cfg, mode):
+    from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample
+    from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
+    from dpcv.data.datasets.common import VideoLoader
+
+    spatial_transform = build_transform_spatial(cfg)
+    # temporal_transform = [TemporalRandomCrop(16)]
+    temporal_transform = [TemporalDownsample(length=1600)]
+    temporal_transform = TemporalCompose(temporal_transform)
+
+    data_cfg = cfg.DATA
+    data_set = VATTPData(
+        data_root="datasets/chalearn2021",
+        data_split=mode,
+        task=data_cfg.SESSION,
+        data_type=data_cfg.TYPE,
+        spa_trans=spatial_transform,
+        tem_trans=temporal_transform,
+        visual_clip=data_cfg.VISUAL_CLIP
+    )
+    return data_set
