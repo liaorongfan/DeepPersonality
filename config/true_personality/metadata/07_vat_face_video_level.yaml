@@ -1,5 +1,5 @@
 DATA:
-  ROOT: "datasets/chalearn2021/model_output_features/14_multi_modal_pred"
+  ROOT: "datasets/chalearn2021/model_output_features/07_vat_face_video_level"
   ANN_DIR: "datasets/chalearn2021/annotation"
   SESSION: "animal"
 DATA_LOADER:
@@ -8,7 +8,7 @@ DATA_LOADER:
   NUM_WORKERS: 0
 MODEL:
   NAME: "meta_fusing_model"
-  INPUT_DIM: 515
+  INPUT_DIM: 1027
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -21,4 +21,4 @@ SOLVER:
 TRAIN:
   TRAINER: "MMetaDataTrainer"
   MAX_EPOCH: 20
-  OUTPUT_DIR: "results_true_personality/metadata_fusing/14_multi_modal_pred"
+  OUTPUT_DIR: "results_true_personality/metadata_fusing/07_vat_face_video_level"

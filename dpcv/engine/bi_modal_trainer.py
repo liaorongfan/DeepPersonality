@@ -342,6 +342,21 @@ class MetaDataTrainer(BiModalTrainer):
 
 
 @TRAINER_REGISTRY.register()
+class MMetaDataTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feat_meta"], data["video_label"]
+        return (inputs,), labels
+
+
+
+
+
+@TRAINER_REGISTRY.register()
 class MultiModalTrainer(BiModalTrainer):
     """
     for model only image data used

@@ -95,6 +95,23 @@ class MetaFuseingData:
         return data_ls_sample
 
 
+class MultiModelDL(MetaFuseingData):
+
+    def encode_feat_meta(self, feat, metadata_val):
+        feat = feat.squeeze()
+        ten = torch.cat([feat, metadata_val], dim=0)
+        return ten
+
+
+class CRNMetaFeatDL(MetaFuseingData):
+
+    def encode_feat_meta(self, feat, metadata_val):
+        feat = feat.squeeze().mean(dim=0)
+        # feat = torch.mean(feat, dim=0)
+        ten = torch.cat([feat, metadata_val], dim=0)
+        return ten
+
+
 @DATA_LOADER_REGISTRY.register()
 def metadata_fuse_modal_data_loader(cfg, mode="train"):
 
@@ -132,6 +149,89 @@ def metadata_fuse_modal_data_loader(cfg, mode="train"):
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )
     return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def multi_model_metadata_fuse_data_loader(cfg, mode="train"):
+
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+    shuffle = cfg.DATA_LOADER.SHUFFLE
+
+    if mode == "train":
+        data_set = MultiModelDL(
+            data_root=cfg.DATA.ROOT,
+            ann_dir=cfg.DATA.ANN_DIR,
+            split="train",
+            session=cfg.DATA.SESSION,
+        )
+    elif mode == "valid":
+        data_set = MultiModelDL(
+            data_root=cfg.DATA.ROOT,
+            ann_dir=cfg.DATA.ANN_DIR,
+            split="valid",
+            session=cfg.DATA.SESSION,
+        )
+    else:
+        shuffle = False
+        data_set = MultiModelDL(
+            data_root=cfg.DATA.ROOT,
+            ann_dir=cfg.DATA.ANN_DIR,
+            split="test",
+            session=cfg.DATA.SESSION,
+        )
+
+    data_loader = DataLoader(
+        dataset=data_set,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def crnet_aud_metadata_fuse_dl(cfg, mode="train"):
+
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+    shuffle = cfg.DATA_LOADER.SHUFFLE
+
+    if mode == "train":
+        data_set = CRNMetaFeatDL(
+            data_root=cfg.DATA.ROOT,
+            ann_dir=cfg.DATA.ANN_DIR,
+            split="train",
+            session=cfg.DATA.SESSION,
+        )
+    elif mode == "valid":
+        data_set = CRNMetaFeatDL(
+            data_root=cfg.DATA.ROOT,
+            ann_dir=cfg.DATA.ANN_DIR,
+            split="valid",
+            session=cfg.DATA.SESSION,
+        )
+    else:
+        shuffle = False
+        data_set = CRNMetaFeatDL(
+            data_root=cfg.DATA.ROOT,
+            ann_dir=cfg.DATA.ANN_DIR,
+            split="test",
+            session=cfg.DATA.SESSION,
+        )
+
+    data_loader = DataLoader(
+        dataset=data_set,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
+
+
+
+
 
 
 if __name__ == "__main__":
