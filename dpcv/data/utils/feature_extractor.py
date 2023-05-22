@@ -66,12 +66,21 @@ class ExtractVisualFeatureData(VideoData):
 
 
 class ExtractAudioFeatureData:
-    def __init__(self, aud_dir, anno_path, save_to):
+    def __init__(self, aud_dir, anno_path, save_to, specify_videos=None):
+        self.aud_dir = aud_dir
         self.aud_files = glob.glob(f"{aud_dir}/*.wav")
         self.model = self.get_extract_model()
         self.annotation = self.get_annotation(anno_path)
         os.makedirs(save_to, exist_ok=True)
         self.save_to = save_to
+        if specify_videos is not None:
+            self.aud_files = self.select_aud_files(specify_videos)
+
+    def select_aud_files(self, specify_videos):
+        with open(specify_videos, 'r') as fo:
+            videos = [line.strip("\n") for line in fo.readlines()]
+        videos_path = ["{}.wav".format(os.path.join(self.aud_dir, vid)) for vid in videos]
+        return videos_path
 
     @staticmethod
     def get_extract_model():
@@ -111,19 +120,19 @@ class ExtractAudioFeatureData:
 
 if __name__ == "__main__":
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
-    extractor = ExtractVisualFeatureData(
-        data_root="datasets",
-        img_dir="image_data/test_data_face",
-        label_file="annotation/annotation_test.pkl",
-        save_to="datasets/extracted_feature_impression/test_face",
-        suffix="face_",
-    )
-    extractor.extract_and_save_feat()
-
-
-    # extr = ExtractAudioFeatureData(
-    #     aud_dir="datasets/voice_data/voice_raw/validationData",
-    #     anno_path="datasets/annotation/annotation_validation.pkl",
-    #     save_to="datasets/extracted_feature_impression/valid_aud"
+    # extractor = ExtractVisualFeatureData(
+    #     data_root="datasets",
+    #     img_dir="image_data/test_data_face",
+    #     label_file="annotation/annotation_test.pkl",
+    #     save_to="datasets/extracted_feature_impression/test_face",
+    #     suffix="face_",
     # )
-    # extr.extract_and_save_feat()
+    # extractor.extract_and_save_feat()
+
+    extr = ExtractAudioFeatureData(
+        aud_dir="datasets/voice_data/voice_raw/train_data",
+        anno_path="datasets/annotation/annotation_training.pkl",
+        save_to="datasets/extracted_feature_ip/few_subj/train_aud",
+        specify_videos="datasets/chalearn16_few_candidates/chalearn16_few_candidates_train.txt"
+    )
+    extr.extract_and_save_feat()
