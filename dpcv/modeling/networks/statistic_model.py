@@ -4,10 +4,10 @@ from .build import NETWORK_REGISTRY
 
 
 class StatisticMLP(nn.Module):
-    def __init__(self, hidden_units=256):
+    def __init__(self, input_dim=60, hidden_units=256):
         super(StatisticMLP, self).__init__()
         # log_param("hidden_units", hidden_units)
-        self.input_layer = nn.Linear(12 * 5, hidden_units)
+        self.input_layer = nn.Linear(input_dim, hidden_units)
         self.relu_1 = nn.ReLU()
         self.hidden_layer_1 = nn.Linear(hidden_units, hidden_units)
         self.relu_2 = nn.ReLU()
