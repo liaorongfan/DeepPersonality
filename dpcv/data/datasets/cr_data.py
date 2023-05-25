@@ -20,6 +20,7 @@ class CRNetData(VideoData):
         sample_size=100,
         num_videos=-1,
         traits="OCEAN",
+        specify_videos=None,
     ):
         super().__init__(data_root, img_dir, label_file, audio_dir, traits=traits)
         self.transform = transform
@@ -27,6 +28,19 @@ class CRNetData(VideoData):
         self.face_img_dir_ls = self.get_face_img_dir(face_img_dir)
         if num_videos > 0:
             self.img_dir_ls = self.img_dir_ls[: num_videos]
+        if specify_videos is not None:
+            self.img_dir_ls = self.select_img_dir(specify_videos)
+
+    def select_img_dir(self, specify_videos):
+        with open(specify_videos, 'r') as fo:
+            videos = [line.strip("\n") for line in fo.readlines()]
+        videos_path = [
+            os.path.join(self.data_root, self.img_dir, vid) for vid in videos
+        ]
+
+        return videos_path
+   
+
 
     def get_face_img_dir(self, face_img_dir):
         dir_ls = os.listdir(os.path.join(self.data_root, face_img_dir))
@@ -235,6 +249,7 @@ def crnet_data_loader(cfg, mode=None):
             transforms,
             num_videos=data_cfg.TRAIN_NUM_VIDEOS,
             traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.TRAIN_SPECIFY_VIDEOS,
         )
     elif mode == "valid":
         dataset = CRNetData(
@@ -246,6 +261,7 @@ def crnet_data_loader(cfg, mode=None):
             transforms,
             num_videos=data_cfg.VALID_NUM_VIDEOS,
             traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.VALID_SPECIFY_VIDEOS,
         )
     elif mode == "full_test":
         return AllFrameCRNetData(
@@ -256,6 +272,7 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
             traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.TEST_SPECIFY_VIDEOS,
         )
     else:
         dataset = CRNetData(
@@ -267,6 +284,7 @@ def crnet_data_loader(cfg, mode=None):
             transforms,
             num_videos=data_cfg.TEST_NUM_VIDEOS,
             traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.TEST_SPECIFY_VIDEOS,
         )
     loader_cfg = cfg.DATA_LOADER
     data_loader = DataLoader(

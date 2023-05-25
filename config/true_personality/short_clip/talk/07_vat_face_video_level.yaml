@@ -23,4 +23,4 @@ TRAIN:
   TRAINER: "ImageModalTrainer"
   MAX_EPOCH: 30
   LOG_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/short_clip/talk/07_vat_video_level"
+  OUTPUT_DIR: "results_true_personality/short_clip_m/talk/07_vat_video_level"

@@ -20,14 +20,26 @@ class VideoFrameSegmentData(VideoData):
     """
     def __init__(
         self, data_root, img_dir, label_file, video_loader, spa_trans=None, tem_trans=None,
-        num_videos=-1, traits="OCEAN",
+        num_videos=-1, traits="OCEAN", specify_videos=None
     ):
         super().__init__(data_root, img_dir, label_file, traits=traits)
         self.loader = video_loader
         if num_videos > 0:
             self.img_dir_ls = self.img_dir_ls[: num_videos]
+        if specify_videos is not None:
+            self.img_dir_ls = self.select_img_dir(specify_videos)
         self.spa_trans = spa_trans
         self.tem_trans = tem_trans
+
+    def select_img_dir(self, specify_videos):
+        with open(specify_videos, 'r') as fo:
+            videos = [line.strip("\n") for line in fo.readlines()]
+        videos_path = [
+            os.path.join(self.data_root, self.img_dir, vid) for vid in videos
+        ]
+
+        return videos_path
+
 
     def __getitem__(self, index):
         img = self.get_image_data(index)

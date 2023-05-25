@@ -82,3 +82,5 @@ _darcs
 tmp*
 /datasets/ChaLearn2016_tiny
 /datasets/extracted_feature_tp
+/datasets/extracted_feature_tp_short_m
+/hy-tmp

@@ -120,7 +120,11 @@ class Chalearn21FrameData(Dataset):
             if len(imgs) < self.visual_clip:
                 separate = np.arange(len(imgs))
             else:
-                separate = np.arange(self.visual_clip)
+                middle_img_num = int(len(imgs) / 2)
+                offset = int(self.visual_clip / 2)
+                min = middle_img_num - offset
+                max = middle_img_num + offset
+                separate = np.arange(min, max)
         else:
             separate = np.linspace(0, len(imgs), self.sample_size, endpoint=False, dtype=np.int16)
         # index = random.choice(separate)
@@ -170,7 +174,8 @@ class Chlearn21AudioData(Chalearn21FrameData):
         suffix_type="npy", 
         data_type="audio", 
         traits="OCEAN",
-        audio_clip=-1.0,
+        audio_clip=-1,
+        sample_rate=16000,
     ):
         super().__init__(
             data_root, data_split, task, data_type=data_type, segment=True, traits=traits, audio_clip=audio_clip,
@@ -178,6 +183,7 @@ class Chlearn21AudioData(Chalearn21FrameData):
         self.sample_len = sample_len
         self.suffix = suffix_type
         self.audio_clip = audio_clip
+        self.sample_rate = sample_rate
 
     def __len__(self):
         return len(self.img_dir_ls)
@@ -196,12 +202,20 @@ class Chlearn21AudioData(Chalearn21FrameData):
         aud_file = opt.join(self.data_dir, f"{img_dir}.{self.suffix}")
         aud_data = np.load(aud_file)
         data_len = aud_data.shape[-1]
+        if data_len < self.sample_len:
+            data_len = self.sample_len - 1
         if self.audio_clip > 0:
-            data_len = int(data_len * self.audio_clip)
-            if data_len < self.sample_len:
-                data_len = self.sample_len - 1
-        start = np.random.randint(data_len - self.sample_len)
-        end = start + self.sample_len
+            # clip select
+            # take one second more for sampling
+            sample_len = int(self.sample_rate * self.audio_clip)
+            sample_offset = int(sample_len / 2)
+            middle_point = int(data_len / 2)
+            start = middle_point - sample_offset
+            end = middle_point + sample_offset
+        else:
+            # random select 
+            start = np.random.randint(data_len - self.sample_len)
+            end = start + self.sample_len
         sample = aud_data[:, :, start: end]
         return sample
     
