@@ -10,11 +10,12 @@ from dpcv.evaluation.metrics import compute_ccc
 
 class LinearRegression:
 
-    def __init__(self, data_root):
+    def __init__(self, data_root, session=None):
         self.data_root = data_root
+        self.session = session
         self.traits = ["O", "C", "E", "A", "N"]
         self.train_data = self.collect_data("train")
-        self.test_data = self.collect_data("valid")
+        self.test_data = self.collect_data("test")
         self.linear_models = self.get_models()
         self.predict_results = None
 
@@ -26,6 +27,8 @@ class LinearRegression:
 
     def collect_data(self, split):
         data_dir = os.path.join(self.data_root, split)
+        if self.session is not None:
+            data_dir = os.path.join(self.data_root, split, f"{self.session}_{split}")
         data_ls = glob.glob(f"{data_dir}/*")
         sample_x = defaultdict(list)
         sample_y = defaultdict(list)
@@ -83,8 +86,35 @@ class LinearRegression:
         self.compute_metrics()
 
 
+class LinearRegressionTP(LinearRegression):
+    def __init__(self, data_root, session):
+        self.session = session
+        super().__init__(data_root)
+
+    def collect_data(self, split):
+        data_dir = os.path.join(self.data_root, split, f"{self.session}_{split}")
+
+        data_ls = glob.glob(f"{data_dir}/*")
+        sample_x = defaultdict(list)
+        sample_y = defaultdict(list)
+
+        for data_path in tqdm(data_ls):
+            data = torch.load(data_path)
+            frame_preds = data["video_frames_pred"]
+            frame_target = data["video_label"]
+            if len(frame_preds) < 400:
+                continue
+            for i, t in enumerate(self.traits):
+                sample_x[t].append(frame_preds.numpy()[:400, i].tolist())
+                sample_y[t].append(frame_target.numpy()[i].tolist())
+
+        return sample_x, sample_y
+
+
 if __name__ == '__main__':
-    data_roots = glob.glob("datasets/second_stage/*")
+    data_roots = glob.glob("datasets/second_stage_TP/*")
+    session = "talk"
+    # data_roots = glob.glob("datasets/second_stage/*")
     for dr in data_roots:
-        LinearRegression(dr).run()
+        LinearRegression(dr, session).run()
         # linear_fusion.run()
