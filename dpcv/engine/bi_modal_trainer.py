@@ -338,7 +338,19 @@ class MetaDataTrainer(BiModalTrainer):
         for k, v in data.items():
             data[k] = v.to(self.device)
         inputs, labels = data["feat_meta"], data["video_label"]
-        return (inputs,), labels.repeat(1000,1)
+        return (inputs,), labels.repeat(1000, 1)
+
+
+@TRAINER_REGISTRY.register()
+class AUTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        data = [item.to(self.device).type(torch.float32) for item in data]
+        inputs, labels = data
+        return (inputs,), labels
+
 
 
 @TRAINER_REGISTRY.register()

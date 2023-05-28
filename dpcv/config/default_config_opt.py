@@ -23,6 +23,7 @@ __C.DATA.TYPE = "frame"
 __C.DATA.FEATURE_ROOT = ""
 __C.DATA.SESSION = "talk"
 __C.DATA.TRAITS = "OCEAN"
+__C.DATA.AU = ""
 __C.DATA.VISUAL_CLIP = -1
 __C.DATA.AUDIO_CLIP = -1
 
