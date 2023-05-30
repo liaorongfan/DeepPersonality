@@ -1,0 +1,27 @@
+DATA:
+  ROOT: "datasets"
+  TRAIN_LABEL_DATA: "datasets/annotation/annotation_training.pkl"
+  VALID_LABEL_DATA: "datasets/annotation/annotation_validation.pkl"
+  TEST_LABEL_DATA: "datasets/annotation/annotation_test.pkl"
+  SESSION: ""
+  AU: "AU45"
+DATA_LOADER:
+  NAME: "au_dataloader"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "au_model"
+  INPUT_DIM: 120
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [150, 180]
+TRAIN:
+  TRAINER: "AUTrainer"
+  MAX_EPOCH: 80
+  OUTPUT_DIR: "results_second_stage/action_units/AU45_ip"

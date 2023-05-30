@@ -141,13 +141,14 @@ class BlockHead(nn.Module):
 
 
 class Tail(nn.Module):
-    def __init__(self, num_classes, num_frames, head=16):
+    def __init__(self, num_classes, num_frames, head=16, return_feature=False):
         super(Tail, self).__init__()
         self.spatial_h = 7
         self.spatial_w = 4
         self.head = head
         self.num_features = 2048
         self.num_frames = num_frames
+        self.return_feature = return_feature
         self.d_model = int(self.num_features / 2)
         self.d_k = self.d_model // self.head
         self.bn1 = nn.BatchNorm2d(self.num_features)
@@ -204,6 +205,8 @@ class Tail(nn.Module):
         # if not self.training:
         #     return f
         y = self.classifier(f)
+        if self.return_feature:
+            return y, f
         return y
 
 
@@ -212,11 +215,12 @@ class SemiTransformer(nn.Module):
 
 
     """
-    def __init__(self, num_classes, seq_len, init_weights=True):  # seq_len --> num_frames
+    def __init__(self, num_classes, seq_len, init_weights=True, return_feature=False):  # seq_len --> num_frames
         super(SemiTransformer, self).__init__()
+        self.return_feature = return_feature
         resnet50 = torchvision.models.resnet50(pretrained=True)
         self.base = nn.Sequential(*list(resnet50.children())[:-2])
-        self.tail = Tail(num_classes, seq_len)
+        self.tail = Tail(num_classes, seq_len, return_feature=return_feature)
         if init_weights:
             initialize_weights(self)
 
@@ -239,7 +243,8 @@ def vat_model(cfg=None):
     num_classes = 5
     if cfg is not None:
         num_classes = cfg.MODEL.NUM_CLASS
-    model = SemiTransformer(num_classes=num_classes, seq_len=32)
+        return_feat = cfg.MODEL.RETURN_FEATURE
+    model = SemiTransformer(num_classes=num_classes, seq_len=32, return_feature=return_feat)
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 

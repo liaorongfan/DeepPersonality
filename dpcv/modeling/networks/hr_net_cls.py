@@ -555,7 +555,8 @@ def hr_net_model(cfg=None, **kwargs):
 def hr_net_true_personality(cfg=None, **kwargs):
     config = hr_net_cfg
     config.MODEL.NUM_CLASSES = cfg.MODEL.NUM_CLASS
-    model = HighResolutionNet(config, normalize_output=False, **kwargs)
+    return_feat = cfg.MODEL.RETURN_FEATURE
+    model = HighResolutionNet(config, normalize_output=False, return_feature=return_feat, **kwargs)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 

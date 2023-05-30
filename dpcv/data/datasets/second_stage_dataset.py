@@ -11,9 +11,17 @@ from math import ceil
 
 class SecondStageData(Dataset):
 
-    def __init__(self, data_dir, data_type="pred", method="statistic", used_frame=1000, top_n_sample=600, sample=False):
+    TRAITS_ID = {
+        "O": 0, "C": 1, "E": 2, "A": 3, "N": 4,
+    }
+
+    def __init__(
+        self, data_dir, data_type="pred", method="none",
+        used_frame=1000, top_n_sample=600, sample=False,
+        traits="OCEAN",
+    ):
         assert data_type in ["pred", "feat"]
-        assert method in ["statistic", "spectrum"]
+        assert method in ["statistic", "spectrum", "none"]
 
         self.data_type = f"video_frames_{data_type}"
         self.process_method = method
@@ -25,6 +33,7 @@ class SecondStageData(Dataset):
         self.sample = sample
         self.data_preprocess(data_dir)  # save processed data to disk first
         self.data_ls = self.load_data()
+        self.traits = [self.TRAITS_ID[t] for t in traits]
 
     def load_data(self):
         # save_to = os.path.join(data_root, f"{self.data_type}_{self.process_method}_{data_split}.pkl")

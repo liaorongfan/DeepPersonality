@@ -1,7 +1,7 @@
 DATA:
   ROOT: "datasets/chalearn2021"
   SESSION: "lego"
-  AUDIO_CLIP: 0.2
+  AUDIO_CLIP: 15
 DATA_LOADER:
   NAME: "true_personality_crnet_audio_dataloader"
   TRAIN_BATCH_SIZE: 2
@@ -19,4 +19,4 @@ SOLVER:
 TRAIN:
   TRAINER: "CRNetAudTrainer"
   MAX_EPOCH: 100
-  OUTPUT_DIR: "results_true_personality/short_clip/lego/03_aud_crnet"
+  OUTPUT_DIR: "results_true_personality/short_clip_m/lego/03_aud_crnet"

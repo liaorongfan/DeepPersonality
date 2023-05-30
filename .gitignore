@@ -15,6 +15,7 @@ datasets/missed_files.txt
 # datasets/*.txt
 datasets/annotation
 datasets/va_data
+datasets/chalearn21
 datasets/chalearn2021
 datasets/chalearn21_fold_*
 datasets/folds
@@ -82,3 +83,5 @@ _darcs
 tmp*
 /datasets/ChaLearn2016_tiny
 /datasets/extracted_feature_tp
+/datasets/extracted_feature_tp_short_m
+/hy-tmp

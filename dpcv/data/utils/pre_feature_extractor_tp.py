@@ -8,7 +8,7 @@ from dpcv.data.datasets.ture_personality_data import Chalearn21FrameData, Chalea
 
 
 class TPExtractVisualFeatureData:
-    def __init__(self, data_root, data_type, task, trans=None, save_to="", sample_num=2000):
+    def __init__(self, data_root, data_type, task, trans=None, save_to="", visual_clip=450):
         assert data_type in ["frame", "face", "audio"], "data_type should be one of [frame, face or video]"
 
         self.type = data_type
@@ -21,11 +21,11 @@ class TPExtractVisualFeatureData:
         else:
             self.dataset = {
                 "train": Chalearn21FrameData(
-                    data_root, "train", task, data_type, even_downsample=sample_num, trans=trans, segment=False),
+                    data_root, "train", task, data_type,  trans=trans, segment=False, visual_clip=visual_clip),
                 "valid": Chalearn21FrameData(
-                    data_root, "valid", task, data_type, even_downsample=sample_num, trans=trans, segment=False),
+                    data_root, "valid", task, data_type, trans=trans, segment=False, visual_clip=visual_clip),
                 "test": Chalearn21FrameData(
-                    data_root, "test", task, data_type, even_downsample=sample_num, trans=trans, segment=False),
+                    data_root, "test", task, data_type, trans=trans, segment=False, visual_clip=visual_clip),
             }
         self.model = self.get_extract_model()
         # os.makedirs(save_to, exist_ok=True)
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     transform = set_transform_op()
 
     for task in ["animal", "talk", "lego", "ghost"]:
-        save_dir = f"/hy-tmp/exptract_feature_tp_short/{task}"
+        save_dir = f"/hy-tmp/exptract_feature_tp_short_m/{task}"
         extractor = TPExtractVisualFeatureData(
             data_root=data_root,
             data_type=type,
