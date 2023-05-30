@@ -1,10 +1,10 @@
 DATA:
-  ROOT: "datasets/chalearn2021/model_output_features/crnet-aud"
+  ROOT: "datasets/chalearn2021/model_output_features/crnet"
   ANN_DIR: "datasets/chalearn2021/annotation"
   SESSION: "animal"
 DATA_LOADER:
   NAME: "crnet_aud_metadata_fuse_dl"
-  TRAIN_BATCH_SIZE: 32
+  TRAIN_BATCH_SIZE: 1
   NUM_WORKERS: 0
 MODEL:
   NAME: "meta_fusing_model"
@@ -19,6 +19,6 @@ SOLVER:
   MOMENTUM: 0.9
   MILESTONE: [15, 18]
 TRAIN:
-  TRAINER: "MMetaDataTrainer"
-  MAX_EPOCH: 20
-  OUTPUT_DIR: "results_true_personality/metadata_fusing/03_aud_crnet"
+  TRAINER: "MetaCRNetDataTrainer"
+  MAX_EPOCH: 10
+  OUTPUT_DIR: "results_true_personality/metadata_fusing/12_crnet"
