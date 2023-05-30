@@ -14,7 +14,7 @@ import pickle
 
 class ExtractVisualFeatureData(VideoData):
     def __init__(
-        self, data_root, img_dir, label_file, save_to, length=100, 
+        self, data_root, img_dir, label_file, save_to, length=100,
         suffix="frame_", specify_videos=None,
     ):
         super().__init__(data_root, img_dir, label_file)
@@ -26,7 +26,7 @@ class ExtractVisualFeatureData(VideoData):
         self.suffix = suffix
         if specify_videos is not None:
             self.img_dir_ls = self.select_img_dir(specify_videos)
-    
+
     def select_img_dir(self, specify_videos):
         with open(specify_videos, 'r') as fo:
             videos = [line.strip("\n") for line in fo.readlines()]
@@ -79,12 +79,21 @@ class ExtractVisualFeatureData(VideoData):
 
 
 class ExtractAudioFeatureData:
-    def __init__(self, aud_dir, anno_path, save_to):
+    def __init__(self, aud_dir, anno_path, save_to, specify_videos=None):
+        self.aud_dir = aud_dir
         self.aud_files = glob.glob(f"{aud_dir}/*.wav")
         self.model = self.get_extract_model()
         self.annotation = self.get_annotation(anno_path)
         os.makedirs(save_to, exist_ok=True)
         self.save_to = save_to
+        if specify_videos is not None:
+            self.aud_files = self.select_aud_files(specify_videos)
+
+    def select_aud_files(self, specify_videos):
+        with open(specify_videos, 'r') as fo:
+            videos = [line.strip("\n") for line in fo.readlines()]
+        videos_path = ["{}.wav".format(os.path.join(self.aud_dir, vid)) for vid in videos]
+        return videos_path
 
     @staticmethod
     def get_extract_model():

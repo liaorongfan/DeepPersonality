@@ -152,14 +152,14 @@ if __name__ == "__main__":
     from multiprocessing import Pool
 
     parser = argparse.ArgumentParser(description="detect and extract face images from videos")
-    parser.add_argument("-v", "--video-path", help="path to video directory", default=None, type=str)
-    parser.add_argument("-o", "--output-dir", help="path to save processed videos", default=None, type=str)
+    parser.add_argument("-v", "--video-dir", help="path to video directory", default="./datasets/demo", type=str)
+    parser.add_argument("-o", "--output-dir", help="path to save processed videos", default="./tmp", type=str)
     parser.add_argument("-l", "--level", default="video", type=str,
                         help="datasets should be one of [video, directory/dir]",)
     args = parser.parse_args()
 
     if args.level == "video":
-        video_dir = args.video_path
+        video_dir = args.video_dir
         data_root = args.output_dir
         run_on_videos(video_dir=video_dir, data_root=data_root)
     elif args.level in ["directory", "dir"]:

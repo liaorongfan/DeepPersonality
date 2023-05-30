@@ -5,37 +5,34 @@ from dpcv.modeling.module.resnet_tv import model_zoo, model_urls
 from .build import NETWORK_REGISTRY
 
 
-class MetaFCNet(nn.Module):
+class AUFCNet(nn.Module):
 
-    def __init__(self, input_dim, out_dim=5,  use_sigmoid=False):
+    def __init__(self, input_dim, out_dim=5, scale=2, use_sigmoid=False):
         super().__init__()
         self.input_dim = input_dim
         self.fc = nn.Sequential(
-            nn.Linear(input_dim, 1024),
+            nn.Linear(input_dim, int(512 * scale)),
             nn.ReLU(),
-            nn.Linear(1024, 512),
+            nn.Linear(int(512 * scale), int(128 * scale)),
             nn.ReLU(),
-            nn.Linear(512, out_dim),
+            nn.Linear(int(128 * scale), out_dim),
         )
         self.sigmoid = nn.Sigmoid()
         self.use_sigmoid = use_sigmoid
 
     def forward(self, x):
-        x = x.reshape(-1, self.input_dim)
+        # x = x.reshape(-1, self.input_dim)
         f = self.fc[:-2](x)
         x = self.fc[-2:](f)
 
-        if self.use_sigmoid:
-            x = self.sigmoid(x)
+        # if self.use_sigmoid:
+        #     x = self.sigmoid(x)
         return x
 
 
 @NETWORK_REGISTRY.register()
-def meta_fusing_model(cfg):
+def au_model(cfg):
     input_dim = cfg.MODEL.INPUT_DIM
-    use_sigmoid = False
-    if cfg.DATA.AU is not None:
-        use_sigmoid = True
-    model = MetaFCNet(input_dim, out_dim=cfg.MODEL.NUM_CLASS, use_sigmoid=use_sigmoid)
+    model = AUFCNet(input_dim, out_dim=cfg.MODEL.NUM_CLASS, use_sigmoid=True)
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model

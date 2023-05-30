@@ -15,6 +15,7 @@ datasets/missed_files.txt
 # datasets/*.txt
 datasets/annotation
 datasets/va_data
+datasets/chalearn21
 datasets/chalearn2021
 datasets/chalearn21_fold_*
 datasets/folds
