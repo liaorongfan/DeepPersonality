@@ -33,7 +33,9 @@ output/
 results_second_stage_tp
 results_second_stage
 results_true_personality
+/results_linear
 #temp/*.txt
+/tmp
 
 events.out*
 # current output files
