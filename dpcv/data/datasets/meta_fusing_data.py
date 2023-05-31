@@ -54,8 +54,8 @@ class MetaFuseingData:
         metadata_val = self.get_metadata_value(label)
         feat_meta = self.encode_feat_meta(feat, metadata_val)
         if not len(self.traits) == 5:
-            label = sample["label"]
-            sample["label"] = label[self.traits]
+            label = sample["video_label"]
+            sample["video_label"] = label[self.traits]
         sample["feat_meta"] = feat_meta
         return sample
 
@@ -102,14 +102,6 @@ class MultiModelDL(MetaFuseingData):
         ten = torch.cat([feat, metadata_val], dim=0)
         return ten
 
-
-class CRNMetaFeatDL(MetaFuseingData):
-
-    def encode_feat_meta(self, feat, metadata_val):
-        feat = feat.squeeze().mean(dim=0)
-        # feat = torch.mean(feat, dim=0)
-        ten = torch.cat([feat, metadata_val], dim=0)
-        return ten
 
 
 @DATA_LOADER_REGISTRY.register()
@@ -231,6 +223,37 @@ def crnet_aud_metadata_fuse_dl(cfg, mode="train"):
 
 
 
+class CRNMetaFeatDL(MetaFuseingData):
+    
+    def __getitem__(self, idx):
+        sample = self.sample_ls[idx]
+        sample = torch.load(sample)
+        label, feat = sample["video_label"], sample["video_frames_feat"]
+        metadata_val = self.get_metadata_value(label)
+        feat_meta = self.encode_feat_meta(feat, metadata_val)
+        label = sample["video_label"]
+        if not len(self.traits) == 5:
+            sample["video_label"] = label[self.traits]
+        if label.shape[0] != feat_meta.shape[0]:
+            label = label[None].repeat(feat_meta.shape[0], 1)
+        
+        sample["feat_meta"] = feat_meta
+        sample["video_label"] = label
+        return sample
+
+    def encode_feat_meta(self, feat, metadata_val):
+        # print(feat.shape)
+        if feat.shape[0] == 1:
+            feat = feat.squeeze().mean(dim=0)
+            # feat = torch.mean(feat, dim=0)
+            ten = torch.cat([feat, metadata_val], dim=0)
+        else:
+            feat = feat.mean(dim=1)
+            metadata = metadata_val[None].repeat(feat.shape[0], 1)
+            ten = torch.cat([feat, metadata], dim=1)
+        return ten
+
+ 
 
 
 

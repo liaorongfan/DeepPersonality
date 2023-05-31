@@ -217,6 +217,7 @@ class BiModalTrainer(object):
         return (wav_in, images_in), label
 
 
+
 @TRAINER_REGISTRY.register()
 class BimodalLSTMTrain(BiModalTrainer):
 
@@ -351,6 +352,18 @@ class AUTrainer(BiModalTrainer):
         inputs, labels = data
         return (inputs,), labels
 
+
+
+@TRAINER_REGISTRY.register()
+class MetaCRNetDataTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feat_meta"], data["video_label"]
+        return (inputs,), labels.squeeze()
 
 
 @TRAINER_REGISTRY.register()
