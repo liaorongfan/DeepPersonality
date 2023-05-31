@@ -1,5 +1,6 @@
 import glob
 
+
 def colloect_single_traits(log_dir="results/single_traits/A"):
     log_files = glob.glob(f"{log_dir}/*/*/log.log")
     results = []

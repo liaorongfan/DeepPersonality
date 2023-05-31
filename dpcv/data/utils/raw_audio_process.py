@@ -7,7 +7,7 @@ import scipy.io.wavfile as wav
 import glob
 
 
-class RawAudioProcessor():
+class RawAudioProcessor:
 
     def __init__(self, mode, aud_dir, save_to):
         self.mode = mode
