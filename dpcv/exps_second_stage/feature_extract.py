@@ -21,10 +21,6 @@ def feature_extract(cfg_file, model_weight, data_loader, output_dir, return_feat
 
     runner = ExpRunner(cfg)
     runner.model = load_model(runner.model, model_weight)
-    # ocean_acc_avg, ocean_acc, dataset_output, dataset_label = runner.trainer.full_test(
-    #     data_loader(cfg, mode="test"), runner.model
-    # )
-    # print(ocean_acc_avg, ocean_acc)
 
     for mode in ["train", "valid", "test"]:
         # note if cuda out of memory, run each mode separately
@@ -48,6 +44,13 @@ def feature_extract_true_personality(cfg_file, model_weight, data_loader, output
 
 
 if __name__ == "__main__":
+
+    feature_extract(
+        cfg_file="config/impression/sequence_prediction_extract/04_resnet50_3d_face.yaml",
+        model_weight="results/unified_face_images/04_resnet50_3d_face/checkpoint_347_resnet3d_face_acc_8948.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/3d_resnet",
+    )
 
     # # interpret_cnn feature extract
     # feature_extract(

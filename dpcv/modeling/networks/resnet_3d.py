@@ -122,6 +122,7 @@ class ResNet(nn.Module):
         widen_factor=1.0,
         n_classes=5,
         init_weights=True,
+        return_feature=False,
     ):
         super().__init__()
 
@@ -151,6 +152,7 @@ class ResNet(nn.Module):
 
         if init_weights:
             initialize_weights(self)
+        self.return_feature = return_feature
         # for m in self.modules():
         #     if isinstance(m, nn.Conv3d):
         #         nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
