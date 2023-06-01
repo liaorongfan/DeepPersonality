@@ -411,7 +411,7 @@ class SlowFast(nn.Module):
     https://arxiv.org/pdf/1812.03982.pdf
     """
 
-    def __init__(self, cfg):
+    def __init__(self, cfg, return_feature=False):
         """
         The `__init__` method of any subclass should also contain these
             arguments.
@@ -420,6 +420,7 @@ class SlowFast(nn.Module):
                 comments of the config file.
         """
         super(SlowFast, self).__init__()
+        self.return_feature = return_feature
         self.norm_module = nn.BatchNorm3d
         self.enable_detection = False
         self.num_pathways = 2

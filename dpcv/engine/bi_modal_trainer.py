@@ -256,6 +256,64 @@ class SequenceBiModalTrain(BiModalTrainer):
         # wav_in = torch.stack([wav] * 100, 0).to(self.device)
         return images_in, label
 
+
+@TRAINER_REGISTRY.register()
+class SequenceSlowFastTrain(BiModalTrainer):
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                batch_size = 64
+                out_ls, feat_ls = [], []
+                for i in range(math.ceil(len(inputs[0]) / batch_size)):
+                    mini_batch_1 = inputs[(i * batch_size): (i + 1) * batch_size]
+                    bs, c, h, w = mini_batch_1.shape
+                    mini_batch_1 = mini_batch_1.reshape(3, bs, h, w)
+                    frame_list = self.pack_pathway_output(mini_batch_1)
+                    mini_batch = (frame_list,)
+                    try:
+                        if model.return_feature:
+                            out, feat = model(*mini_batch)
+                            out_ls.append(out.cpu())
+                            feat_ls.append(feat.cpu())
+                        else:
+                            out = model(*mini_batch)
+                            out_ls.append(out.cpu())
+                            feat_ls.append(torch.tensor([0]))
+                    except:
+                        print("invalid batch input")
+                        continue
+                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
+                video_extract = {
+                    "video_frames_pred": out_pred,
+                    "video_frames_feat": out_feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+    def full_test_data_fmt(self, data):
+        images,  label = data["all_images"],  data["label"]
+        images_in = torch.stack(images, 0)#.to(self.device)
+        # wav_in = torch.stack([wav] * 100, 0).to(self.device)
+        return images_in, label
+
+    def pack_pathway_output(self, frames):
+        fast_pathway = frames
+        slow_pathway = torch.index_select(
+            frames,
+            1,
+            torch.linspace(
+                0, frames.shape[1] - 1, frames.shape[1] // 4
+            ).long(),
+        )
+        frame_list = [slow_pathway[None].to(self.device), fast_pathway[None].to(self.device)]
+
+        return frame_list
+
 @TRAINER_REGISTRY.register()
 class BimodalLSTMTrain(BiModalTrainer):
 
