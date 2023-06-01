@@ -46,10 +46,10 @@ def feature_extract_true_personality(cfg_file, model_weight, data_loader, output
 if __name__ == "__main__":
 
     feature_extract(
-        cfg_file="config/impression/sequence_prediction_extract/04_resnet50_3d_face.yaml",
-        model_weight="results/unified_face_images/04_resnet50_3d_face/checkpoint_347_resnet3d_face_acc_8948.pkl",
+        cfg_file="config/impression/sequence_prediction_extract/06_tpn_face.yaml",
+        model_weight="results/checkpoint_267_tpn_acc_9003.pkl",
         data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/3d_resnet",
+        output_dir="datasets/second_stage/tpn",
     )
 
     # # interpret_cnn feature extract

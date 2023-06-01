@@ -72,11 +72,13 @@ class TSN2D(BaseRecognizer):
                  flip=False,
                  cls_head=None,
                  train_cfg=None,
-                 test_cfg=None):
+                 test_cfg=None,
+                 return_feature=False):
 
         super(TSN2D, self).__init__()
         self.backbone = resnet_mm.ResNet(**backbone)
         self.modality = modality
+        self.return_feature = return_feature
         self.in_channels = in_channels
         if necks is not None:
             self.necks = tpn.TPN(**necks)
