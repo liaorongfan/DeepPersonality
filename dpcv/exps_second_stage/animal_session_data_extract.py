@@ -2,6 +2,8 @@ from dpcv.exps_second_stage.feature_extract import feature_extract_true_personal
 from dpcv.data.datasets.feature_extract_dataset_tp import (
     set_true_personality_dataloader,
     set_vat_tp_dataloader,
+    set_3Dres_tp_dataloader,
+    set_slowfast_tp_dataloader,
     set_multi_modal_pred_tp_dataloader,
     set_crnet_aud_true_personality_dataloader,
     set_audiovisual_true_personality_dataloader,
@@ -108,10 +110,44 @@ if __name__ == "__main__":
     #     return_feat=True,
     # )
 
+    # feature_extract_true_personality(
+    #     cfg_file="config/true_personality/all_sessions/06_multi_modal_pred_audio.yaml",
+    #     model_weight="results_true_personality/all_sesstion/audio_all/06_multi_modal_pred/03-19_15-44/checkpoint_1.pkl",
+    #     data_loader=set_multi_modal_pred_tp_dataloader,
+    #     output_dir="datasets/model_output_features/06_multi_modal_pred_audio",
+    #     return_feat=True,
+    # )
+
+    # ================================================================================================
     feature_extract_true_personality(
-        cfg_file="config/true_personality/all_sessions/06_multi_modal_pred_audio.yaml",
-        model_weight="results_true_personality/all_sesstion/audio_all/06_multi_modal_pred/03-19_15-44/checkpoint_1.pkl",
-        data_loader=set_multi_modal_pred_tp_dataloader,
-        output_dir="datasets/model_output_features/06_multi_modal_pred_audio",
-        return_feat=True,
-    )
+        cfg_file="config/true_personality/feature_extact_tmp/07_vat_face_video_level.yaml",
+        model_weight="results_true_personality/all_sesstion/unified_face_images_all/07_vat_video_level/03-16_10-42/checkpoint_1.pkl",
+        data_loader=set_vat_tp_dataloader,
+        output_dir="datasets/second_stage_tp/07_vat_face_video_level",
+        return_feat=False,
+    ) 
+
+    feature_extract_true_personality(
+        cfg_file="config/true_personality/sequence_prediction_extract/3d_resnet.yaml",
+        model_weight="results_true_personality/resnet_3d_checkpoint_90.pkl",
+        data_loader=set_3Dres_tp_dataloader,
+        output_dir="datasets/second_stage_tp/3Dresnet",
+        return_feat=False,
+    ) 
+
+
+    feature_extract_true_personality(
+        cfg_file="config/true_personality/sequence_prediction_extract/tpn.yaml",
+        model_weight="results_true_personality/tpn_checkpoint_70.pkl",
+        data_loader=set_3Dres_tp_dataloader,
+        output_dir="datasets/second_stage_tp/tpn",
+        return_feat=False,
+    ) 
+
+    feature_extract_true_personality(
+        cfg_file="config/true_personality/sequence_prediction_extract/slow_fast.yaml",
+        model_weight="results_true_personality/slow_fast_checkpoint_0.pkl",
+        data_loader=set_slowfast_tp_dataloader,
+        output_dir="datasets/second_stage_tp/slow_fast",
+        return_feat=False,
+    ) 
