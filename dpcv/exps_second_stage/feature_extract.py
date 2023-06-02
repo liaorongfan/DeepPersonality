@@ -46,11 +46,12 @@ def feature_extract_true_personality(cfg_file, model_weight, data_loader, output
 if __name__ == "__main__":
 
     feature_extract(
-        cfg_file="config/impression/sequence_prediction_extract/06_tpn_face.yaml",
-        model_weight="results/checkpoint_267_tpn_acc_9003.pkl",
+        cfg_file="config/impression/sequence_prediction_extract/05_slow_fast_face.yaml",
+        model_weight="results/unified_face_images/05_slow_fast_face/checkpoint_25_slow_fast_acc_8650.pkl",
         data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/tpn",
+        output_dir="datasets/second_stage/slow_fast",
     )
+
 
     # # interpret_cnn feature extract
     # feature_extract(

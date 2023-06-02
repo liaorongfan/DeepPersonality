@@ -103,9 +103,13 @@ class AllSampleFrameData2(VideoData):
     def get_sample_frames(self, idx):
         img_dir = self.img_dir_ls[idx]
         # Note randomly ordered after glob search
-        img_path_ls = sorted(glob.glob(f"{img_dir}/*.jpg"))
+        img_path_ls = list(sorted(glob.glob(f"{img_dir}/*.jpg")))
         img_obj_ls = [Image.open(img_path) for img_path in img_path_ls]
-        return img_obj_ls
+        print(img_dir, len(img_obj_ls))
+        if len(img_obj_ls) > 64:
+            return img_obj_ls
+        else:
+            return self.get_sample_frames(idx + 1)
 
 
 def make_data_loader(cfg, mode="train"):
