@@ -536,6 +536,18 @@ class AUTrainer(BiModalTrainer):
 
 
 @TRAINER_REGISTRY.register()
+class SoundTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        inputs, labels = data["feature"], data["label"]
+        inputs = inputs.squeeze().to(self.device)
+        labels = labels.type(torch.float32)
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
 class MetaCRNetDataTrainer(BiModalTrainer):
     """
     for model only image data used
