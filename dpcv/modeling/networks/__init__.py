@@ -20,3 +20,4 @@ from .spectrum_model import spectrum_conv_model2
 from .multi_modal_pred_net import multi_modal_visual_model, multi_modal_audio_model
 from .meta_fusing_mlp import meta_fusing_model
 from .au_fusing_mlp import au_model
+from .sound_feat_mlp import sound_model
