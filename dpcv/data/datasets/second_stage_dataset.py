@@ -6,6 +6,7 @@ import glob
 import os
 from tqdm import tqdm
 import numpy as np
+import pickle
 from math import ceil
 
 
@@ -214,6 +215,58 @@ class StatisticData(Dataset):
         return len(self.sample_dict["video_label"])
 
 
+class SeqSecondStageData(SecondStageData):
+
+    def data_preprocess(self, data_dir):
+        if os.path.exists(self.save_to) or os.path.exists(self.save_to.replace(".pkl", "_1.pkl")):
+            return
+
+        print(
+            f"preprocessing data [{data_dir}] \n"
+            f"[{self.data_type}] by [{self.process_method}]"
+        )
+        data_ls = []
+        sample_pth_ls = sorted(glob.glob(f"{data_dir}/*.pkl"))
+        sample_num = len(sample_pth_ls)
+        seg_id = 0
+        data_slot = []
+        for i, sample_pth in enumerate(tqdm(sample_pth_ls)):
+            sample = torch.load(sample_pth)
+            data, label = sample[self.data_type], sample["video_label"]  # data: (382, 2048) label: (5,)
+            data_slot.append(data.squeeze())
+            if len(data_slot) == 100:
+                data = torch.stack(data_slot, dim=0)
+                data_slot = []
+                if self.process_method == "statistic":
+                    data = self.statistic_process(data)
+                elif self.process_method == "spectrum":
+                    data, valid = self.spectrum_process(data)  # data: (382, 2048) label: (5,)
+                    if not valid:
+                        print(f"{sample_pth} not valid with data shape {data.shape}")
+                        continue
+                else:
+                    raise NotImplementedError
+
+                sample_train = {"id": i, "data": data, "label": label}
+                data_ls.append(sample_train)
+                # signal_num = data_ls[0]["data"].shape[1]
+                # if signal_num >= 1024:
+                # if self.signal_num != signal_num:
+                #     self.signal_num = signal_num
+                # for large feature save 1000 item every time in case of memory issue
+                # last_seg = ceil(len(sample_pth_ls) / 1000)
+                data_seg = 2000
+                if len(data_ls) == data_seg:
+                    seg_id += 1
+                    torch.save(data_ls[:data_seg], self.save_to.replace(".pkl", f"_{seg_id}.pkl"))
+                    data_ls = data_ls[data_seg:]
+                elif i == sample_num - 1:
+                    seg_id += 1
+                    torch.save(data_ls, self.save_to.replace(".pkl", f"_{seg_id}.pkl"))
+
+
+
+
 @DATA_LOADER_REGISTRY.register()
 def statistic_data_loader(cfg, mode):
     assert mode in ["train", "valid", "test", "full_test"], \
@@ -280,12 +333,14 @@ def second_stage_data(cfg, mode):
             data_dir=data_cfg.TRAIN_IMG_DATA,
             data_type=sec_stage_cfg.TYPE,
             method=sec_stage_cfg.METHOD,
+            top_n_sample=data_cfg.TOP_SAMPLE,
         )
     elif mode == "valid":
         dataset = SecondStageData(
             data_dir=data_cfg.VALID_IMG_DATA,
             data_type=sec_stage_cfg.TYPE,
             method=sec_stage_cfg.METHOD,
+            top_n_sample=data_cfg.TOP_SAMPLE,
         )
         SHUFFLE = False
     else:
@@ -293,6 +348,7 @@ def second_stage_data(cfg, mode):
             data_dir=data_cfg.TEST_IMG_DATA,
             data_type=sec_stage_cfg.TYPE,
             method=sec_stage_cfg.METHOD,
+            top_n_sample=data_cfg.TOP_SAMPLE,
         )
         SHUFFLE = False
     loader_cfg = cfg.DATA_LOADER
@@ -305,6 +361,48 @@ def second_stage_data(cfg, mode):
     )
     return data_loader
 
+
+@DATA_LOADER_REGISTRY.register()
+def seq_second_stage_data(cfg, mode):
+    assert mode in ["train", "valid", "test", "full_test"], \
+        f"{mode} should be one of 'train', 'valid' or 'test'"
+
+    SHUFFLE = True
+
+    data_cfg = cfg.DATA
+    sec_stage_cfg = cfg.DATA_LOADER.SECOND_STAGE
+    if mode == "train":
+        dataset = SeqSecondStageData(
+            data_dir=data_cfg.TRAIN_IMG_DATA,
+            data_type=sec_stage_cfg.TYPE,
+            method=sec_stage_cfg.METHOD,
+            top_n_sample=data_cfg.TOP_SAMPLE,
+        )
+    elif mode == "valid":
+        dataset = SeqSecondStageData(
+            data_dir=data_cfg.VALID_IMG_DATA,
+            data_type=sec_stage_cfg.TYPE,
+            method=sec_stage_cfg.METHOD,
+            top_n_sample=data_cfg.TOP_SAMPLE,
+        )
+        SHUFFLE = False
+    else:
+        dataset = SeqSecondStageData(
+            data_dir=data_cfg.TEST_IMG_DATA,
+            data_type=sec_stage_cfg.TYPE,
+            method=sec_stage_cfg.METHOD,
+            top_n_sample=data_cfg.TOP_SAMPLE,
+        )
+        SHUFFLE = False
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        num_workers=loader_cfg.NUM_WORKERS,
+        shuffle=SHUFFLE,
+        drop_last=cfg.DATA_LOADER.DROP_LAST,
+    )
+    return data_loader
 
 if __name__ == "__main__":
     os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")

@@ -230,9 +230,10 @@ class VATTPData(Chalearn21FrameData):
         spa_trans=None, tem_trans=None, 
         traits="OCEAN", visual_clip=-1,
         time_step=16,
+        even_downsample=1600
     ):
         super().__init__(
-            data_root, data_split, task, data_type, even_downsample=1600, trans=None, segment=True, 
+            data_root, data_split, task, data_type, even_downsample=even_downsample, trans=None, segment=True, 
             traits=traits, visual_clip=visual_clip,
         )
         self.spa_trans = spa_trans
@@ -345,6 +346,51 @@ class ExtMultiModalData(MultiModalData):
         return sample
 
 
+class TemporalData(VATTPData):
+
+    def __getitem__(self, index):
+
+        img_lst, label = self.training_samples[index].values()
+        img_ten = self._loading(img_lst)
+        t, c, h, w = img_ten.shape
+        img_ten = img_ten.reshape(c, t, h, w)
+        if len(self.traits) != 5:
+            label = label[self.traits]
+        return {"all_images": img_ten, "label": torch.as_tensor(label, dtype=torch.float32)}
+
+
+class SlowFastTemporalData(VATTPData):
+
+    def __getitem__(self, index):
+
+        img_lst, label = self.training_samples[index].values()
+        img_ten = self._loading(img_lst)
+        t, c, h, w = img_ten.shape
+        img_ten = img_ten.reshape(c, t, h, w)
+        img_lst = self.pack_pathway_output(img_ten)
+        if len(self.traits) != 5:
+            label = label[self.traits]
+        return {"all_images": img_lst, "label": torch.as_tensor(label, dtype=torch.float32)}
+
+
+    def pack_pathway_output(self, frames):
+        fast_pathway = frames
+        slow_pathway = torch.index_select(
+            frames,
+            1,
+            torch.linspace(
+                0, frames.shape[1] - 1, frames.shape[1] // 4
+            ).long(),
+        )
+        frame_list = [slow_pathway[None], fast_pathway[None]]
+
+        return frame_list
+
+
+
+
+
+
 def set_true_personality_dataloader(cfg, mode):
     transform = build_transform_spatial(cfg)
     data_set = AllSampleTruePersonalityData(
@@ -443,4 +489,49 @@ def set_multi_modal_pred_tp_dataloader(cfg, mode):
         traits=cfg.DATA.TRAITS,
     )
     return data_set
+
+
+def set_3Dres_tp_dataloader(cfg, mode):
+    from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample
+    from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
+
+    spatial_transform = build_transform_spatial(cfg)
+    temporal_transform = [TemporalDownsample(length=1600)]
+    temporal_transform = TemporalCompose(temporal_transform)
+
+    data_cfg = cfg.DATA
+    data_set = TemporalData(
+        data_root="datasets/chalearn2021",
+        data_split=mode,
+        task=data_cfg.SESSION,
+        data_type=data_cfg.TYPE,
+        spa_trans=spatial_transform,
+        tem_trans=temporal_transform,
+        visual_clip=data_cfg.VISUAL_CLIP
+    )
+    return data_set
+
+def set_slowfast_tp_dataloader(cfg, mode):
+    from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample
+    from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
+
+    spatial_transform = build_transform_spatial(cfg)
+    temporal_transform = [TemporalDownsample(length=6400)]
+    temporal_transform = TemporalCompose(temporal_transform)
+
+    data_cfg = cfg.DATA
+    data_set = SlowFastTemporalData(
+        data_root="datasets/chalearn2021",
+        data_split=mode,
+        task=data_cfg.SESSION,
+        data_type=data_cfg.TYPE,
+        spa_trans=spatial_transform,
+        tem_trans=temporal_transform,
+        visual_clip=data_cfg.VISUAL_CLIP,
+        time_step=64,
+        even_downsample=6400,
+    )
+    return data_set
+
+
 
