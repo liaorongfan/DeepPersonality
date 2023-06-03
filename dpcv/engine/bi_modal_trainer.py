@@ -228,7 +228,7 @@ class SequenceBiModalTrain(BiModalTrainer):
                 inputs, label = self.full_test_data_fmt(data)
                 batch_size = 16
                 out_ls, feat_ls = [], []
-                for i in range(math.ceil(len(inputs[0]) / batch_size)):
+                for i in range(math.ceil(inputs.shape[0] / batch_size)):
                     mini_batch_1 = inputs[(i * batch_size): (i + 1) * batch_size]
                     bs, c, h, w = mini_batch_1.shape
                     mini_batch_1 = mini_batch_1.reshape(1, 3, bs, h, w)
@@ -268,7 +268,7 @@ class SequenceTPNTrain(BiModalTrainer):
                 inputs, label = self.full_test_data_fmt(data)
                 batch_size = 16
                 out_ls, feat_ls = [], []
-                for i in range(math.ceil(len(inputs[0]) / batch_size)):
+                for i in range(math.ceil(inputs.shape[0] / batch_size)):
                     mini_batch_1 = inputs[(i * batch_size): (i + 1) * batch_size]
                     bs, c, h, w = mini_batch_1.shape
                     mini_batch_1 = mini_batch_1.reshape(1, 3, bs, h, w)
@@ -314,7 +314,7 @@ class SequenceSlowFastTrain(BiModalTrainer):
                 inputs, label = self.full_test_data_fmt(data)
                 batch_size = 64
                 out_ls, feat_ls = [], []
-                for i in range(math.ceil(len(inputs[0]) / batch_size)):
+                for i in range(math.ceil(inputs.shape[0] / batch_size)):
                     mini_batch_1 = inputs[(i * batch_size): (i + 1) * batch_size]
                     bs, c, h, w = mini_batch_1.shape
                     mini_batch_1 = mini_batch_1.reshape(3, bs, h, w)

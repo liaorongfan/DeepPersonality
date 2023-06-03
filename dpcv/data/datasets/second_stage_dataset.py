@@ -281,12 +281,14 @@ def second_stage_data(cfg, mode):
             data_dir=data_cfg.TRAIN_IMG_DATA,
             data_type=sec_stage_cfg.TYPE,
             method=sec_stage_cfg.METHOD,
+            top_n_sample=3,
         )
     elif mode == "valid":
         dataset = SecondStageData(
             data_dir=data_cfg.VALID_IMG_DATA,
             data_type=sec_stage_cfg.TYPE,
             method=sec_stage_cfg.METHOD,
+            top_n_sample=3,
         )
         SHUFFLE = False
     else:
@@ -294,6 +296,7 @@ def second_stage_data(cfg, mode):
             data_dir=data_cfg.TEST_IMG_DATA,
             data_type=sec_stage_cfg.TYPE,
             method=sec_stage_cfg.METHOD,
+            top_n_sample=3,
         )
         SHUFFLE = False
     loader_cfg = cfg.DATA_LOADER
