@@ -244,7 +244,7 @@ def vat_model(cfg=None):
     if cfg is not None:
         num_classes = cfg.MODEL.NUM_CLASS
         return_feat = cfg.MODEL.RETURN_FEATURE
-    model = SemiTransformer(num_classes=num_classes, seq_len=32, return_feature=return_feat)
+    model = SemiTransformer(num_classes=num_classes, seq_len=8, return_feature=return_feat)
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
