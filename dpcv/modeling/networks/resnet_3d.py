@@ -247,6 +247,6 @@ def resnet50_3d_model(cfg):
 
 if __name__ == "__main__":
     model = get_3d_resnet_model(50)
-    xin = torch.randn(4, 3, 16, 224, 224)
+    xin = torch.randn(4, 3, 16, 224, 224).cuda()
     y = model(xin)
     print(y.shape)

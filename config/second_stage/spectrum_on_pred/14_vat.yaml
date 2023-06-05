@@ -1,7 +1,7 @@
 DATA:
-  TRAIN_IMG_DATA: "datasets/second_stage/3d_resnet/train"
-  VALID_IMG_DATA: "datasets/second_stage/3d_resnet/valid"
-  TEST_IMG_DATA: "datasets/second_stage/3d_resnet/test"
+  TRAIN_IMG_DATA: "datasets/second_stage/vat/train"
+  VALID_IMG_DATA: "datasets/second_stage/vat/valid"
+  TEST_IMG_DATA: "datasets/second_stage/vat/test"
   TOP_SAMPLE: 15
 DATA_LOADER:
   NAME: "second_stage_data"
@@ -23,4 +23,4 @@ SOLVER:
 TRAIN:
   TRAINER: "SpectrumTrainer"
   MAX_EPOCH: 50
-  OUTPUT_DIR: "results_second_stage/spectrum_on_pred/11_3DResnet"
+  OUTPUT_DIR: "results_second_stage/spectrum_on_pred/13_tpn"
