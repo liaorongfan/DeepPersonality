@@ -54,11 +54,13 @@ if __name__ == "__main__":
     #
 
     feature_extract(
-        cfg_file="config/impression/sequence_prediction_extract/04_resnet50_3d_face.yaml",
-        model_weight="results/unified_face_images/04_resnet50_3d_face/checkpoint_347_resnet3d_face_acc_8948.pkl",
+        cfg_file="config/impression/sequence_prediction_extract/05_slow_fast_face.yaml",
+        model_weight="results/unified_face_images/05_slow_fast_face/checkpoint_25_slow_fast_acc_8650.pkl",
         data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/3d_resnet",
+        output_dir="datasets/second_stage/slow_fast",
     )
+
+
     # # interpret_cnn feature extract
     # feature_extract(
     #     cfg_file="config/unified_frame_images/10_swin_transformer.yaml",
