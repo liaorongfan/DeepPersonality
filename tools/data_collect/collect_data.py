@@ -80,6 +80,8 @@ def collect_files(data_root):
 
 class AUDataCollect:
 
+    TRAITS = ["Ope", "Con", "Ext", "Agr", "Neu"]
+
     def __init__(self, data_root=None):
         self.ip_au_log_files = collect_au_log_files("results_second_stage/action_units/ip")
         self.tp_au_log_files = collect_au_log_files("results_second_stage/action_units/tp")
@@ -108,6 +110,17 @@ class AUDataCollect:
         return name_ls
 
     def get_traits_au(self, trait):
+        if trait == "M":
+            aus_ip = self.ip_data_array.mean(axis=1) * 100  # .tolist()
+            aus_tp = self.tp_data_array.mean(axis=1) * 100  # .tolist()
+            return aus_ip, aus_tp
+
+        if trait == "T":
+            aus_ip = self.ip_data_array.mean(axis=0) * 100  # .tolist()
+            aus_tp = self.tp_data_array.mean(axis=0) * 100  # .tolist()
+            return aus_ip, aus_tp
+
+
         idx = ["O", "C", "E", "A", "N"].index(trait)
         aus_ip = self.ip_data_array[:, idx] * 100  # .tolist()
         aus_tp = self.tp_data_array[:, idx] * 100  # .tolist()
@@ -121,18 +134,19 @@ def collect_au_log_files(data_root):
 
 class CompareGraph:
     def __init__(self, labels, input_1, input_2, x_label):
-        x = np.arange(len(labels)) * 2  # the label locations
-        width = 0.8  # the width of the bars
+        x = np.arange(len(labels)) * 4  # the label locations
+        width = 1.2  # the width of the bars
 
         self.fig, self.ax = plt.subplots()
-        self.frame = self.ax.bar(x - width / 2, input_1, width, label='IP')
-        self.face = self.ax.bar(x + width / 2, input_2, width, label='TP')
+        self.frame = self.ax.bar(x - width / 2, input_1, width, label='Apparent personality')
+        self.face = self.ax.bar(x + width / 2, input_2, width, label='True personality')
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         self.ax.set_ylabel('CCC (%)', fontsize=15)
         # ax.set_title('Impression ACC scores by frame and face images')
         traits_label = {
-            "O": "Ope.", "C": "Con.", "E": "Ext.", "A": "Agr.", "N": "Neu.",
+            "O": "Openness", "C": "Conscientiousness", "E": "Extraversion", "A": "Agreeableness", "N": "Neuroticism",
+            "M": "OCEAN Average From 17 Action Units", "T": "AUs Average on OCEAN traits"
         }[x_label]
         self.ax.set_xlabel(traits_label, fontsize=15)
         self.ax.set_xticks(x)
@@ -147,31 +161,34 @@ class CompareGraph:
                              xy=(rect.get_x() + rect.get_width() / 2, height),
                              xytext=xytxt,  # 3 points vertical offset
                              textcoords="offset points",
-                             fontsize=8,
+                             fontsize=6,
                              ha='center', va='bottom')
 
-    def autolabel_face(self, rects, xytxt=(2, 2)):
+    def autolabel_face(self, rects, xytxt=(4, 2)):
         """Attach a text label above each bar in *rects*, displaying its height."""
         for rect in rects:
             height = rect.get_height()
-            self.ax.annotate('{:.2f}'.format(height),
+            value = height
+            if height < 0:
+                height = height - 1.2
+            self.ax.annotate('{:.2f}'.format(value),
                              xy=(rect.get_x() + rect.get_width() / 2, height),
                              xytext=xytxt,  # 3 points vertical offset
                              textcoords="offset points",
-                             fontsize=8,
+                             fontsize=6,
                              ha='center', va='bottom')
 
-    def draw(self):
+    def draw(self, name):
         self.autolabel_frame(self.frame)
         self.autolabel_face(self.face)
 
         self.fig.tight_layout()
         # plt.figure(figsize=(12, 12))
-        plt.ylim(-7, 18)
+        plt.ylim(-8, 25)
         # plt.xlim(-0.4, 30)
-        plt.xticks(rotation=-30)
+        plt.xticks(rotation=-30, size=8)
         # plt.xticks(np.linspace(0, 40, 17))
-        plt.savefig("Impression_ACC.png", dpi=800)
+        plt.savefig(name, dpi=800)
         plt.show()
 
 
@@ -179,11 +196,13 @@ if __name__ == "__main__":
     collector = AUDataCollect()
     # collector = FoldDataCollect()
     labels = collector.au_ls
-    labels.append("mean")
+    # labels = AUDataCollect.TRAITS
+    labels.append("Mean")
     # for t in ["O", "C", "E", "A", "N"]:
     #     aus_ip, aus_tp = collector.get_traits_au(t)
     #     graph = CompareGraph(labels, aus_ip, aus_tp, x_label=t)
     #     graph.draw()
+    img_name = "A_17AUs.png"
     t = "A"
     aus_ip, aus_tp = collector.get_traits_au(t)
     aus_ip_mean = aus_ip.mean().astype(np.float32).round(4)[None]
@@ -194,6 +213,6 @@ if __name__ == "__main__":
     aus_ip_m = np.concatenate([aus_ip, aus_ip_mean], axis=0)
     aus_tp_m = np.concatenate([aus_tp, aus_tp_mean], axis=0)
     graph = CompareGraph(labels, aus_ip_m, aus_tp_m, x_label=t)
-    graph.draw()
+    graph.draw(img_name)
 
 
