@@ -5,13 +5,16 @@ DATA:
   DOWNSAMPLE: 100
   FRAMES: 16
 DATA_LOADER:
-  NAME: "spatial_temporal_data_loader"
-  TRANSFORM: "face_image_x2_transform"
+  NAME: "tpn_data_loader"
+  TRANSFORM: "set_tpn_transform_op"
   TRANSFORM_TMP: "set_tmp_transform"
-  TRAIN_BATCH_SIZE: 8
+  TRAIN_BATCH_SIZE: 4
   NUM_WORKERS: 4
 MODEL:
-  NAME: "resnet50_3d_model"
+  NAME: "tpn_model"
+SOLVER:
+  LR_INIT: 0.01
 TRAIN:
-  MAX_EPOCH: 60
-  OUTPUT_DIR: "results/unified_face_images/04_resnet50_3d_face"
+  TRAINER: "TPNTrainer"
+  MAX_EPOCH: 40
+  OUTPUT_DIR: "results/unified_face_images/13_tpn"

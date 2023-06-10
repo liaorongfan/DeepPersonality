@@ -3,18 +3,18 @@ DATA:
   VALID_IMG_DATA: "image_data/valid_data_face"
   TEST_IMG_DATA: "image_data/test_data_face"
   DOWNSAMPLE: 100
-  FRAMES: 16
+  FRAMES: 64
 DATA_LOADER:
   NAME: "tpn_data_loader"
   TRANSFORM: "set_tpn_transform_op"
   TRANSFORM_TMP: "set_tmp_transform"
-  TRAIN_BATCH_SIZE: 4
-  NUM_WORKERS: 4
+  TRAIN_BATCH_SIZE: 1
+  NUM_WORKERS: 2
 MODEL:
   NAME: "tpn_model"
 SOLVER:
-  LR_INIT: 0.001
+  LR_INIT: 0.01
 TRAIN:
   TRAINER: "TPNTrainer"
-  MAX_EPOCH: 40
+  MAX_EPOCH: 100
   OUTPUT_DIR: "results/unified_face_images/13_tpn"
