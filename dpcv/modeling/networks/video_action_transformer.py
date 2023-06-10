@@ -241,10 +241,11 @@ def get_vat_model():
 @NETWORK_REGISTRY.register()
 def vat_model(cfg=None):
     num_classes = 5
+    frames = cfg.DATA.FRAMES
     if cfg is not None:
         num_classes = cfg.MODEL.NUM_CLASS
         return_feat = cfg.MODEL.RETURN_FEATURE
-    model = SemiTransformer(num_classes=num_classes, seq_len=8, return_feature=return_feat)
+    model = SemiTransformer(num_classes=num_classes, seq_len=frames, return_feature=return_feat)
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 

@@ -28,6 +28,10 @@ __C.DATA.TOP_SAMPLE = 600
 __C.DATA.VISUAL_CLIP = -1
 __C.DATA.AUDIO_CLIP = -1
 
+# used for temporal inputs
+__C.DATA.DOWNSAMPLE = 100
+__C.DATA.FRAMES = 32
+
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
 __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
@@ -59,6 +63,7 @@ __C.DATA_LOADER = CfgNode()
 __C.DATA_LOADER.NAME = "single_frame_data_loader"
 __C.DATA_LOADER.DATASET = ""
 __C.DATA_LOADER.TRANSFORM = "standard_frame_transform"
+__C.DATA_LOADER.TRANSFORM_TMP = "set_tmp_transform"
 __C.DATA_LOADER.TRAIN_BATCH_SIZE = 32
 __C.DATA_LOADER.VALID_BATCH_SIZE = 32
 __C.DATA_LOADER.TEST_BATCH_SIZE = 32

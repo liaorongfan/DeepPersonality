@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.transforms.transform import set_transform_op
-from dpcv.data.transforms.build import build_transform_spatial
+from dpcv.data.transforms.build import build_transform_spatial, build_transform_temporal
 from .build import DATA_LOADER_REGISTRY
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop,  TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
@@ -252,11 +252,7 @@ def spatial_temporal_data_loader(cfg, mode="train"):
         "'mode' should be 'train' , 'valid', 'trainval', 'test' or 'full_test' "
 
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
-    # temporal_transform = [TemporalRandomCrop(16)]
-    # temporal_transform = [TemporalDownsample(32)]
-
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform = build_transform_temporal(cfg)
 
     data_cfg = cfg.DATA
     if "face" in data_cfg.TRAIN_IMG_DATA:

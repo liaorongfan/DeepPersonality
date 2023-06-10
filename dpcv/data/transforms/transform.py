@@ -1,3 +1,8 @@
+
+from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample, TemporalEvenCropDownsample
+from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
+
+
 """
 transform operation for different networks
 for vgg face mean = (131.0912, 103.8827, 91.4953) no std
@@ -19,7 +24,7 @@ def set_transform_op():
 
 
 @TRANSFORM_REGISTRY.register()
-def standard_frame_transform():
+def standard_frame_transform(cfg):
     import torchvision.transforms as transforms
     transforms = transforms.Compose([
         transforms.Resize(256),
@@ -32,7 +37,7 @@ def standard_frame_transform():
 
 
 @TRANSFORM_REGISTRY.register()
-def strong_frame_transform():
+def strong_frame_transform(cfg):
     import torchvision.transforms as transforms
     transforms = transforms.Compose([
         transforms.Resize(256),
@@ -47,7 +52,7 @@ def strong_frame_transform():
 
 
 @TRANSFORM_REGISTRY.register()
-def face_image_transform():
+def face_image_transform(cfg):
     import torchvision.transforms as transforms
     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
     norm_std = [0.229, 0.224, 0.225]
@@ -61,7 +66,7 @@ def face_image_transform():
 
 
 @TRANSFORM_REGISTRY.register()
-def face_image_x2_transform():
+def face_image_x2_transform(cfg):
     import torchvision.transforms as transforms
     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
     norm_std = [0.229, 0.224, 0.225]
@@ -75,7 +80,7 @@ def face_image_x2_transform():
 
 
 @TRANSFORM_REGISTRY.register()
-def crnet_frame_face_transform():
+def crnet_frame_face_transform(cfg):
     import torchvision.transforms as transforms
     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
     norm_std = [0.229, 0.224, 0.225]
@@ -97,7 +102,7 @@ def crnet_frame_face_transform():
 
 
 @TRANSFORM_REGISTRY.register()
-def set_tpn_transform_op():
+def set_tpn_transform_op(cfg):
     import torchvision.transforms as transforms
     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
     norm_std = [0.229, 0.224, 0.225]
@@ -112,7 +117,7 @@ def set_tpn_transform_op():
 
 
 @TRANSFORM_REGISTRY.register()
-def set_vat_transform_op():
+def set_vat_transform_op(cfg):
     import torchvision.transforms as transforms
     norm_mean = [0.485, 0.456, 0.406]  # statistics from imagenet dataset which contains about 120 million images
     norm_std = [0.229, 0.224, 0.225]
@@ -159,3 +164,13 @@ def set_per_transform():
     ])
     return transforms
 
+
+@TRANSFORM_REGISTRY.register()
+def set_tmp_transform(cfg):
+    length = cfg.DATA.DOWNSAMPLE
+    frames = cfg.DATA.FRAMES
+    temporal_transform = [
+        TemporalDownsample(length=length), 
+        TemporalRandomCrop(frames),
+    ]
+    return TemporalCompose(temporal_transform)

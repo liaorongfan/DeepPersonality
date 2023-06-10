@@ -22,7 +22,7 @@ args = {
         'out_channels': 1024,
         'spatial_modulation_config': {'inplanes': [1024, 2048], 'planes': 2048},
         'temporal_modulation_config': {
-            'scales': (16, 16),
+            'scales': (32, 32),
             'param': {'inplanes': -1, 'planes': -1, 'downsample_scale': -1}
         },
         'upsampling_config': {'scale': (1, 1, 1)},
@@ -267,6 +267,8 @@ def get_tpn_model():
 
 @NETWORK_REGISTRY.register()
 def tpn_model(cfg=None):
+    frames = cfg.DATA.FRAMES
+    args["necks"]["temporal_modulation_config"]["scales"] = (frames, frames)
     model = TSN2D(**args)
     return model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 

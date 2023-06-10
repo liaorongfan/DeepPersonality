@@ -5,7 +5,7 @@ from dpcv.data.datasets.video_segment_data import VideoFrameSegmentData
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.common import VideoLoader
-from dpcv.data.transforms.build import build_transform_spatial
+from dpcv.data.transforms.build import build_transform_spatial, build_transform_temporal
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
 from dpcv.data.datasets.video_segment_data import TruePersonalityVideoFrameSegmentData
 
@@ -129,9 +129,7 @@ def tpn_data_loader(cfg, mode="train"):
         "'mode' should be 'train' , 'valid' or 'trainval'"
 
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
-    # temporal_transform = [TemporalDownsample(length=16)]
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform = build_transform_temporal(cfg)
 
     data_cfg = cfg.DATA
     if "face" in data_cfg.TRAIN_IMG_DATA:
@@ -205,9 +203,7 @@ def tpn_data_loader(cfg, mode="train"):
 @DATA_LOADER_REGISTRY.register()
 def tpn_true_per_data_loader(cfg, mode="train"):
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalRandomCrop(16)]
-    # temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform = build_transform_temporal(cfg)
 
     data_cfg = cfg.DATA
     if data_cfg.TYPE == "face":
@@ -241,9 +237,7 @@ def all_tpn_true_per_data_loader(cfg, mode="train"):
     from torch.utils.data.dataset import ConcatDataset
 
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalRandomCrop(16)]
-    # temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform = build_transform_temporal(cfg)
 
     data_cfg = cfg.DATA
     if data_cfg.TYPE == "face":

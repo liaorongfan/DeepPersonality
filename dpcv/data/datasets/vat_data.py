@@ -8,7 +8,7 @@ from dpcv.data.datasets.tpn_data import FullTestTPNData as FullTestVATData
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
-from dpcv.data.transforms.build import build_transform_spatial
+from dpcv.data.transforms.build import build_transform_spatial, build_transform_temporal
 from dpcv.data.datasets.common import VideoLoader
 
 
@@ -71,9 +71,7 @@ def vat_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(8)]
-    # temporal_transform = [TemporalDownsample(length=16)]
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform =  build_transform_temporal(cfg)   # temporal_transform = [TemporalDownsample(length=16)]
 
     data_cfg = cfg.DATA
     if "face" in data_cfg.TRAIN_IMG_DATA:
