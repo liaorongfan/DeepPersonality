@@ -57,7 +57,8 @@ class Chalearn21FrameData(Dataset):
                 self.img_dir_ls.extend([f"{dire}/FC1_{self.task_mark}_face", f"{dire}/FC2_{self.task_mark}_face"])
         else:
             raise TypeError(f"type should be 'face' or 'frame' or 'audio', but got {type}")
-
+        # for debug usage
+        # self.img_dir_ls = self.img_dir_ls[:4]
         self.segment = segment
         if not data_type == "audio":
             self.all_images = self.assemble_images()

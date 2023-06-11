@@ -321,9 +321,7 @@ def spatial_temporal_data_loader(cfg, mode="train"):
 @DATA_LOADER_REGISTRY.register()
 def true_personality_spatial_temporal_data_loader(cfg, mode="train"):
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalRandomCrop(32)]
-    # temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform = build_transform_temporal(cfg)
 
     data_cfg = cfg.DATA
 
@@ -358,10 +356,7 @@ def all_true_personality_spatial_temporal_data_loader(cfg, mode="train"):
 
     from torch.utils.data.dataset import ConcatDataset
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalRandomCrop(32)]
-    # TODO: add temporal transform configuration
-    # temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform = build_transform_temporal(cfg)
 
     data_cfg = cfg.DATA
 
