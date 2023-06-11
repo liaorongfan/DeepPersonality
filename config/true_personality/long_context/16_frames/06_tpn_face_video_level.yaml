@@ -25,4 +25,4 @@ TRAIN:
   TRAINER: "TPNTrainer"
   MAX_EPOCH: 30
   LOG_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/unified_face_images_animal/06_tpn_video_level"
+  OUTPUT_DIR: "results_true_personality/unified_face_images/06_tpn_video_level_16"

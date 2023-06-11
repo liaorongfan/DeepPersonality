@@ -25,4 +25,4 @@ TRAIN:
   TRAINER: "ImageModalTrainer"
   MAX_EPOCH: 30
   LOG_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/unified_face_images_animal/04_resnet3d_video_level"
+  OUTPUT_DIR: "results_true_personality/unified_face_images/04_resnet3d_video_level_16"
