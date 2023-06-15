@@ -16,8 +16,8 @@ SOLVER:
   LR_INIT: 0.01
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [300, 400]
+  MILESTONE: [150, 180]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 50
+  MAX_EPOCH: 300
   OUTPUT_DIR: "results/unified_face_images/8_multi_modal_pred"
