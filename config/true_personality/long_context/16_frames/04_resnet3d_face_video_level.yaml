@@ -1,12 +1,14 @@
 DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "all"
   TYPE: "face"
-  TRAIN_IMG_DATA: "image_data/train_data"
-  VALID_IMG_DATA: "image_data/valid_data"
-  TEST_IMG_DATA: "image_data/test_data"
+  DOWNSAMPLE: 2000
+  FRAMES: 16
 DATA_LOADER:
-  NAME: "true_personality_spatial_temporal_data_loader"
+  NAME: "all_true_personality_spatial_temporal_data_loader"
   TRANSFORM: "standard_frame_transform"
-  TRAIN_BATCH_SIZE: 8
+  TRANSFORM_TMP: "set_tmp_transform"
+  TRAIN_BATCH_SIZE: 2
   NUM_WORKERS: 0
 MODEL:
   NAME: "resnet50_3d_model"
@@ -18,9 +20,9 @@ SOLVER:
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [15, 18]
+  MILESTONE: [20, 25]
 TRAIN:
   TRAINER: "ImageModalTrainer"
-  MAX_EPOCH: 100
+  MAX_EPOCH: 30
   LOG_INTERVAL: 10
-  OUTPUT_DIR: "results_true_personality/unified_face_images/04_resnet3d"
+  OUTPUT_DIR: "results_true_personality/unified_face_images/04_resnet3d_video_level_16"
