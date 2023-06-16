@@ -68,6 +68,42 @@ class AudInitStage(nn.Module):
         return x
 
 
+class AUsInitStage(nn.Module):
+    def __init__(self, in_channels=1, out_channels=64):
+        super(AUsInitStage, self).__init__()
+        self.conv1 = nn.Conv2d(
+            in_channels, out_channels, kernel_size=(1, 39), stride=(1, 4), padding=(0, 19), bias=False)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=(1, 9), stride=(1, 4), padding=(0, 4))
+
+    def forward(self, inputs):
+        x = self.conv1(inputs)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+        return x
+
+
+class AUs2DInitStage(nn.Module):
+    def __init__(self, in_channels=1, out_channels=64):
+        super(AUs2DInitStage, self).__init__()
+        self.conv1 = nn.Conv2d(
+            in_channels, out_channels, kernel_size=(1, 39), stride=(1, 4), padding=(0, 0), bias=False)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        # self.maxpool = nn.MaxPool2d(kernel_size=(1, 9), stride=(1, 4), padding=(0, 4))
+
+    def forward(self, inputs):
+        x = self.conv1(inputs)
+        x = self.bn1(x)
+        x = self.relu(x)
+        # x = self.maxpool(x)
+        bs, *_ = x.shape
+        # x = x.reshape(bs, 1, 1, -1)
+        return x
+
+
 class BiModalBasicBlock(nn.Module):
     """
     build visual and audio conv block for resnet18 architecture
@@ -108,8 +144,8 @@ class AudioVisualResNet(nn.Module):
                  zero_init_residual=False):
         super(AudioVisualResNet, self).__init__()
 
-        assert init_stage.__name__ in ["AudInitStage", "VisInitStage"], \
-            "init conv stage should be 'AudInitStage' or 'VisInitStage'"
+        # assert init_stage.__name__ in ["AudInitStage", "VisInitStage", "AUsInitStage"], \
+        #     "init conv stage should be 'AudInitStage' or 'VisInitStage', 'AUsInitStage'"
         assert len(conv) == 2, "conv should be a list containing <conv3x3 conv1x1> or <conv1x9, conv1x1> function"
 
         self.inplanes = channels[0]
