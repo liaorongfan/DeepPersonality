@@ -536,6 +536,32 @@ class AUTrainer(BiModalTrainer):
 
 
 @TRAINER_REGISTRY.register()
+class AUsPredBimodalTrain(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        data = [item.to(self.device).type(torch.float32) for item in data]
+        inputs, labels = data
+        bs, h, w = inputs.shape
+        inputs = inputs.reshape(bs, 1, 1, -1)
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
+class AUsPred2DBimodalTrain(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        data = [item.to(self.device).type(torch.float32) for item in data]
+        inputs, labels = data
+        bs, h, w = inputs.shape
+        inputs = inputs.reshape(bs, 1, h, w)
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
 class SoundTrainer(BiModalTrainer):
     """
     for model only image data used

@@ -1,4 +1,5 @@
 import glob
+import torch
 from torch.utils.data import DataLoader
 from pathlib import Path
 import pickle
@@ -41,7 +42,15 @@ class AUsDataset:
         self.traits = [self.TRAITS_ID[t] for t in traits]
 
     def __getitem__(self, idx):
-        return self.au_data[idx], self.au_label[idx]
+        data, label = self.au_data[idx], self.au_label[idx]
+        length = len(data)
+        if length < 400:
+            tmp = np.zeros((400, 39))
+            tmp[:length] = data
+            data = tmp
+        else:
+            data = data[:400, :]
+        return data, label
     
     def __len__(self):
         return len(self.au_data)
@@ -72,10 +81,12 @@ class AUsDataset:
             au_data = self.get_au_data(csv)
             if len(au_data) < self.min_frame_num:
                 continue
-
-            au_feat, valid = self.select_spectrum(au_data[None])
-            if not valid:
-                continue
+            if not self.top_n_sample < 0:
+                au_feat, valid = self.select_spectrum(au_data[None])
+                if not valid:
+                    continue
+            else:
+                au_feat = au_data.astype("float32")
             au_label = self.get_au_label(csv)
             data_lst.append(au_feat)
             label_lst.append(au_label)
@@ -100,7 +111,7 @@ class AUsDataset:
                 self.label_dict["agreeableness"][video_name],
                 self.label_dict["neuroticism"][video_name],
             ]
-        return np.array(score)
+        return np.array(score).astype("float32")
 
     def get_au_data(self, csv):
         aus_dict = {}
@@ -111,6 +122,8 @@ class AUsDataset:
             val = np.array(val)
             for idx, key in enumerate(aus_names):
                 aus_dict[key] = val[:, idx]
+        if self.au == "all":
+            return val[:, 1:]
         return aus_dict[f"{self.au}_r"]
 
     @staticmethod
@@ -157,6 +170,9 @@ class AUsDataset:
         return feat, valid
 
 
+
+
+
 @DATA_LOADER_REGISTRY.register()
 def au_dataloader(cfg, mode="train"):
 
@@ -171,6 +187,7 @@ def au_dataloader(cfg, mode="train"):
             au=cfg.DATA.AU,
             label_file=cfg.DATA.TRAIN_LABEL_DATA,
             session=cfg.DATA.SESSION,
+            spec_sample=cfg.DATA.TOP_SAMPLE,
         )
     elif mode == "valid":
         dataset = AUsDataset(
@@ -179,6 +196,7 @@ def au_dataloader(cfg, mode="train"):
             au=cfg.DATA.AU,
             label_file=cfg.DATA.VALID_LABEL_DATA,
             session=cfg.DATA.SESSION,
+            spec_sample=cfg.DATA.TOP_SAMPLE,
         )
     else:
         shuffle = False
@@ -188,6 +206,7 @@ def au_dataloader(cfg, mode="train"):
             au=cfg.DATA.AU,
             label_file=cfg.DATA.TEST_LABEL_DATA,
             session=cfg.DATA.SESSION,
+            spec_sample=cfg.DATA.TOP_SAMPLE,
         )
 
     data_loader = DataLoader(
