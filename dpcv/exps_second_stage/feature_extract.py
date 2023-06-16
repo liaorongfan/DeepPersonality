@@ -14,7 +14,7 @@ from dpcv.data.datasets.feature_extract_dataset_tp import (
 from dpcv.experiment.exp_runner import ExpRunner
 
 
-def feature_extract(cfg_file, model_weight, data_loader, output_dir, return_feat=False):
+def feature_extract(cfg_file, model_weight, data_loader, output_dir, return_feat=False, test_only=False):
 
     cfg_from_file(cfg_file)
     cfg.MODEL.RETURN_FEATURE = return_feat
@@ -22,21 +22,24 @@ def feature_extract(cfg_file, model_weight, data_loader, output_dir, return_feat
     runner = ExpRunner(cfg)
     runner.model = load_model(runner.model, model_weight)
 
-    for mode in ["train", "valid", "test"]:
+    split = ["train", "valid", "test"] if not test_only else ["test"]
+    for mode in split:
         # note if cuda out of memory, run each mode separately
         dataloader = data_loader(cfg, mode=mode)
         output_sub_dir = os.path.join(output_dir, mode)
         runner.data_extract(dataloader, output_sub_dir)
 
 
-def feature_extract_true_personality(cfg_file, model_weight, data_loader, output_dir, return_feat=False):
+def feature_extract_true_personality(
+    cfg_file, model_weight, data_loader, output_dir, return_feat=False, test_only=False
+):
     cfg_from_file(cfg_file)
     cfg.MODEL.RETURN_FEATURE = return_feat
 
     runner = ExpRunner(cfg, feature_extract=True)
     runner.model = load_model(runner.model, model_weight)
-
-    for mode in ["train", "valid", "test"]:
+    split = ["train", "valid", "test"] if not test_only else ["test"]
+    for mode in split:
         # note if cuda out of memory, run each mode separately
         dataloader = data_loader(cfg, mode=mode)
         output_sub_dir = os.path.join(output_dir, mode, f"{cfg.DATA.SESSION}_{mode}")
