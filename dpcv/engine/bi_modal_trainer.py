@@ -226,25 +226,31 @@ class SequenceBiModalTrain(BiModalTrainer):
         with torch.no_grad():
             for idx, data in enumerate(tqdm(data_set)):
                 inputs, label = self.full_test_data_fmt(data)
-                batch_size = 16
-                out_ls, feat_ls = [], []
-                for i in range(math.ceil(inputs.shape[0] / batch_size)):
+                batch_size = 32
+                # out_ls, feat_ls = [], []
+                batch_input = []
+                for i in range(math.floor(inputs.shape[0] / batch_size)):
                     mini_batch_1 = inputs[(i * batch_size): (i + 1) * batch_size]
                     bs, c, h, w = mini_batch_1.shape
-                    mini_batch_1 = mini_batch_1.reshape(1, bs, 3, h, w)  # for VAT (1, bs, 3, h, w)
-                    mini_batch = (mini_batch_1,)
-                    if model.return_feature:
-                        out, feat = model(*mini_batch)
-                        out_ls.append(out.cpu())
-                        feat_ls.append(feat.cpu())
-                    else:
-                        out = model(*mini_batch)
-                        out_ls.append(out.cpu())
-                        feat_ls.append(torch.tensor([0]))
-                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
+                    # mini_batch_1 = mini_batch_1.reshape(3, bs, h, w)  # for VAT (1, bs, 3, h, w)
+                    mini_batch = mini_batch_1.reshape(bs, 3, h, w)  # for VAT (1, bs, 3, h, w)
+                    batch_input.append(mini_batch)
+                
+                batch_input = (torch.stack(batch_input, dim=0),)
+
+                if model.return_feature:
+                    out, feat = model(*batch_input)
+                    # out_ls.append(out.cpu())
+                    # feat_ls.append(feat.cpu())
+                else:
+                    out = model(*batch_input)
+                    feat = torch.tensor([0])
+                    # out_ls.append(out.cpu())
+                    # feat_ls.append(torch.tensor([0]))
+                # out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
                 video_extract = {
-                    "video_frames_pred": out_pred,
-                    "video_frames_feat": out_feat,
+                    "video_frames_pred": out.cpu(),
+                    "video_frames_feat": feat.cpu(),
                     "video_label": label.cpu()
                 }
                 save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
