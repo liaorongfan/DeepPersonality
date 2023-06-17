@@ -14,9 +14,7 @@ from dpcv.data.datasets.feature_extract_dataset_tp import (
 from dpcv.experiment.exp_runner import ExpRunner
 
 
-def feature_extract(
-    cfg_file, model_weight, data_loader, output_dir, return_feat=False, test_only=False
-):
+def feature_extract(cfg_file, model_weight, data_loader, output_dir, return_feat=False, test_only=False):
 
     cfg_from_file(cfg_file)
     cfg.MODEL.RETURN_FEATURE = return_feat

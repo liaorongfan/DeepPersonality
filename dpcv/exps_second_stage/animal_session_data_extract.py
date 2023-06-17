@@ -119,35 +119,78 @@ if __name__ == "__main__":
     # )
 
     # ================================================================================================
+    # feature_extract_true_personality(
+    #     cfg_file="config/true_personality/feature_extact_tmp/07_vat_face_video_level.yaml",
+    #     model_weight="results_true_personality/all_sesstion/unified_face_images_all/07_vat_video_level/03-16_10-42/checkpoint_1.pkl",
+    #     data_loader=set_vat_tp_dataloader,
+    #     output_dir="datasets/second_stage_tp/07_vat_face_video_level",
+    #     return_feat=False,
+    # ) 
+
+    # feature_extract_true_personality(
+    #     cfg_file="config/true_personality/sequence_prediction_extract/3d_resnet.yaml",
+    #     model_weight="results_true_personality/resnet_3d_checkpoint_90.pkl",
+    #     data_loader=set_3Dres_tp_dataloader,
+    #     output_dir="datasets/second_stage_tp/3Dresnet",
+    #     return_feat=False,
+    # ) 
+
+
+    # feature_extract_true_personality(
+    #     cfg_file="config/true_personality/sequence_prediction_extract/tpn.yaml",
+    #     model_weight="results_true_personality/tpn_checkpoint_70.pkl",
+    #     data_loader=set_3Dres_tp_dataloader,
+    #     output_dir="datasets/second_stage_tp/tpn",
+    #     return_feat=False,
+    # ) 
+
+    # feature_extract_true_personality(
+    #     cfg_file="config/true_personality/sequence_prediction_extract/slow_fast.yaml",
+    #     model_weight="results_true_personality/slow_fast_checkpoint_0.pkl",
+    #     data_loader=set_slowfast_tp_dataloader,
+    #     output_dir="datasets/second_stage_tp/slow_fast",
+    #     return_feat=False,
+    # ) 
+
+    # =========================================================================================================
+    # feature_extract_true_personality(
+    #     cfg_file="config/true_personality/sequence_prediction_extract/07_vat_face_video_level_A.yaml",
+    #     model_weight="results_true_personality/unified_face_images_A/07_vat_video_level/03-27_01-25/checkpoint_2.pkl",
+    #     data_loader=set_vat_tp_dataloader,
+    #     output_dir="datasets/second_stage_tp/07_vat_face_video_level_A",
+    #     return_feat=False,
+    #     test_only=True
+    # ) 
+
     feature_extract_true_personality(
-        cfg_file="config/true_personality/feature_extact_tmp/07_vat_face_video_level.yaml",
-        model_weight="results_true_personality/all_sesstion/unified_face_images_all/07_vat_video_level/03-16_10-42/checkpoint_1.pkl",
+        cfg_file="config/true_personality/sequence_prediction_extract/07_vat_face_video_level_C.yaml",
+        model_weight="results_true_personality/unified_face_images_C/07_vat_video_level/03-27_00-04/checkpoint_28.pkl",
         data_loader=set_vat_tp_dataloader,
-        output_dir="datasets/second_stage_tp/07_vat_face_video_level",
+        output_dir="datasets/second_stage_tp/07_vat_face_video_level_C",
         return_feat=False,
+        test_only=True
     ) 
-
     feature_extract_true_personality(
-        cfg_file="config/true_personality/sequence_prediction_extract/3d_resnet.yaml",
-        model_weight="results_true_personality/resnet_3d_checkpoint_90.pkl",
-        data_loader=set_3Dres_tp_dataloader,
-        output_dir="datasets/second_stage_tp/3Dresnet",
+        cfg_file="config/true_personality/sequence_prediction_extract/07_vat_face_video_level_E.yaml",
+        model_weight="results_true_personality/unified_face_images_E/07_vat_video_level/03-27_00-45/checkpoint_24.pkl",
+        data_loader=set_vat_tp_dataloader,
+        output_dir="datasets/second_stage_tp/07_vat_face_video_level_E",
         return_feat=False,
+        test_only=True
     ) 
-
-
     feature_extract_true_personality(
-        cfg_file="config/true_personality/sequence_prediction_extract/tpn.yaml",
-        model_weight="results_true_personality/tpn_checkpoint_70.pkl",
-        data_loader=set_3Dres_tp_dataloader,
-        output_dir="datasets/second_stage_tp/tpn",
+        cfg_file="config/true_personality/sequence_prediction_extract/07_vat_face_video_level_O.yaml",
+        model_weight="results_true_personality/unified_face_images_O/07_vat_video_level/03-26_22-48/checkpoint_7.pkl",
+        data_loader=set_vat_tp_dataloader,
+        output_dir="datasets/second_stage_tp/07_vat_face_video_level_O",
         return_feat=False,
+        test_only=True
     ) 
-
     feature_extract_true_personality(
-        cfg_file="config/true_personality/sequence_prediction_extract/slow_fast.yaml",
-        model_weight="results_true_personality/slow_fast_checkpoint_0.pkl",
-        data_loader=set_slowfast_tp_dataloader,
-        output_dir="datasets/second_stage_tp/slow_fast",
+        cfg_file="config/true_personality/sequence_prediction_extract/07_vat_face_video_level_N.yaml",
+        model_weight="results_true_personality/unified_face_images_N/07_vat_video_level/03-27_02-05/checkpoint_0.pkl",
+        data_loader=set_vat_tp_dataloader,
+        output_dir="datasets/second_stage_tp/07_vat_face_video_level_N",
         return_feat=False,
+        test_only=True
     ) 

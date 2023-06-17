@@ -13,7 +13,7 @@ DATA_LOADER:
 MODEL:
   NAME: "vat_model"
 SOLVER:
-  LR_INIT: 0.01
+  LR_INIT: 0.001
 TRAIN:
   MAX_EPOCH: 100
-  OUTPUT_DIR: "results/unified_face_images/07_vat_face"
+  OUTPUT_DIR: "results/unified_face_images/07_vat_face_16F"
