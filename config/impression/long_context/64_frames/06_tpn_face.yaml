@@ -13,7 +13,7 @@ DATA_LOADER:
 MODEL:
   NAME: "tpn_model"
 SOLVER:
-  LR_INIT: 0.01
+  LR_INIT: 0.001
 TRAIN:
   TRAINER: "TPNTrainer"
   MAX_EPOCH: 100

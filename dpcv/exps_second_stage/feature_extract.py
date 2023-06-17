@@ -56,12 +56,58 @@ if __name__ == "__main__":
     # )
     #
 
+    # feature_extract(
+    #     cfg_file="config/impression/sequence_prediction_extract/05_slow_fast_face.yaml",
+    #     model_weight="results/unified_face_images/05_slow_fast_face/checkpoint_25_slow_fast_acc_8650.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/slow_fast",
+    # )
+
+    # ============================================ Single-Trait: O ================================
+    # feature_extract(
+    #     cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait.yaml",
+    #     model_weight="results/single_traits/O/07_vat_face_vl/05-15_05-24/checkpoint_17.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/vat_A",
+    #     test_only=True,
+    # )
+
+    # ============================================ Single-Trait: C ================================
     feature_extract(
-        cfg_file="config/impression/sequence_prediction_extract/05_slow_fast_face.yaml",
-        model_weight="results/unified_face_images/05_slow_fast_face/checkpoint_25_slow_fast_acc_8650.pkl",
+        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_C.yaml",
+        model_weight="sig_trait_C_vat.pkl",
         data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/slow_fast",
+        output_dir="datasets/second_stage/vat_C",
+        test_only=True,
     )
+
+    # ============================================ Single-Trait: E ================================
+    feature_extract(
+        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_E.yaml",
+        model_weight="sig_trait_vat_E.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/vat_E",
+        test_only=True,
+    )
+
+    # ============================================ Single-Trait: A ================================
+    feature_extract(
+        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_A.yaml",
+        model_weight="results/single_traits/A/07_vat_face_vl/05-16_01-12/checkpoint_15.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/vat_AA",
+        test_only=True,
+    )
+
+    # ============================================ Single-Trait: N ================================
+    feature_extract(
+        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_N.yaml",
+        model_weight="results/single_traits/N/07_vat_face_vl/05-16_14-36/checkpoint_18.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/vat_N",
+        test_only=True,
+    )
+
 
 
     # # interpret_cnn feature extract
