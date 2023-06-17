@@ -21,3 +21,7 @@ from .multi_modal_pred_net import multi_modal_visual_model, multi_modal_audio_mo
 from .meta_fusing_mlp import meta_fusing_model
 from .au_fusing_mlp import au_model
 from .sound_feat_mlp import sound_model
+from .nets_1d.vgg19_1d import get_1d_vgg19_model
+from .nets_1d.denseNet_1d import get_1d_densenet_model
+from .nets_1d.vit_1d import get_1d_vit_model
+from .vit import get_vit_model

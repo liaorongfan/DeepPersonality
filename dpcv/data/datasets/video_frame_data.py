@@ -18,13 +18,13 @@ class SingleFrameData(VideoData):
     }
 
     def __init__(
-        self, data_root, img_dir, label_file, trans=None, number_vdieo=-1, traits="OCEAN", specify_videos=None
+        self, data_root, img_dir, label_file, trans=None, number_vdieo=-1, traits="OCEAN", specify_videos=""
     ):
         super().__init__(data_root, img_dir, label_file)
         self.trans = trans
         if number_vdieo > 0:
             self.img_dir_ls = self.img_dir_ls[:number_vdieo]
-        if specify_videos is not None:
+        if len(specify_videos) > 0:
             self.img_dir_ls = self.select_img_dir(specify_videos)
 
         self.traits = [self.TRAITS_ID[t] for t in traits]
@@ -161,7 +161,7 @@ def single_frame_data_loader(cfg, mode="train"):
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
     shuffle = cfg.DATA_LOADER.SHUFFLE
     training_transform = build_transform_spatial(cfg)
-    standard_transform = standard_frame_transform()
+    standard_transform = standard_frame_transform(cfg)
     if mode == "train":
         data_set = SingleFrameData(
             cfg.DATA.ROOT,

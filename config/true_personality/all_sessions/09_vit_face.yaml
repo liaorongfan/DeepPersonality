@@ -1,0 +1,25 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "all"
+  TYPE: "face"
+DATA_LOADER:
+  NAME: "all_true_personality_dataloader"
+  TRANSFORM: "vit_image_transform"
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "get_vit_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.01
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [1, 2]
+TRAIN:
+  TRAINER: "ImageModalTrainer"
+  MAX_EPOCH: 3
+  LOG_INTERVAL: 50
+  OUTPUT_DIR: "results_true_personality/unified_face_images_all/09_vit"
