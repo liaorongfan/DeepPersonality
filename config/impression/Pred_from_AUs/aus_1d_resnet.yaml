@@ -25,4 +25,4 @@ SOLVER:
 TRAIN:
   TRAINER: "AUsPredBimodalTrain"
   MAX_EPOCH: 20
-  OUTPUT_DIR: "results_second_stage/action_units_pred/AUs_resnet"
+  OUTPUT_DIR: "results_second_stage/action_units_pred/AUs_densenet"

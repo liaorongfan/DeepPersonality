@@ -11,8 +11,7 @@ DATA_LOADER:
   TRAIN_BATCH_SIZE: 256
   NUM_WORKERS: 8
 MODEL:
-  NAME: "get_aus_2d_resnet_model"
-  INPUT_DIM: 120
+  NAME: "get_1d_densenet_model"
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -23,6 +22,6 @@ SOLVER:
   MOMENTUM: 0.9
   MILESTONE: [80, 90]
 TRAIN:
-  TRAINER: "AUsPred2DBimodalTrain"
+  TRAINER: "AUsPred1DBimodalTrain"
   MAX_EPOCH: 100
-  OUTPUT_DIR: "results_second_stage/action_units_pred/AUs_resnet"
+  OUTPUT_DIR: "results_second_stage/action_units_pred/AUs_1d_vgg19"

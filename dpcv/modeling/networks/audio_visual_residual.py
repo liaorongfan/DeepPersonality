@@ -127,10 +127,10 @@ class AUs2DResNet18(nn.Module):
         self.audio_branch = AudioVisualResNet(
             in_channels=1, init_stage=AUs2DInitStage,
             block=BiModalBasicBlock, conv=[aud_conv1x9, aud_conv1x1],
-            channels=[8, 32, 128, 256],
+            channels=[64, 128, 256, 512],
             layers=[2, 2, 2, 2]
         )
-        self.linear = nn.Linear(256, 5)
+        self.linear = nn.Linear(512, 5)
 
     def forward(self, aud_input):
         aud_x = self.audio_branch(aud_input)
