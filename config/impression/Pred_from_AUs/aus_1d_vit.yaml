@@ -3,7 +3,7 @@ DATA:
   TRAIN_LABEL_DATA: "datasets/annotation/annotation_training.pkl"
   VALID_LABEL_DATA: "datasets/annotation/annotation_validation.pkl"
   TEST_LABEL_DATA: "datasets/annotation/annotation_test.pkl"
-  SESSION: ""
+  SESSION: "all"
   AU: "all"
   TOP_SAMPLE: -1
 DATA_LOADER:
@@ -24,4 +24,4 @@ SOLVER:
 TRAIN:
   TRAINER: "AUsPred1DBimodalTrain"
   MAX_EPOCH: 100
-  OUTPUT_DIR: "results_second_stage/action_units_pred/AUs_1d_vit"
+  OUTPUT_DIR: "results_second_stage/action_units_pred_tp/AUs_1d_vit"

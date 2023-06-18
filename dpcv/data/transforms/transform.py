@@ -87,6 +87,7 @@ def vit_image_transform(cfg):
     norm_std = [0.229, 0.224, 0.225]
     transforms = transforms.Compose([
         transforms.Resize(256),
+        transforms.CenterCrop((256, 256)),
         transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
         transforms.Normalize(norm_mean, norm_std)
