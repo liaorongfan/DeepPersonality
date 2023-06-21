@@ -15,7 +15,7 @@ import pickle
 class ExtractVisualFeatureData(VideoData):
     def __init__(
         self, data_root, img_dir, label_file, save_to, length=100,
-        suffix="frame_", specify_videos=None,
+        suffix="frame_", specify_videos="",
     ):
         super().__init__(data_root, img_dir, label_file)
         self.len = length
@@ -24,7 +24,7 @@ class ExtractVisualFeatureData(VideoData):
         os.makedirs(save_to, exist_ok=True)
         self.save_to = save_to
         self.suffix = suffix
-        if specify_videos is not None:
+        if len(specify_videos) > 0:
             self.img_dir_ls = self.select_img_dir(specify_videos)
 
     def select_img_dir(self, specify_videos):
@@ -132,21 +132,22 @@ class ExtractAudioFeatureData:
 
 
 if __name__ == "__main__":
-    os.chdir("/root/DeepPersonality")
-    # extractor = ExtractVisualFeatureData(
-    #     data_root="datasets",
-    #     img_dir="image_data/valid_data_face",
-    #     label_file="annotation/annotation_validation.pkl",
-    #     save_to="datasets/extracted_feature_ip/few_subj/valid_face",
-    #     suffix="face_",
-    #     specify_videos="datasets/chalearn16_few_candidates/chalearn16_few_candidates_valid.txt"
-    # )
-    # extractor.extract_and_save_feat()
-
-
-    extr = ExtractAudioFeatureData(
-        aud_dir="datasets/voice_data/voice_raw/validationData",
-        anno_path="datasets/annotation/annotation_validation.pkl",
-        save_to="datasets/extracted_feature_impression/valid_aud"
+    os.chdir("/home/rongfan/05-personality_traits/DeepPersonality")
+    extractor = ExtractVisualFeatureData(
+        data_root="datasets",
+        img_dir="image_data/train_data_face",
+        label_file="annotation/annotation_training.pkl",
+        save_to="datasets/extracted_feature_impression/frame_6/train_face",
+        suffix="face_",
+        length=6,
+        # specify_videos="datasets/chalearn16_few_candidates/chalearn16_few_candidates_valid.txt"
     )
-    extr.extract_and_save_feat()
+    extractor.extract_and_save_feat()
+
+
+    # extr = ExtractAudioFeatureData(
+    #     aud_dir="datasets/voice_data/voice_raw/validationData",
+    #     anno_path="datasets/annotation/annotation_validation.pkl",
+    #     save_to="datasets/extracted_feature_impression/valid_aud"
+    # )
+    # extr.extract_and_save_feat()
