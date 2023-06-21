@@ -1,0 +1,16 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data"
+  VALID_IMG_DATA: "image_data/valid_data"
+  TEST_IMG_DATA: "image_data/test_data"
+DATA_LOADER:
+  NAME: "single_frame_data_loader"
+  TRANSFORM: "vit_image_transform"
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "get_vit_model"
+SOLVER:
+  LR_INIT: 0.001
+TRAIN:
+  MAX_EPOCH: 80
+  OUTPUT_DIR: "results/unified_frame_images/16_vit"

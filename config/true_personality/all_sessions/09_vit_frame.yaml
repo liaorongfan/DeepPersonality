@@ -1,7 +1,7 @@
 DATA:
   ROOT: "datasets/chalearn2021"
   SESSION: "all"
-  TYPE: "face"
+  TYPE: "frame"
 DATA_LOADER:
   NAME: "all_true_personality_dataloader"
   TRANSFORM: "vit_image_transform"
