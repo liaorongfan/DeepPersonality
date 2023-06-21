@@ -2,12 +2,15 @@ DATA:
   TRAIN_AUD_DATA: "voice_data/voice_logfbank/train_data"
   VALID_AUD_DATA: "voice_data/voice_logfbank/valid_data"
   TEST_AUD_DATA: "voice_data/voice_logfbank/test_data"
+  AUDIO_LEN: 0.53
 DATA_LOADER:
   NAME: "build_audio_loader"
   DATASET: "VoiceLogfbank"
   TRAIN_BATCH_SIZE: 128
+  NUM_WORKERS: 0
 MODEL:
   NAME: "get_aud_linear_regressor"
+  INPUT_DIM: 2810
 SOLVER:
   LR_INIT: 0.00083
   MOMENTUM: 0.9

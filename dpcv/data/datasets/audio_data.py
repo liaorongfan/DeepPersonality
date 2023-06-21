@@ -88,6 +88,11 @@ class VoiceLogfbank(AudioData):
             aud_trans = aud_padding
         else:
             aud_trans = aud_ft
+        if self.audio_len > 0:
+            sample_len = int(self.audio_len / 15 * 79534)
+            start = random.randint(0, 79534 - sample_len - 1)
+            end = start + sample_len
+            aud_trans = aud_trans[..., start: end]
         return torch.as_tensor(aud_trans, dtype=torch.float32).squeeze()
 
 
@@ -116,6 +121,11 @@ class VoiceLibrosa(AudioData):
             wav_fill = np.zeros((1, 1, 50176))
             wav_fill[..., :wav_tmp.shape[-1]] = wav_tmp
             wav_tmp = wav_fill
+        if self.audio_len > 0:
+            sample_len = int(self.audio_len / 15 * 50176)
+            start = random.randint(0, 50176 - sample_len - 1)
+            end = start + sample_len
+            wav_tmp = wav_tmp[..., start: end]
         return torch.as_tensor(wav_tmp, dtype=torch.float32)
 
 
