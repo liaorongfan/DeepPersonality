@@ -1,6 +1,7 @@
 import torch
 import glob
 import os
+import numpy as np
 from torch.utils.data import DataLoader
 from pathlib import Path
 from .build import DATA_LOADER_REGISTRY

@@ -4,7 +4,7 @@ DATA:
   TYPE: "face"
 DATA_LOADER:
   NAME: "multi_modal_data_loader"
-  TRAIN_BATCH_SIZE: 128
+  TRAIN_BATCH_SIZE: 256
   NUM_WORKERS: 0
 MODEL:
   NAME: "multi_modal_visual_model"
@@ -13,7 +13,7 @@ LOSS:
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.01
+  LR_INIT: 0.02
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
   MILESTONE: [150, 180]

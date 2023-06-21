@@ -117,10 +117,17 @@ class VisualFCNet(nn.Module):
         super().__init__()
         self.fc = nn.Sequential(
             nn.Linear(input_dim, 1024),
+            nn.LayerNorm(1024),
             nn.ReLU(),
             nn.Linear(1024, 512),
+            nn.LayerNorm(512),
             nn.ReLU(),
-            nn.Dropout(),
+
+            nn.Linear(512, 512),
+            nn.LayerNorm(512),
+            nn.ReLU(),
+
+            nn.Dropout(0.2),
             nn.Linear(512, out_dim),
         )
         self.dropout = nn.Dropout()
