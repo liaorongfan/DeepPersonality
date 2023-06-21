@@ -1,4 +1,6 @@
 import os
+import random
+
 import numpy as np
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.datasets.cr_data import CRNetData
@@ -9,7 +11,7 @@ import torch
 
 @DATA_LOADER_REGISTRY.register()
 class AudioData(VideoData):
-    def __init__(self, data_root, aud_dir, label_file, num_videos=-1, traits="OCEAN", specify_videos=None):
+    def __init__(self, data_root, aud_dir, label_file, num_videos=-1, traits="OCEAN", specify_videos="", audio_len=-1):
         super().__init__(
             data_root, img_dir=None, audio_dir=aud_dir, label_file=label_file,
             parse_img_dir=False,
@@ -19,8 +21,9 @@ class AudioData(VideoData):
         if num_videos > 0:
             self.aud_file_ls = self.aud_file_ls[: num_videos]
         
-        if specify_videos is not None:
+        if len(specify_videos) > 0:
             self.aud_file_ls = self.select_aud_files(specify_videos)
+        self.audio_len = audio_len
 
     def select_aud_files(self, specify_videos):
         with open(specify_videos, 'r') as fo:
@@ -138,6 +141,11 @@ class VoiceCRNetData(AudioData):
             aud_ft_pad = np.zeros((1, 1, 244832))
             aud_ft_pad[..., :aud_ft.shape[-1]] = aud_ft
             aud_ft = aud_ft_pad
+        if self.audio_len > 0:
+            sample_len = int(16000 * self.audio_len)  # audio sample rate 16000
+            start = random.randint(0, int(244832 - sample_len - 1))
+            end = start + sample_len
+            aud_ft = aud_ft[..., start: end]
         return torch.as_tensor(aud_ft, dtype=torch.float32)
 
 
@@ -178,6 +186,7 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.TRAIN_NUM_VIDEOS,
             traits=cfg.DATA.TRAITS,
             specify_videos=cfg.DATA.TRAIN_SPECIFY_VIDEOS,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
     elif mode == "valid":
         dataset = dataset_cls(
@@ -187,6 +196,7 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.VALID_NUM_VIDEOS,
             traits=cfg.DATA.TRAITS,
             specify_videos=cfg.DATA.VALID_SPECIFY_VIDEOS,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
         shuffle = False
     elif mode == "test":
@@ -197,6 +207,7 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.TEST_NUM_VIDEOS,
             traits=cfg.DATA.TRAITS,
             specify_videos=cfg.DATA.TEST_SPECIFY_VIDEOS,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
         shuffle = False
         batch_size = cfg.DATA_LOADER.TEST_BATCH_SIZE
