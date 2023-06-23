@@ -15,7 +15,7 @@ class MultiModalData:
     }
 
     def __init__(self, data_root, split, mode, session, spectrum_channel=15, traits="OCEAN", 
-        visual_clip=-1.0, audio_clip=-1.0, num_videos=-1,
+        visual_clip=-1.0, audio_clip=-1.0, num_videos=-1, audio_len=-1,
     ):
         assert session in ["none", "talk", "animal", "lego", "ghost"], \
             "session should be in one of ['none', 'talk', 'animal', 'ghost'] or 'none'"
@@ -30,6 +30,7 @@ class MultiModalData:
         if num_videos > 0:
             self.sample_ls = self.sample_ls[: num_videos]
         self.traits = [self.TRAITS_ID[t] for t in traits]
+        self.audio_len = audio_len
 
     def __getitem__(self, idx):
         sample = self.sample_ls[idx]
@@ -49,6 +50,12 @@ class MultiModalData:
         if not len(self.traits) == 5:
             label = sample["label"]
             sample["label"] = label[self.traits]
+        if self.audio_len > 0:
+            feature = sample["feature"]
+            sample_len = int(self.audio_len) + 1
+            start = np.random.randint(0, len(feature) - sample_len - 2)
+            end = start + sample_len
+            sample["feature"] = feature[start: end]
 
         # data, label = sample["data"], sample["label"]
         return sample
@@ -299,6 +306,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             audio_clip=cfg.DATA.AUDIO_CLIP,
             num_videos=cfg.DATA.TRAIN_NUM_VIDEOS,
             traits=cfg.DATA.TRAITS,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
     elif mode == "valid":
         data_set = MultiModalData(
@@ -311,6 +319,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             audio_clip=cfg.DATA.AUDIO_CLIP,
             num_videos=cfg.DATA.VALID_NUM_VIDEOS,
             traits=cfg.DATA.TRAITS,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
     else:
         shuffle = False
@@ -324,6 +333,7 @@ def multi_modal_data_loader(cfg, mode="train"):
             audio_clip=cfg.DATA.AUDIO_CLIP,
             num_videos=cfg.DATA.TEST_NUM_VIDEOS,
             traits=cfg.DATA.TRAITS,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
 
     data_loader = DataLoader(

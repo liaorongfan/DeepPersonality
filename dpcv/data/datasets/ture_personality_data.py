@@ -177,6 +177,7 @@ class Chlearn21AudioData(Chalearn21FrameData):
         traits="OCEAN",
         audio_clip=-1,
         sample_rate=16000,
+        audio_len=-1.0,
     ):
         super().__init__(
             data_root, data_split, task, data_type=data_type, segment=True, traits=traits, audio_clip=audio_clip,
@@ -185,6 +186,7 @@ class Chlearn21AudioData(Chalearn21FrameData):
         self.suffix = suffix_type
         self.audio_clip = audio_clip
         self.sample_rate = sample_rate
+        self.audio_len = audio_len
 
     def __len__(self):
         return len(self.img_dir_ls)
@@ -208,11 +210,18 @@ class Chlearn21AudioData(Chalearn21FrameData):
         if self.audio_clip > 0:
             # clip select
             # take one second more for sampling
+            # clip `audio_clip` seconds audio segment from file
+            # select the middle point of the audio segment
             sample_len = int(self.sample_rate * self.audio_clip)
             sample_offset = int(sample_len / 2)
             middle_point = int(data_len / 2)
             start = middle_point - sample_offset
             end = middle_point + sample_offset
+        elif self.audio_len > 0:
+            # random select 
+            sample_len = int(self.sample_rate * self.audio_len)
+            start = random.randint(0, data_len - sample_len - 1)
+            end = start + sample_len
         else:
             # random select 
             start = np.random.randint(data_len - self.sample_len)
@@ -373,8 +382,10 @@ class Chalearn21CRNetData(Chalearn21FrameData):
 
 class CRNetAudioTruePersonality(Chlearn21AudioData):
 
-    def __init__(self, data_root, data_split, task, sample_len=244832, traits="OCEAN", audio_clip=-1):
-        super().__init__(data_root, data_split, task, sample_len, traits=traits, audio_clip=audio_clip)
+    def __init__(self, data_root, data_split, task, sample_len=244832, traits="OCEAN", audio_clip=-1, audio_len=-1):
+        super().__init__(
+            data_root, data_split, task, sample_len, traits=traits, audio_clip=audio_clip, audio_len=audio_len
+        )
 
     def __getitem__(self, idx):
         img_dir = self.img_dir_ls[idx]
@@ -635,6 +646,34 @@ def true_personality_audio_dataloader(cfg, mode):
 
 
 @DATA_LOADER_REGISTRY.register()
+def all_true_personality_audio_dataloader(cfg, mode):
+    from torch.utils.data.dataset import ConcatDataset
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    datasets = []
+    for session in ["ghost", "animal", "talk", "lego"]:
+        dataset = Chlearn21AudioData(
+            data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,  # "talk"
+            audio_len=cfg.DATA.AUDIO_LEN,
+        )
+        datasets.append(dataset)
+    conca_datasets = ConcatDataset(datasets)
+    
+    data_loader = DataLoader(
+        dataset=conca_datasets,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
+
+
+@DATA_LOADER_REGISTRY.register()
 def true_personality_audio_bimodal_lstm_dataloader(cfg, mode):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
@@ -774,6 +813,8 @@ def all_true_personality_crnet_audio_dataloader(cfg, mode):
             data_split=mode,
             task=session,  # "talk"
             traits=cfg.DATA.TRAITS,
+            audio_clip=cfg.DATA.AUDIO_CLIP,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
         datasets.append(dataset)
     concat_dataset = ConcatDataset(datasets)
