@@ -38,7 +38,8 @@ class MultiModalData:
         if self.mode == "audio":
             feature = sample["feature"]
             if self.session in ["talk", "animal", "lego", "ghost"]:
-                temp = feature[:self.spectrum_channel]
+                # temp = feature[: self.spectrum_channel]
+                temp = feature[: 80]
                 sample["feature"] = temp
             else:
                 sample_len = len(feature)
@@ -53,7 +54,7 @@ class MultiModalData:
         if self.audio_len > 0:
             feature = sample["feature"]
             sample_len = int(self.audio_len) + 1
-            start = np.random.randint(0, len(feature) - sample_len - 2)
+            start = np.random.randint(0, len(feature) - sample_len)
             end = start + sample_len
             sample["feature"] = feature[start: end]
 
@@ -364,7 +365,8 @@ def all_multi_modal_data_loader(cfg, mode="train"):
                 mode=cfg.DATA.TYPE,
                 session=session,
                 spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
-                traits=cfg.DATA.TRAITS
+                traits=cfg.DATA.TRAITS,
+                audio_len=cfg.DATA.AUDIO_LEN,
             )
         elif mode == "valid":
             data_set = MultiModalData(
@@ -373,7 +375,8 @@ def all_multi_modal_data_loader(cfg, mode="train"):
                 mode=cfg.DATA.TYPE,
                 session=session,
                 spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
-                traits=cfg.DATA.TRAITS
+                traits=cfg.DATA.TRAITS,
+                audio_len=cfg.DATA.AUDIO_LEN,
             )
         else:
             shuffle = False
@@ -383,7 +386,8 @@ def all_multi_modal_data_loader(cfg, mode="train"):
                 mode=cfg.DATA.TYPE,
                 session=session,
                 spectrum_channel=cfg.MODEL.SPECTRUM_CHANNEL,
-                traits=cfg.DATA.TRAITS
+                traits=cfg.DATA.TRAITS,
+                audio_len=cfg.DATA.AUDIO_LEN,
             )
         datasets.append(data_set)
     concat_dataset = ConcatDataset(datasets)

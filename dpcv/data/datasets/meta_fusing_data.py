@@ -60,6 +60,8 @@ class MetaFuseingData:
         return sample
 
     def encode_feat_meta(self, feat, metadata_val):
+        gen, edu, age = metadata_val
+        metadata_val = torch.tensor([gen, edu / 10, age / 100])
         metadata_val = metadata_val.repeat(1000, 1)
         ten = torch.cat([feat, metadata_val], dim=1)
         return ten
@@ -99,6 +101,7 @@ class MultiModelDL(MetaFuseingData):
 
     def encode_feat_meta(self, feat, metadata_val):
         feat = feat.squeeze()
+
         ten = torch.cat([feat, metadata_val], dim=0)
         return ten
 
@@ -242,6 +245,9 @@ class CRNMetaFeatDL(MetaFuseingData):
         return sample
 
     def encode_feat_meta(self, feat, metadata_val):
+        # metadata normalization
+        gen, cou, age = metadata_val
+        metadata_val = torch.tensor([gen, cou / 10, age / 100])
         # print(feat.shape)
         if feat.shape[0] == 1:
             feat = feat.squeeze().mean(dim=0)
