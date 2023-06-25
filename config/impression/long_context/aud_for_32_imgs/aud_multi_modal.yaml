@@ -2,14 +2,14 @@ DATA:
   ROOT: "datasets/extracted_feature_impression"
   SESSION: "none"
   TYPE: "audio"
-  AUDIO_LEN: 0.53
+  AUDIO_LEN: 1.06
 DATA_LOADER:
   NAME: "multi_modal_data_loader"
   TRAIN_BATCH_SIZE: 128
   NUM_WORKERS: 0
 MODEL:
   NAME: "multi_modal_audio_model"
-  SPECTRUM_CHANNEL: 1
+  SPECTRUM_CHANNEL: 2
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -22,4 +22,4 @@ SOLVER:
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 500
-  OUTPUT_DIR: "results/audio/aud_multi_modal_pred_16frames"
+  OUTPUT_DIR: "results/audio/aud_multi_modal_pred_32frames"
