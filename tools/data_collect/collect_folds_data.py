@@ -10,7 +10,7 @@ from copy import deepcopy
 
 class FoldDataCollect:
 
-    def __init__(self, data_root="results/folds_ip", print_info=False):
+    def __init__(self, data_root="results/folds_tp", print_info=False):
         self.data_root = data_root
         self.models = os.listdir(f"{self.data_root}/fold_0")
         self.log_files = collect_files(data_root)
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     np.set_printoptions(suppress=True)
 
     collector = FoldDataCollect()
-    collector.compute_p_value("04_crnet")
+    collector.compute_p_value("02_hrnet")
 
 
 
