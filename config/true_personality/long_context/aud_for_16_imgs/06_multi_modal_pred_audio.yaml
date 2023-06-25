@@ -1,11 +1,11 @@
 DATA:
-  ROOT: "datasets/extracted_feature_impression"
-  SESSION: "none"
+  ROOT: "datasets/extracted_feature_tp"
+  SESSION: "all"
   TYPE: "audio"
   AUDIO_LEN: 0.53
 DATA_LOADER:
-  NAME: "multi_modal_data_loader"
-  TRAIN_BATCH_SIZE: 128
+  NAME: "all_multi_modal_data_loader"
+  TRAIN_BATCH_SIZE: 32
   NUM_WORKERS: 0
 MODEL:
   NAME: "multi_modal_audio_model"
@@ -15,11 +15,11 @@ LOSS:
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.001
+  LR_INIT: 0.01
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
   MILESTONE: [300, 400]
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 500
-  OUTPUT_DIR: "results/audio/aud_multi_modal_pred_16frames"
+  OUTPUT_DIR: "results_true_personality/audio_all/06_multi_modal_pred_16frames"

@@ -2,7 +2,7 @@ DATA:
   TRAIN_AUD_DATA: "voice_data/voice_librosa/train_data"
   VALID_AUD_DATA: "voice_data/voice_librosa/valid_data"
   TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
-  AUDIO_LEN: 0.53
+  AUDIO_LEN: 1.07
 DATA_LOADER:
   NAME: "build_audio_loader"
   DATASET: "VoiceCRNetData"
