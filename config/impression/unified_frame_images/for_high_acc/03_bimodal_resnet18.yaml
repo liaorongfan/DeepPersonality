@@ -7,9 +7,9 @@ DATA:
   TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
 DATA_LOADER:
   NAME: "bimodal_resnet_data_loader"
-  TRANSFORM: "standard_frame_transform"
+  TRANSFORM: "strong_frame_transform"
   TRAIN_BATCH_SIZE: 32
-  NUM_WORKERS: 4
+  NUM_WORKERS: 8
 MODEL:
   NAME: "audiovisual_resnet"
 LOSS:
@@ -17,11 +17,11 @@ LOSS:
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.001
+  LR_INIT: 0.002
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [100, 200]
+  MILESTONE: [300, 400, 500]
 TRAIN:
   TRAINER: "BiModalTrainer"
-  MAX_EPOCH: 300
+  MAX_EPOCH: 600
   OUTPUT_DIR: "results/unified_frame_images/03_bimodal_resnet"
