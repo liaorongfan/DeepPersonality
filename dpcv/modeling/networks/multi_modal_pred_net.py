@@ -188,6 +188,9 @@ def multi_modal_audio_model(cfg):
     if cfg.DATA.SESSION in ["talk", "animal", "ghost", "lego", "all"]:
         dim = cfg.MODEL.SPECTRUM_CHANNEL * 128
         use_sigmoid = False
+    elif cfg.DATA.AUDIO_LEN > 0:
+        dim = cfg.MODEL.SPECTRUM_CHANNEL * 128
+        use_sigmoid = False
     else:
         dim = 15 * 128
         use_sigmoid = True
