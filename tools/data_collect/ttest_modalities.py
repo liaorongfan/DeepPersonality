@@ -85,8 +85,11 @@ def transform(aud, vis, aud_vis):
     return aud, vis, aud_vis
 
 
-aud, vis, aud_vis = transform(aud_tp, vis_tp, aud_vis_tp)
+aud, vis, aud_vis = transform(aud_ip, vis_ip, aud_vis_ip)
 # compute_p_value(aud_tp, vis_tp)
+
+print_latex_table(aud_vis, vis)
+print()
 print_latex_table(aud, vis)
 print()
-print_latex_table(vis, aud_vis)
+print_latex_table(aud, aud_vis)

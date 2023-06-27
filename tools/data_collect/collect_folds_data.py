@@ -77,6 +77,31 @@ class FoldDataCollect:
         t_statistic, p_value = stats.ttest_ind(data_1, data_2)
         return p_value
 
+    def p_value__(self, model_name_1, model_name_2):
+        aud_p_value_list = []
+        for trait in range(6):
+            p_value = self.p_value(model_name_1, model_name_2,  trait)
+            p_value_str = f"{p_value:.6f}"
+            aud_p_value_list.append(p_value_str)
+        aud_p_value_list = clean_data(str(aud_p_value_list))
+        return aud_p_value_list
+
+    def modality_p_value_tp(self):
+        val = self.p_value__("06_multi_modal_pred", "03_aud_crnet")
+        print(f"aud: {val}")
+        val = self.p_value__("02_hrnet", "07_vat_video_level")
+        print(f"vis: {val}")
+        val = self.p_value__("14_multi_modal_pred", "12_crnet")
+        print(f"aud-vis: {val}")
+
+    def modality_p_value_ip(self):
+        val = self.p_value__("aud_crnet", "aud_multi_modal_pred")
+        print(f"aud: {val}")
+        val = self.p_value__("02_hrnet_face", "07_vat_face_vl")
+        print(f"vis: {val}")
+        val = self.p_value__("04_crnet", "8_multi_modal_pred")
+        print(f"aud-vis: {val}")
+
 
 def clean_data(data):
     data = data.strip("[").strip("]").replace(",", " &").replace("'", "")
@@ -120,7 +145,9 @@ if __name__ == "__main__":
     np.set_printoptions(suppress=True)
 
     collector = FoldDataCollect()
-    collector.compute_p_value("02_hrnet")
-
+    # collector.compute_p_value("02_hrnet_face")
+    # collector.compute_p_value("03_aud_crnet")
+    # collector.modality_p_value_tp()
+    collector.modality_p_value_ip()
 
 
