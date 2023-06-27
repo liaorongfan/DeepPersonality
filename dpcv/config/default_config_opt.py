@@ -27,7 +27,7 @@ __C.DATA.AU = ""
 __C.DATA.TOP_SAMPLE = 600
 __C.DATA.VISUAL_CLIP = -1
 __C.DATA.AUDIO_CLIP = -1
-
+__C.DATA.AUDIO_LEN = -1.
 # used for temporal inputs
 __C.DATA.DOWNSAMPLE = 100
 __C.DATA.FRAMES = 32

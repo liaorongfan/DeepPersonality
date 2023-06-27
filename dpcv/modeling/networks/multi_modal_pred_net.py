@@ -116,8 +116,18 @@ class VisualFCNet(nn.Module):
     def __init__(self, input_dim, out_dim=5, use_sigmoid=True, return_feature=False):
         super().__init__()
         self.fc = nn.Sequential(
-            nn.Linear(input_dim, 512),
+            nn.Linear(input_dim, 1024),
+            nn.LayerNorm(1024),
             nn.ReLU(),
+            nn.Linear(1024, 512),
+            nn.LayerNorm(512),
+            nn.ReLU(),
+
+            nn.Linear(512, 512),
+            nn.LayerNorm(512),
+            nn.ReLU(),
+
+            nn.Dropout(0.2),
             nn.Linear(512, out_dim),
         )
         self.dropout = nn.Dropout()
@@ -126,7 +136,7 @@ class VisualFCNet(nn.Module):
         self.return_feature = return_feature
 
     def forward(self, x):
-        x = self.dropout(x)
+        # x = self.dropout(x)
         f = self.fc[0](x)
         x = self.fc[1:](f)
         x = x.mean(dim=1)
@@ -176,6 +186,9 @@ def multi_modal_visual_model(cfg):
 @NETWORK_REGISTRY.register()
 def multi_modal_audio_model(cfg):
     if cfg.DATA.SESSION in ["talk", "animal", "ghost", "lego", "all"]:
+        dim = cfg.MODEL.SPECTRUM_CHANNEL * 128
+        use_sigmoid = False
+    elif cfg.DATA.AUDIO_LEN > 0:
         dim = cfg.MODEL.SPECTRUM_CHANNEL * 128
         use_sigmoid = False
     else:

@@ -1,0 +1,19 @@
+DATA:
+  TRAIN_AUD_DATA: "voice_data/voice_logfbank/train_data"
+  VALID_AUD_DATA: "voice_data/voice_logfbank/valid_data"
+  TEST_AUD_DATA: "voice_data/voice_logfbank/test_data"
+DATA_LOADER:
+  NAME: "build_audio_loader"
+  DATASET: "VoiceLogfbank"
+  TRAIN_BATCH_SIZE: 128
+MODEL:
+  NAME: "get_aud_linear_regressor"
+SOLVER:
+  LR_INIT: 0.00083
+  MOMENTUM: 0.9
+  WEIGHT_DECAY: 6.5
+  MILESTONE: [800, 900]
+TRAIN:
+  TRAINER: "AudioTrainer"
+  MAX_EPOCH: 1000
+  OUTPUT_DIR: "results/aud_linear_regressor"

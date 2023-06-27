@@ -8,10 +8,10 @@ DATA:
   TOP_SAMPLE: -1
 DATA_LOADER:
   NAME: "au_dataloader"
-  TRAIN_BATCH_SIZE: 128
-  NUM_WORKERS: 8
+  TRAIN_BATCH_SIZE: 64
+  NUM_WORKERS: 0
 MODEL:
-  NAME: "get_1d_vit_model"
+  NAME: "get_aus_2d_resnet_model"
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -22,6 +22,6 @@ SOLVER:
   MOMENTUM: 0.9
   MILESTONE: [80, 90]
 TRAIN:
-  TRAINER: "AUsPred1DBimodalTrain"
+  TRAINER: "AUsPred2DBimodalTrain"
   MAX_EPOCH: 100
-  OUTPUT_DIR: "results_second_stage/action_units_pred_tp/AUs_1d_vit"
+  OUTPUT_DIR: "results_second_stage/action_units_pred_tp/AUs_resnet"

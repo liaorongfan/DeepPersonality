@@ -88,8 +88,11 @@ class Transformer(nn.Module):
 
 
 class ViT(nn.Module):
-    def __init__(self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, pool='cls', channels=3,
-                 dim_head=64, dropout=0., emb_dropout=0.):
+    def __init__(
+        self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, pool='cls', channels=3,
+        dim_head=64, dropout=0., emb_dropout=0.,
+        sigmoid=False,
+    ):
         super().__init__()
         image_height, image_width = pair(image_size)
         patch_height, patch_width = pair(patch_size)
@@ -120,6 +123,7 @@ class ViT(nn.Module):
             nn.LayerNorm(dim),
             nn.Linear(dim, num_classes)
         )
+        self.sigmoid = sigmoid
 
     def forward(self, img):
         x = self.to_patch_embedding(img)
@@ -135,7 +139,10 @@ class ViT(nn.Module):
         x = x.mean(dim=1) if self.pool == 'mean' else x[:, 0]
 
         x = self.to_latent(x)
-        return self.mlp_head(x)
+        x = self.mlp_head(x)
+        if self.sigmoid:
+            x = torch.sigmoid(x)
+        return x
 
 
 @NETWORK_REGISTRY.register()
@@ -149,7 +156,8 @@ def get_vit_model(cfg):
         heads=16,
         mlp_dim=2048,
         dropout=0.1,
-        emb_dropout=0.1
+        emb_dropout=0.1,
+        sigmoid=True,
     )
 
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))

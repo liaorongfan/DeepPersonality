@@ -161,7 +161,9 @@ def single_frame_data_loader(cfg, mode="train"):
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
     shuffle = cfg.DATA_LOADER.SHUFFLE
     training_transform = build_transform_spatial(cfg)
-    standard_transform = standard_frame_transform(cfg)
+    # standard_transform = standard_frame_transform(cfg)
+    # TODO: set different transform methods in train and valid stage
+    standard_transform = build_transform_spatial(cfg)
     if mode == "train":
         data_set = SingleFrameData(
             cfg.DATA.ROOT,

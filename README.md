@@ -95,8 +95,11 @@ For experiments start from raw video processing, please find this Colab Notebook
 
 
 ### Developing new personality computing models
-We use config-pipe line files and registration mechanism to organize our experiments. If user want to add their own 
-models or algorithms into this program please reference the Colab Notebook
+We use pipeline config files and registration mechanism to organize our experiments. 
+
+In the framework user can design and config their own spatial-temporal data preprocessing approaches. 
+
+If user want to add their own models or algorithms for experiments, please reference the Colab Notebook
 **[TrainYourModel](https://colab.research.google.com/drive/1lB3B0C9LgZ6NmZmsdblRKcfiY6nWoEcI?usp=sharing)**
 
 
