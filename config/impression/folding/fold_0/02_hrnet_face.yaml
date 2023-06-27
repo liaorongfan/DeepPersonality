@@ -5,7 +5,7 @@ DATA:
 DATA_LOADER:
   NAME: "single_frame_data_loader"
   TRANSFORM: "face_image_x2_transform"
-  TRAIN_BATCH_SIZE: 4
+  TRAIN_BATCH_SIZE: 32
   NUM_WORKERS: 8
 MODEL:
   NAME: "hr_net_model"
