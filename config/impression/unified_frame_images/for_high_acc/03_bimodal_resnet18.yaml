@@ -7,7 +7,7 @@ DATA:
   TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
 DATA_LOADER:
   NAME: "bimodal_resnet_data_loader"
-  TRANSFORM: "standard_frame_transform"
+  TRANSFORM: "strong_frame_transform"
   TRAIN_BATCH_SIZE: 32
   NUM_WORKERS: 8
 MODEL:
