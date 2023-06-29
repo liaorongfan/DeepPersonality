@@ -93,7 +93,8 @@ of the following:
 For example, if users want to use the strong data augmentation strategy, the command line will be:
 ```shell
 
-script/run_exp.py --config config/demo/bimodal_resnet18.yaml --set DATA_LOADER.TRANSFORM strong_frame_transform
+script/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
+                  --set DATA_LOADER.TRANSFORM strong_frame_transform
 
 ````
 
