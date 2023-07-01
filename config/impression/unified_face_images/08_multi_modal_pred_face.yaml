@@ -1,5 +1,5 @@
 DATA:
-  ROOT: "datasets/extracted_feature_impression/frame_6"
+  ROOT: "datasets/extracted_feature_impression"
   SESSION: "none"
   TYPE: "face"
 DATA_LOADER:
