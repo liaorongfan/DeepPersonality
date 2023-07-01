@@ -83,6 +83,23 @@ if you prepare the data by the instructions in above section, the following comm
 # cd DeepPersonality # top directory
 script/run_exp.py --config config/demo/bimodal_resnet18.yaml
 ```
+If users want to employ different data augmentation strategies, the framework provides a command line argument 
+"--set DATA_LOADER.TRANSFORM < augmentation strategy >" to set the data augmentation strategy. The strategy can be one 
+of the following:
+- `standard_frame_transform`: the default data augmentation strategy for that benchmark.
+- `strong_frame_transform`: a strong data augmentation strategy with multiple image transforms.
+- `custom_frame_transform`: a customized data augmentation strategy, which can be defined by users.
+
+For example, if users want to use the strong data augmentation strategy, the command line will be:
+```shell
+
+script/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
+                  --set DATA_LOADER.TRANSFORM strong_frame_transform
+
+````
+
+
+
 Detailed arguments description are presented in  **[command line interface file](docs/Command_line_interface.md)**.
 
 
