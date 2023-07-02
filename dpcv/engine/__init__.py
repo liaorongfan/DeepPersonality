@@ -12,4 +12,4 @@ from .bi_modal_trainer import (
     AudioTrainer,
     MultiModalTrainer,
 )
-from .crnet_trainer import CRNetTrainer2
+from .crnet_trainer import CRNetTrainer2, CRNetTrainerETR
