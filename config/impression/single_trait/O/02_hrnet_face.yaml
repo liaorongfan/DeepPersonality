@@ -6,11 +6,11 @@ DATA:
 DATA_LOADER:
   NAME: "single_frame_data_loader"
   TRANSFORM: "face_image_x2_transform"
-  TRAIN_BATCH_SIZE: 64
+  TRAIN_BATCH_SIZE: 32
   NUM_WORKERS: 8
 MODEL:
   NAME: "hr_net_model"
   NUM_CLASS: 1
 TRAIN:
-  MAX_EPOCH: 80
+  MAX_EPOCH: 200
   OUTPUT_DIR: "results/single_traits/O/02_hrnet_face"

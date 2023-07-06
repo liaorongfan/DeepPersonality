@@ -19,5 +19,7 @@ SOLVER:
   MILESTONE: [300, 400]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 50
+  MAX_EPOCH: 500
   OUTPUT_DIR: "results/folds/fold_6/8_multi_modal_pred"
+TEST:
+  SAVE_DATASET_OUTPUT: "./post_fuse/fold_6/fac"

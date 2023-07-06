@@ -10,4 +10,5 @@ DATA_LOADER:
 MODEL:
   NAME: "hr_net_model"
 TRAIN:
+  MAX_EPOCH: 200
   OUTPUT_DIR: "results/unified_face_images/02_hrnet_face"
