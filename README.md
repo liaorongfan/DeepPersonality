@@ -83,22 +83,6 @@ if you prepare the data by the instructions in above section, the following comm
 # cd DeepPersonality # top directory
 script/run_exp.py --config config/demo/bimodal_resnet18.yaml
 ```
-If users want to employ different data augmentation strategies, the framework provides a command line argument 
-"--set DATA_LOADER.TRANSFORM < augmentation strategy >" to set the data augmentation strategy. The strategy can be one 
-of the following:
-- `standard_frame_transform`: the default data augmentation strategy for that benchmark.
-- `strong_frame_transform`: a strong data augmentation strategy with multiple image transforms.
-- `custom_frame_transform`: a customized data augmentation strategy, which can be defined by users.
-
-For example, if users want to use the strong data augmentation strategy, the command line will be:
-```shell
-
-script/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
-                  --set DATA_LOADER.TRANSFORM strong_frame_transform
-
-````
-
-
 
 Detailed arguments description are presented in  **[command line interface file](docs/Command_line_interface.md)**.
 
@@ -118,6 +102,84 @@ In the framework user can design and config their own spatial-temporal data prep
 
 If user want to add their own models or algorithms for experiments, please reference the Colab Notebook
 **[TrainYourModel](https://colab.research.google.com/drive/1lB3B0C9LgZ6NmZmsdblRKcfiY6nWoEcI?usp=sharing)**
+
+
+## Data augmentation
+
+If users want to employ different data augmentation strategies, the framework provides a command line argument 
+"--set DATA_LOADER.TRANSFORM < augmentation strategy >" to set the data augmentation strategy. The strategy can be one 
+of the following:
+
+- `standard_frame_transform`: the default data augmentation strategy for that benchmark.
+
+- `strong_frame_transform`: a stronger data augmentation strategy with multiple image transforms.
+
+- `customized_frame_transform`: a customized data augmentation strategy, which can be defined by users.
+
+
+if users want to use the strong data augmentation strategy, the command line will be:
+```shell
+
+script/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
+                  --set DATA_LOADER.TRANSFORM strong_frame_transform
+
+````
+### Standard_frame_transform
+This method will first resize smaller edges of an image into 256, while keeping its aspect ratio. For example, if an image is in a size of (width: 720, height: 512), the resized image will be in the size of (width: 360, height: 256);
+
+After that, the resized image will be filpped horizontally at a probablity of 0.5;
+
+Then, the image will be cropped from its center to the size of (width: 224, height: 244);
+
+At last, the pixel values (P) in the cropped image will be normalized to a numerical range of (-1, 1) by the formulation of $P = (p / 255 - mean) / std$,  
+where the $mean$ and $std$ values for each image channel are [0.485, 0.456, 0.406] and [0.229, 0.224, 0.225] respectively.
+
+### Strong_frame_transform
+Beside the first two augmentaion steps in `standar_frame_transform` method ( `resize` and horiziontally `flip`) this method also sequentially employs random rotation, color jitter, and random resized crop followed by the same image normalization operation described in `standard_frame_tansform`.
+
+For `random rotation`, an image will be rotated by an angle randomly selected from the range of (-5, 5). 
+
+`color jitter` will randomly change the brightness, contrast and saturation of an image, the default setting for brightness, contrast and saturation jittering factors are in range of (0.9, 1.1) which used to scale their original values.
+
+`random resized crop` will crop a random patch (from 0.8 to 1) from the jittered original image and resize it into the size of (width: 224, height: 224).
+
+
+### Customized_frame_transform
+
+If user want to define their own data preprocess pipeline, they can follow the following practice:
+
+First, define your own data transform function, and rigister it to the registry. 
+```python
+# step 1: import the registry for data transforms
+from dpcv.data.transforms.build import TRANSFORM_REGISTRY
+
+# step 2: define your own data transform function
+# and rigister it to the registry
+@TRANSFORM_REGISTRY.register()
+def my_frame_transform(cfg):
+    """
+    define your own data transform function
+    """
+    # take the transforms functions from torchvision for your reference
+    import torchvision.transforms as transforms
+    transforms = transforms.Compose([
+        transforms.CenterCrop((112, 112)),
+        transforms.ToTensor(),
+    ])
+    
+    return transform
+
+```
+Then, use the command line argument:
+
+
+```shell
+
+script/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
+                  --set DATA_LOADER.TRANSFORM my_frame_transform
+
+````
+
 
 
 # Models
