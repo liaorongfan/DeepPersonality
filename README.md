@@ -75,13 +75,13 @@ We employ a build-from-config manner to conduct an experiment. After setting up 
 we can have a quick start by the following command line:
 ```shell
 # cd DeepPersonality # top directory 
-script/run_exp.py --config path/to/exp_config.yaml 
+python ./tools/run_exp.py --config path/to/exp_config.yaml 
 ```
 For quick start with [tiny ChaLearn 2016 dataset](https://drive.google.com/file/d/1S87nJFLz9ygzw2Ep_rJUXzzWFfdz15an/view?usp=sharing),
 if you prepare the data by the instructions in above section, the following command will launch an experiment for `bimodal-resnet18 model`.
 ```shell
 # cd DeepPersonality # top directory
-script/run_exp.py --config config/demo/bimodal_resnet18.yaml
+python ./tools/run_exp.py --config config/demo/bimodal_resnet18.yaml
 ```
 
 Detailed arguments description are presented in  **[command line interface file](docs/Command_line_interface.md)**.
@@ -120,8 +120,8 @@ of the following:
 if users want to use the strong data augmentation strategy, the command line will be:
 ```shell
 
-script/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
-                  --set DATA_LOADER.TRANSFORM strong_frame_transform
+python ./tools/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
+                          --set DATA_LOADER.TRANSFORM strong_frame_transform
 
 ````
 ### Standard_frame_transform
@@ -175,11 +175,42 @@ Then, use the command line argument:
 
 ```shell
 
-script/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
-                  --set DATA_LOADER.TRANSFORM my_frame_transform
+python ./tools/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
+                          --set DATA_LOADER.TRANSFORM my_frame_transform
 
 ````
+### Train with meta data or additional data
+If users want to train with meta data or additional data, the framework provides a extension for that. Following the steps below:
+- Step 1: Prepare the data
+    - Prepare the meta data or additional data in a csv file.
+    - The first column should be the video file name.
 
+- Step 2: Modify the training config file:
+    ```yaml
+  # file: config/demo/hrnet_use_other_data.yaml
+    # modify the training config file
+  DATA:
+      ROOT: "datasets/chalearn2021"
+      # the path to the meta data or additional data
+      TRAIN_OTHER_DATA: "datasets/chalearn21_metadata/metadata_train.csv"
+      VALID_OTHER_DATA: "datasets/chalearn21_metadata/metadata_valid.csv"
+      TEST_OTHER_DATA: "datasets/chalearn21_metadata/metadata_test.csv"
+  DATA_LOADER:
+      # the name of the data loader used for adding additional data
+      NAME: "all_true_personality_with_other_data_loader"
+  MODEL:
+      # the name of the model used for training with additional data
+      NAME: "hr_net_true_personality_with_meta_data"
+      USE_OTHER_DATA: True
+      # the dimension of the additional data
+      OTHER_DATA_DIM: 3
+    ```
+- Step 3: Train the model
+    ```shell
+    python ./tools/run_exp.py --config config/demo/hrnet_use_other_data.yaml
+    ```
+
+Above demo training with additional data on HRNet will concatinate the additional data with the visual features extracted from the HRNet backbone. The concatinated feature dimension will be 1024 + 3 = 1027 and the feature will be fed into a fully connected layer to predict the personality trait.
 
 
 # Models
