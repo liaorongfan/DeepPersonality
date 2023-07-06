@@ -116,6 +116,29 @@ class VisualFCNet(nn.Module):
     def __init__(self, input_dim, out_dim=5, use_sigmoid=True, return_feature=False):
         super().__init__()
         self.fc = nn.Sequential(
+            nn.Linear(input_dim, 512),
+            nn.ReLU(),
+            nn.Linear(512, out_dim),
+        )
+        self.dropout = nn.Dropout()
+        self.sigmoid = nn.Sigmoid()
+        self.use_sigmoid = use_sigmoid
+        self.return_feature = return_feature
+
+    def forward(self, x):
+        x = self.dropout(x)
+        x = self.fc(x)
+        x = x.mean(dim=1)
+        if self.use_sigmoid:
+            return self.sigmoid(x)
+        return x
+
+
+class VisualFCNet__(nn.Module):
+
+    def __init__(self, input_dim, out_dim=5, use_sigmoid=True, return_feature=False):
+        super().__init__()
+        self.fc = nn.Sequential(
             nn.Linear(input_dim, 1024),
             nn.LayerNorm(1024),
             nn.ReLU(),
