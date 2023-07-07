@@ -106,55 +106,51 @@ If user want to add their own models or algorithms for experiments, please refer
 
 ## Data augmentation
 
-If users want to employ different data augmentation strategies, the framework provides a command line argument 
-"--set DATA_LOADER.TRANSFORM < augmentation strategy >" to set the data augmentation strategy. The strategy can be one 
-of the following:
+To allow users to use different data augmentation strategies, the framework provides a command line argument 
+"--set DATA_LOADER.TRANSFORM < augmentation strategy >" to choose the data augmentation strategy. The details are listed as follows:
 
-- `standard_frame_transform`: the default data augmentation strategy for that benchmark.
+- `standard_frame_transform`: the default data augmentation strategy.
 
 - `strong_frame_transform`: a stronger data augmentation strategy with multiple image transforms.
 
 - `customized_frame_transform`: a customized data augmentation strategy, which can be defined by users.
 
 
-if users want to use the strong data augmentation strategy, the command line will be:
-```shell
-
-python ./tools/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
-                          --set DATA_LOADER.TRANSFORM strong_frame_transform
-
-````
 ### Standard_frame_transform
-This method will first resize smaller edges of an image into 256, while keeping its aspect ratio. For example, if an image is in a size of (width: 720, height: 512), the resized image will be in the size of (width: 360, height: 256);
+Step 1: Resizing the input image (or cropped face image) as a 3-channel rectangle whose shorter edge is 256 pixles long. For example, if an image has a size of (width: 720, height: 512), the resized image will have the size of (width: 360, height: 256);
 
-After that, the resized image will be filpped horizontally at a probablity of 0.5;
+Step 2: the resized image will be filpped horizontally at a probablity of 0.5;
 
-Then, the image will be cropped from its center to the size of (width: 224, height: 244);
+Step 3: a image patch of the size (width: 224, height: 244) is cropped from the filpped image;
 
-At last, the pixel values (P) in the cropped image will be normalized to a numerical range of (-1, 1) by the formulation of $P = (p / 255 - mean) / std$,  
+Step 4: the pixel values (P) in the cropped image will be normalized to a numerical range of (-1, 1) by the formulation of $P = (p / 255 - mean) / std$,  
 where the $mean$ and $std$ values for each image channel are [0.485, 0.456, 0.406] and [0.229, 0.224, 0.225] respectively.
 
 ### Strong_frame_transform
-Beside the first two augmentaion steps in `standar_frame_transform` method ( `resize` and horiziontally `flip`) this method also sequentially employs random rotation, color jitter, and random resized crop followed by the same image normalization operation described in `standard_frame_tansform`.
+Besides the first two augmentaion steps in `standar_frame_transform` strategy ( `resize` and `horiziontally flip`), this strategy also sequentially employs `random rotation`, `color jitter`, and `random resized crop` followed by the same image normalization operation (Step 4) described in `standard_frame_tansform`.
 
-For `random rotation`, an image will be rotated by an angle randomly selected from the range of (-5, 5). 
+`random rotation`: the image is rotated by a  randomly selected angle with the range of (-5, 5). 
 
-`color jitter` will randomly change the brightness, contrast and saturation of an image, the default setting for brightness, contrast and saturation jittering factors are in range of (0.9, 1.1) which used to scale their original values.
+`color jitter`: the brightness, contrast and saturation of the image are randomly changed, where the ranges of scaling/jittering factors for the brightness, contrast and saturation are (0.9, 1.1).
 
-`random resized crop` will crop a random patch (from 0.8 to 1) from the jittered original image and resize it into the size of (width: 224, height: 224).
+`random resized crop`: a patch (whose size is 0.8 to 1 of the original image) is randomly cropped from the image, which is then resized into the size of (width: 224, height: 224).
 
+The command line for using the strong data augmentation strategy is:
+```shell
+
+python ./tools/run_exp.py --config config/demo/(model.yaml, e.g., bimodal_resnet18.yaml)  \
+                          --set DATA_LOADER.TRANSFORM strong_frame_transform
+
+````
 
 ### Customized_frame_transform
 
-If user want to define their own data preprocess pipeline, they can follow the following practice:
-
-First, define your own data transform function, and rigister it to the registry. 
+First, defining your own data transform function, and registering it to the registry. 
 ```python
-# step 1: import the registry for data transforms
+# step 1: importing the registry for data transforms：
 from dpcv.data.transforms.build import TRANSFORM_REGISTRY
 
-# step 2: define your own data transform function
-# and rigister it to the registry
+# step 2: defining your own data transform function and registering it to the registry
 @TRANSFORM_REGISTRY.register()
 def my_frame_transform(cfg):
     """
@@ -170,8 +166,7 @@ def my_frame_transform(cfg):
     return transform
 
 ```
-Then, use the command line argument:
-
+The command line for using the customized frame transform strategy is:
 
 ```shell
 
@@ -179,38 +174,39 @@ python ./tools/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
                           --set DATA_LOADER.TRANSFORM my_frame_transform
 
 ````
-### Train with meta data or additional data
-If users want to train with meta data or additional data, the framework provides a extension for that. Following the steps below:
-- Step 1: Prepare the data
-    - Prepare the meta data or additional data in a csv file.
+
+
+## Developing models with metadata or additional data
+This framework facilitates user to train models with metadata or additional data. The guideline is provided below:
+- Step 1: Preparing the additional data
+    - Preparing the metadata or additional data in a csv file.
     - The first column should be the video file name.
 
-- Step 2: Modify the training config file:
+- Step 2: Modifing the training config file:
     ```yaml
   # file: config/demo/hrnet_use_other_data.yaml
     # modify the training config file
   DATA:
       ROOT: "datasets/chalearn2021"
-      # the path to the meta data or additional data
+      # the path to the metadata or additional data
       TRAIN_OTHER_DATA: "datasets/chalearn21_metadata/metadata_train.csv"
       VALID_OTHER_DATA: "datasets/chalearn21_metadata/metadata_valid.csv"
       TEST_OTHER_DATA: "datasets/chalearn21_metadata/metadata_test.csv"
   DATA_LOADER:
-      # the name of the data loader used for adding additional data
+      # the name of the data_loader used for adding additional data
       NAME: "all_true_personality_with_other_data_loader"
   MODEL:
       # the name of the model used for training with additional data
-      NAME: "hr_net_true_personality_with_meta_data"
+      NAME: "hr_net_true_personality_with_meta_data" (please selecting and modifing your model)
       USE_OTHER_DATA: True
       # the dimension of the additional data
-      OTHER_DATA_DIM: 3
+      OTHER_DATA_DIM: 3 (please customize the number here (the dimension of the metadata/additional data))
     ```
-- Step 3: Train the model
+- Step 3: Training the model
     ```shell
     python ./tools/run_exp.py --config config/demo/hrnet_use_other_data.yaml
     ```
 
-Above demo training with additional data on HRNet will concatinate the additional data with the visual features extracted from the HRNet backbone. The concatinated feature dimension will be 1024 + 3 = 1027 and the feature will be fed into a fully connected layer to predict the personality trait.
 
 
 # Models
@@ -256,8 +252,8 @@ Above demo training with additional data on HRNet will concatinate the additiona
 | [CRNet](dpcv/modeling/networks/cr_net.py)                                   | audiovisual | [cfg]()  [weight]() | [cfg]()  [weight]() | [cfg]()  [weight]() | [cfg]()  [weight]() |
 | [Amb-Fac](dpcv/modeling/networks/multi_modal_pred_net.py)                   | audiovisual | [cfg]()  [weight]() | [cfg]()  [weight]() | [cfg]()  [weight]() | [cfg]()  [weight]() |
 
-## Papers 
-From which the models are reproduced
+## Related papers 
+The models that we have or will reproduced:
 
 - Deep bimodal regression of apparent personality traits from short video sequences
 - Bi-modal first impressions recognition using temporally ordered deep audio and stochastic visual features
