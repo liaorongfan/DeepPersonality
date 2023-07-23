@@ -396,6 +396,41 @@ class CRNetTrainer2(BiModalTrainer):
 
 
 @TRAINER_REGISTRY.register()
+class CRNetTrainerETR(CRNetTrainer2):
+    
+  
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        model.set_train_regressor()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                out_ls, feat_ls = [], []
+
+                mini_batch_i = inputs  
+                if model.return_feature:
+                    _, out, feat = model(*mini_batch_i)
+                    out_ls.append(out.cpu())
+                    feat_ls.append(feat.cpu())
+                else:
+                    _, out = model(*mini_batch_i)
+                    out_ls.append(out.cpu())
+                    feat_ls.append(torch.tensor([0]))
+
+                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
+                video_extract = {
+                    "video_frames_pred": out_pred,
+                    "video_frames_feat": out_feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+  
+
+
+@TRAINER_REGISTRY.register()
 class CRNetTrainer2Vis(CRNetTrainer2):
 
     def data_fmt(self, data):

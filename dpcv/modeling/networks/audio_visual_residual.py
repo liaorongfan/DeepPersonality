@@ -15,18 +15,21 @@ class AudioVisualResNet18(nn.Module):
         self.audio_branch = AudioVisualResNet(
             in_channels=1, init_stage=AudInitStage,
             block=BiModalBasicBlock, conv=[aud_conv1x9, aud_conv1x1],
-            channels=[64, 128, 256, 512],
-            # channels=[32, 64, 128, 256],
-            layers=[2, 2, 3, 4]
+            # channels=[64, 128, 256, 512],
+            channels=[32, 64, 128, 256],
+            layers=[2, 2, 2, 2]
         )
         self.visual_branch = AudioVisualResNet(
             in_channels=3, init_stage=VisInitStage,
             block=BiModalBasicBlock, conv=[vis_conv3x3, vis_conv1x1],
-            # channels=[32, 64, 128, 256],
-            channels=[64, 128, 256, 512],
-            layers=[2, 2, 3, 4]
+            channels=[32, 64, 128, 256],
+            # channels=[64, 128, 256, 512],
+            layers=[2, 2, 2, 2]
         )
-        self.linear = nn.Linear(1024, 5)
+        self.linear = nn.Linear(512, 256)
+        self.linear_norm = nn.LayerNorm(256)
+        self.relu = nn.ReLU()
+        self.linear_out = nn.Linear(256, 5)
 
         if init_weights:
             initialize_weights(self)
@@ -40,6 +43,9 @@ class AudioVisualResNet18(nn.Module):
 
         feat = torch.cat([aud_x, vis_x], dim=-1)
         x = self.linear(feat)
+        x = self.linear_norm(x)
+        x = self.relu(x)
+        x = self.linear_out(x)
         x = torch.sigmoid(x)
         # x = torch.tanh(x)
         # x = (x + 1) / 2  # scale tanh output to [0, 1]

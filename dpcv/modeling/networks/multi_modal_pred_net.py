@@ -137,7 +137,7 @@ class VisualFCNet(nn.Module):
 
 class VisualFCNet__(nn.Module):
 
-    def __init__(self, input_dim, out_dim=5, use_sigmoid=False, return_feature=False):
+    def __init__(self, input_dim, out_dim=5, use_sigmoid=True, return_feature=False):
         super().__init__()
         self.fc = nn.Sequential(
             nn.Linear(input_dim, 1024),

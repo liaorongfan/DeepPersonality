@@ -2,7 +2,7 @@ import os
 from dpcv.checkpoint.save import load_model
 from dpcv.config.default_config_opt import cfg, cfg_from_file
 from dpcv.data.datasets.feature_extract_dataset_ip import (
-    setup_dataloader, setup_crnet_dataloader,
+    setup_dataloader, setup_crnet_dataloader, setup_etr_crnet_dataloader,
     setup_persemon_dataloader, setup_bimodal_resnet_dataloader,
 )
 from dpcv.data.datasets.feature_extract_dataset_tp import (
@@ -22,7 +22,7 @@ def feature_extract(cfg_file, model_weight, data_loader, output_dir, return_feat
     runner = ExpRunner(cfg)
     runner.model = load_model(runner.model, model_weight)
 
-    split = ["train", "valid", "test"] if not test_only else ["test"]
+    split = ["train", "test"] if not test_only else ["test"]
     for mode in split:
         # note if cuda out of memory, run each mode separately
         dataloader = data_loader(cfg, mode=mode)
@@ -73,40 +73,40 @@ if __name__ == "__main__":
     # )
 
     # ============================================ Single-Trait: C ================================
-    feature_extract(
-        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_C.yaml",
-        model_weight="sig_trait_C_vat.pkl",
-        data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/vat_C",
-        test_only=True,
-    )
+    # feature_extract(
+    #     cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_C.yaml",
+    #     model_weight="sig_trait_C_vat.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/vat_C",
+    #     test_only=True,
+    # )
 
-    # ============================================ Single-Trait: E ================================
-    feature_extract(
-        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_E.yaml",
-        model_weight="sig_trait_vat_E.pkl",
-        data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/vat_E",
-        test_only=True,
-    )
+    # # ============================================ Single-Trait: E ================================
+    # feature_extract(
+    #     cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_E.yaml",
+    #     model_weight="sig_trait_vat_E.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/vat_E",
+    #     test_only=True,
+    # )
 
-    # ============================================ Single-Trait: A ================================
-    feature_extract(
-        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_A.yaml",
-        model_weight="results/single_traits/A/07_vat_face_vl/05-16_01-12/checkpoint_15.pkl",
-        data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/vat_AA",
-        test_only=True,
-    )
+    # # ============================================ Single-Trait: A ================================
+    # feature_extract(
+    #     cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_A.yaml",
+    #     model_weight="results/single_traits/A/07_vat_face_vl/05-16_01-12/checkpoint_15.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/vat_AA",
+    #     test_only=True,
+    # )
 
-    # ============================================ Single-Trait: N ================================
-    feature_extract(
-        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_N.yaml",
-        model_weight="results/single_traits/N/07_vat_face_vl/05-16_14-36/checkpoint_18.pkl",
-        data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/vat_N",
-        test_only=True,
-    )
+    # # ============================================ Single-Trait: N ================================
+    # feature_extract(
+    #     cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_N.yaml",
+    #     model_weight="results/single_traits/N/07_vat_face_vl/05-16_14-36/checkpoint_18.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/vat_N",
+    #     test_only=True,
+    # )
 
 
 
@@ -152,12 +152,13 @@ if __name__ == "__main__":
     # )
 
     # # crnet feature extract
-    # feature_extract(
-    #     cfg_file="config/unified_frame_images/04_crnet.yaml",
-    #     model_weight="results/unified_frame_images/04_crnet/12-07_09-01/checkpoint_85.pkl",
-    #     data_loader=setup_crnet_dataloader,
-    #     output_dir="datasets/stage_two/cr_net_extract",
-    # )
+    feature_extract(
+        cfg_file="config/impression/unified_frame_images/04_crnet_etr.yaml",
+        model_weight="results/crnet_checkpoint_85.pkl",
+        data_loader=setup_etr_crnet_dataloader,
+        output_dir="datasets/stage_two/cr_net_extract",
+        return_feat=True,
+    )
 
     # bimodal_renet18 feature extract
     # feature_extract(

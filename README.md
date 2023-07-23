@@ -75,14 +75,15 @@ We employ a build-from-config manner to conduct an experiment. After setting up 
 we can have a quick start by the following command line:
 ```shell
 # cd DeepPersonality # top directory 
-script/run_exp.py --config path/to/exp_config.yaml 
+python ./tools/run_exp.py --config path/to/exp_config.yaml 
 ```
 For quick start with [tiny ChaLearn 2016 dataset](https://drive.google.com/file/d/1S87nJFLz9ygzw2Ep_rJUXzzWFfdz15an/view?usp=sharing),
 if you prepare the data by the instructions in above section, the following command will launch an experiment for `bimodal-resnet18 model`.
 ```shell
 # cd DeepPersonality # top directory
-script/run_exp.py --config config/demo/bimodal_resnet18.yaml
+python ./tools/run_exp.py --config config/demo/bimodal_resnet18.yaml
 ```
+
 Detailed arguments description are presented in  **[command line interface file](docs/Command_line_interface.md)**.
 
 
@@ -101,6 +102,111 @@ In the framework user can design and config their own spatial-temporal data prep
 
 If user want to add their own models or algorithms for experiments, please reference the Colab Notebook
 **[TrainYourModel](https://colab.research.google.com/drive/1lB3B0C9LgZ6NmZmsdblRKcfiY6nWoEcI?usp=sharing)**
+
+
+## Data augmentation
+
+To allow users to use different data augmentation strategies, the framework provides a command line argument 
+"--set DATA_LOADER.TRANSFORM < augmentation strategy >" to choose the data augmentation strategy. The details are listed as follows:
+
+- `standard_frame_transform`: the default data augmentation strategy.
+
+- `strong_frame_transform`: a stronger data augmentation strategy with multiple image transforms.
+
+- `customized_frame_transform`: a customized data augmentation strategy, which can be defined by users.
+
+
+### Standard_frame_transform
+Step 1: Resizing the input image (or cropped face image) as a 3-channel rectangle whose shorter edge is 256 pixles long. For example, if an image has a size of (width: 720, height: 512), the resized image will have the size of (width: 360, height: 256);
+
+Step 2: the resized image will be filpped horizontally at a probablity of 0.5;
+
+Step 3: a image patch of the size (width: 224, height: 244) is cropped from the filpped image;
+
+Step 4: the pixel values (P) in the cropped image will be normalized to a numerical range of (-1, 1) by the formulation of $P = (p / 255 - mean) / std$,  
+where the $mean$ and $std$ values for each image channel are [0.485, 0.456, 0.406] and [0.229, 0.224, 0.225] respectively.
+
+### Strong_frame_transform
+Besides the first two augmentaion steps in `standar_frame_transform` strategy ( `resize` and `horiziontally flip`), this strategy also sequentially employs `random rotation`, `color jitter`, and `random resized crop` followed by the same image normalization operation (Step 4) described in `standard_frame_tansform`.
+
+`random rotation`: the image is rotated by a  randomly selected angle with the range of (-5, 5). 
+
+`color jitter`: the brightness, contrast and saturation of the image are randomly changed, where the ranges of scaling/jittering factors for the brightness, contrast and saturation are (0.9, 1.1).
+
+`random resized crop`: a patch (whose size is 0.8 to 1 of the original image) is randomly cropped from the image, which is then resized into the size of (width: 224, height: 224).
+
+The command line for using the strong data augmentation strategy is:
+```shell
+
+python ./tools/run_exp.py --config config/demo/(model.yaml, e.g., bimodal_resnet18.yaml)  \
+                          --set DATA_LOADER.TRANSFORM strong_frame_transform
+
+````
+
+### Customized_frame_transform
+
+First, defining your own data transform function, and registering it to the registry. 
+```python
+# step 1: importing the registry for data transforms：
+from dpcv.data.transforms.build import TRANSFORM_REGISTRY
+
+# step 2: defining your own data transform function and registering it to the registry
+@TRANSFORM_REGISTRY.register()
+def my_frame_transform(cfg):
+    """
+    define your own data transform function
+    """
+    # take the transforms functions from torchvision for your reference
+    import torchvision.transforms as transforms
+    transforms = transforms.Compose([
+        transforms.CenterCrop((112, 112)),
+        transforms.ToTensor(),
+    ])
+    
+    return transform
+
+```
+The command line for using the customized frame transform strategy is:
+
+```shell
+
+python ./tools/run_exp.py --config config/demo/bimodal_resnet18.yaml  \
+                          --set DATA_LOADER.TRANSFORM my_frame_transform
+
+````
+
+
+## Developing models with metadata or additional data
+This framework facilitates user to train models with metadata or additional data. The guideline is provided below:
+- Step 1: Preparing the additional data
+    - Preparing the metadata or additional data in a csv file.
+    - The first column should be the video file name.
+
+- Step 2: Modifing the training config file:
+    ```yaml
+  # file: config/demo/hrnet_use_other_data.yaml
+    # modify the training config file
+  DATA:
+      ROOT: "datasets/chalearn2021"
+      # the path to the metadata or additional data
+      TRAIN_OTHER_DATA: "datasets/chalearn21_metadata/metadata_train.csv"
+      VALID_OTHER_DATA: "datasets/chalearn21_metadata/metadata_valid.csv"
+      TEST_OTHER_DATA: "datasets/chalearn21_metadata/metadata_test.csv"
+  DATA_LOADER:
+      # the name of the data_loader used for adding additional data
+      NAME: "all_true_personality_with_other_data_loader"
+  MODEL:
+      # the name of the model used for training with additional data
+      NAME: "hr_net_true_personality_with_meta_data" (please selecting and modifing your model)
+      USE_OTHER_DATA: True
+      # the dimension of the additional data
+      OTHER_DATA_DIM: 3 (please customize the number here (the dimension of the metadata/additional data))
+    ```
+- Step 3: Training the model
+    ```shell
+    python ./tools/run_exp.py --config config/demo/hrnet_use_other_data.yaml
+    ```
+
 
 
 # Models
@@ -146,8 +252,8 @@ If user want to add their own models or algorithms for experiments, please refer
 | [CRNet](dpcv/modeling/networks/cr_net.py)                                   | audiovisual | [cfg]()  [weight]() | [cfg]()  [weight]() | [cfg]()  [weight]() | [cfg]()  [weight]() |
 | [Amb-Fac](dpcv/modeling/networks/multi_modal_pred_net.py)                   | audiovisual | [cfg]()  [weight]() | [cfg]()  [weight]() | [cfg]()  [weight]() | [cfg]()  [weight]() |
 
-## Papers 
-From which the models are reproduced
+## Related papers 
+The models that we have or will reproduced:
 
 - Deep bimodal regression of apparent personality traits from short video sequences
 - Bi-modal first impressions recognition using temporally ordered deep audio and stochastic visual features

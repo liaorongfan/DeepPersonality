@@ -168,6 +168,7 @@ def make_data_loader(cfg, mode):
 def bimodal_resnet_data_loader(cfg, mode):
     assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
     transforms = build_transform_spatial(cfg)
+    # valid_transforms = 
     if mode == "train":
         dataset = AudioVisualData(
             cfg.DATA.ROOT,

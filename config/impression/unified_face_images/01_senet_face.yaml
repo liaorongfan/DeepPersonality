@@ -10,4 +10,5 @@ DATA_LOADER:
 MODEL:
   NAME: "se_resnet50"
 TRAIN:
+  MAX_EPOCH: 200
   OUTPUT_DIR: "results/unified_face_images/01_senet_face"
