@@ -20,7 +20,7 @@ class CRNetData(VideoData):
         sample_size=100,
         num_videos=-1,
         traits="OCEAN",
-        specify_videos=None,
+        specify_videos="",
     ):
         super().__init__(data_root, img_dir, label_file, audio_dir, traits=traits)
         self.transform = transform
@@ -28,7 +28,7 @@ class CRNetData(VideoData):
         self.face_img_dir_ls = self.get_face_img_dir(face_img_dir)
         if num_videos > 0:
             self.img_dir_ls = self.img_dir_ls[: num_videos]
-        if specify_videos is not None:
+        if len(specify_videos) > 0:
             self.img_dir_ls = self.select_img_dir(specify_videos)
 
     def select_img_dir(self, specify_videos):
