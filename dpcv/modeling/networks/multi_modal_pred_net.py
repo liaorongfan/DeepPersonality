@@ -111,9 +111,33 @@ def resnet101_visual_feature_extractor(pretrained=True, **kwargs):
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
+
 class VisualFCNet(nn.Module):
 
     def __init__(self, input_dim, out_dim=5, use_sigmoid=True, return_feature=False):
+        super().__init__()
+        self.fc = nn.Sequential(
+            nn.Linear(input_dim, 512),
+            nn.ReLU(),
+            nn.Linear(512, out_dim),
+        )
+        self.dropout = nn.Dropout()
+        self.sigmoid = nn.Sigmoid()
+        self.use_sigmoid = use_sigmoid
+        self.return_feature = return_feature
+
+    def forward(self, x):
+        x = self.dropout(x)
+        x = self.fc(x)
+        x = x.mean(dim=1)
+        if self.use_sigmoid:
+            return self.sigmoid(x)
+        return x
+
+
+class VisualFCNet__(nn.Module):
+
+    def __init__(self, input_dim, out_dim=5, use_sigmoid=False, return_feature=False):
         super().__init__()
         self.fc = nn.Sequential(
             nn.Linear(input_dim, 1024),
@@ -123,11 +147,11 @@ class VisualFCNet(nn.Module):
             nn.LayerNorm(512),
             nn.ReLU(),
 
-            nn.Linear(512, 512),
-            nn.LayerNorm(512),
-            nn.ReLU(),
+            # nn.Linear(512, 512),
+            # nn.LayerNorm(512),
+            # nn.ReLU(),
 
-            nn.Dropout(0.2),
+            # nn.Dropout(0.2),
             nn.Linear(512, out_dim),
         )
         self.dropout = nn.Dropout()
@@ -149,7 +173,7 @@ class VisualFCNet(nn.Module):
 
 class AudioFCNet(nn.Module):
 
-    def __init__(self, input_dim, out_dim=5, spectrum_channel=15, use_sigmoid=True, return_feature=False):
+    def __init__(self, input_dim, out_dim=5, spectrum_channel=15, use_sigmoid=False, return_feature=False):
         super().__init__()
         self.spectrum_channel = spectrum_channel
         self.return_feature = return_feature
