@@ -30,7 +30,7 @@ __C.DATA.AUDIO_CLIP = -1
 __C.DATA.AUDIO_LEN = -1.
 # used for temporal inputs
 __C.DATA.DOWNSAMPLE = 100
-__C.DATA.FRAMES = 16
+__C.DATA.FRAMES = 32
 
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
