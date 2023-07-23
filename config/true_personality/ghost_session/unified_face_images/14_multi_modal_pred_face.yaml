@@ -4,7 +4,7 @@ DATA:
   TYPE: "face"
 DATA_LOADER:
   NAME: "multi_modal_data_loader"
-  TRAIN_BATCH_SIZE: 32
+  TRAIN_BATCH_SIZE: 2048
   NUM_WORKERS: 0
 MODEL:
   NAME: "multi_modal_visual_model"
@@ -16,7 +16,7 @@ SOLVER:
   LR_INIT: 0.01
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [300, 400]
+  MILESTONE: [100, 150]
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 500

@@ -18,5 +18,5 @@ SOLVER:
   MILESTONE: [80, 90]
 TRAIN:
   TRAINER: "CRNetAudTrainer"
-  MAX_EPOCH: 100
+  MAX_EPOCH: 200
   OUTPUT_DIR: "results_true_personality/short_clip_m/animal/03_aud_crnet"

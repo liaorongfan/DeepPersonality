@@ -21,4 +21,4 @@ SOLVER:
 TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 10
-  OUTPUT_DIR: "results_true_personality/fold_3/14_multi_modal_pred"
+  OUTPUT_DIR: "results_true_personality/folds_tp/fold_3/14_multi_modal_pred"

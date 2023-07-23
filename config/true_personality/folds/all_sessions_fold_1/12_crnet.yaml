@@ -20,4 +20,4 @@ SOLVER:
 TRAIN:
   TRAINER: "CRNetTrainer2"
   MAX_EPOCH: 3
-  OUTPUT_DIR: "results_true_personality/fold_1/12_crnet"
+  OUTPUT_DIR: "results_true_personality/folds_tp/fold_1/12_crnet"

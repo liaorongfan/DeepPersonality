@@ -5,7 +5,7 @@ DATA:
   TRAITS: "A"
 DATA_LOADER:
   NAME: "all_multi_modal_data_loader"
-  TRAIN_BATCH_SIZE: 32
+  TRAIN_BATCH_SIZE: 256
   NUM_WORKERS: 0
 MODEL:
   NAME: "multi_modal_visual_model"
@@ -21,5 +21,5 @@ SOLVER:
   MILESTONE: [15, 18]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 5
+  MAX_EPOCH: 200
   OUTPUT_DIR: "results_true_personality/unified_face_images_A/14_multi_modal_pred"

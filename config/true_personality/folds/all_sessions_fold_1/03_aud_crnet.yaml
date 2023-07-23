@@ -18,4 +18,4 @@ SOLVER:
 TRAIN:
   TRAINER: "CRNetAudTrainer"
   MAX_EPOCH: 80
-  OUTPUT_DIR: "results_true_personality/fold_1/03_aud_crnet"
+  OUTPUT_DIR: "results_true_personality/folds_tp/fold_1/03_aud_crnet"
