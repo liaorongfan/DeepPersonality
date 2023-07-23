@@ -1,7 +1,7 @@
 DATA:
   TRAIN_IMG_DATA: "folds/fold_1/image_data/train_data_face"
   VALID_IMG_DATA: "folds/fold_1/image_data/valid_data_face"
-  TEST_IMG_DATA: "folds/fold_1/image_data/test_data_face"
+  TEST_IMG_DATA: "folds/fold_1/image_data/valid_data_face"
 DATA_LOADER:
   NAME: "single_frame_data_loader"
   TRANSFORM: "face_image_x2_transform"
@@ -9,6 +9,8 @@ DATA_LOADER:
   NUM_WORKERS: 8
 MODEL:
   NAME: "hr_net_model"
+SOLVER:
+  LR_INIT: 0.01
 TRAIN:
-  MAX_EPOCH: 80
+  MAX_EPOCH: 120
   OUTPUT_DIR: "results/folds/fold_1/02_hrnet_face"

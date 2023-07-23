@@ -19,5 +19,5 @@ SOLVER:
   MILESTONE: [300, 400]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 50
+  MAX_EPOCH: 300
   OUTPUT_DIR: "results/folds/fold_1/8_multi_modal_pred"
