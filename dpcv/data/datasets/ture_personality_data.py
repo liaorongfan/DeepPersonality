@@ -58,7 +58,10 @@ class Chalearn21FrameData(Dataset):
         else:
             raise TypeError(f"type should be 'face' or 'frame' or 'audio', but got {type}")
         # for debug usage
-        # self.img_dir_ls = self.img_dir_ls[:4]
+        # if data_split == "train":
+        #     self.img_dir_ls = self.img_dir_ls[:5]
+        # elif data_split == "valid":
+        #     self.img_dir_ls = self.img_dir_ls[:5]
         self.segment = segment
         if not data_type == "audio":
             self.all_images = self.assemble_images()
@@ -622,6 +625,36 @@ def all_true_personality_dataloader(cfg, mode):
     return data_loader
 
 
+@DATA_LOADER_REGISTRY.register()
+def fold_all_true_personality_dataloader(cfg, mode):
+    from torch.utils.data.dataset import ConcatDataset
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+    if mode == "test":
+        mode = "valid"
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    transform = build_transform_spatial(cfg)
+    datasets = []
+    # for session in ["ghost",]:
+    for session in ["ghost", "animal", "talk", "lego"]:
+
+        dataset = Chalearn21FrameData(
+            data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,  
+            data_type=cfg.DATA.TYPE,
+            trans=transform,
+            traits=cfg.DATA.TRAITS,
+        )
+        datasets.append(dataset)
+    conca_datasets = ConcatDataset(datasets)
+    data_loader = DataLoader(
+        dataset=conca_datasets,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
 
 
 @DATA_LOADER_REGISTRY.register()
