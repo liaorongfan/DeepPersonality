@@ -51,6 +51,9 @@ class SingleFrameData(VideoData):
     def get_image_data(self, index):
         img_dir = self.img_dir_ls[index]
         img_path = self.image_sample(img_dir)
+        if not img_path:
+            # print(f"image path {img_path} does not exist, go to next video")
+            return self.get_image_data(index + 1)
         img = Image.open(img_path).convert("RGB")
         return img
 
@@ -58,6 +61,9 @@ class SingleFrameData(VideoData):
     def image_sample(img_dir):
         img_path_ls = glob.glob(f"{img_dir}/*.jpg")
         num_img = len(img_path_ls)
+        if num_img == 0:
+            # raise ValueError(f"no image found in {img_dir}")
+            return None
         # downsample the frames to 100 / video
         sample_frames = np.linspace(0, num_img, 100, endpoint=False, dtype=np.int16)
         selected = random.choice(sample_frames)

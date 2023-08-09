@@ -65,17 +65,18 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--label", type=str)
     args = parser.parse_args()
 
-    # fusion = CmpPostFusion(
-    #     visual_data_path="tmp/impresssion/frame/pred.pkl",
-    #     audio_data_path="tmp/impresssion/audio/pred.pkl",
-    #     label_data_path="tmp/impresssion/audio/label.pkl"
-    # )
-
     fusion = CmpPostFusion(
-        visual_data_path=args.visual,
-        audio_data_path=args.audio,
-        label_data_path=args.label,
-        addition_data_path=args.other,
+        visual_data_path="tmp/dan+/pred.pkl",
+        audio_data_path="tmp/output_fuse_9111/pred.pkl",
+        label_data_path="tmp/dan+/label.pkl",
+        # addition_data_path="senet_frame/pred.pkl",
     )
 
+    # fusion = CmpPostFusion(
+    #     visual_data_path=args.visual,
+    #     audio_data_path=args.audio,
+    #     label_data_path=args.label,
+    #     addition_data_path=args.other,
+    # )
+    #
     fusion.compute()

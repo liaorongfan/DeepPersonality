@@ -111,7 +111,7 @@ def resnet101_visual_feature_extractor(pretrained=True, **kwargs):
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
-class VisualFCNet(nn.Module):
+class VisualFCNet__(nn.Module):
 
     def __init__(self, input_dim, out_dim=5, use_sigmoid=True, return_feature=False):
         super().__init__()
@@ -144,6 +144,29 @@ class VisualFCNet(nn.Module):
             x = self.sigmoid(x)
         if self.return_feature:
             return x, f
+        return x
+
+
+class VisualFCNet(nn.Module):
+
+    def __init__(self, input_dim, out_dim=5, use_sigmoid=True, return_feature=False):
+        super().__init__()
+        self.fc = nn.Sequential(
+            nn.Linear(input_dim, 512),
+            nn.ReLU(),
+            nn.Linear(512, out_dim),
+        )
+        self.dropout = nn.Dropout()
+        self.sigmoid = nn.Sigmoid()
+        self.use_sigmoid = use_sigmoid
+        self.return_feature = return_feature
+
+    def forward(self, x):
+        x = self.dropout(x)
+        x = self.fc(x)
+        x = x.mean(dim=1)
+        if self.use_sigmoid:
+            return self.sigmoid(x)
         return x
 
 

@@ -1,19 +1,30 @@
 import numpy as np
 import scipy.stats as stats
 
+# VAT, TPN, Slow-fast, 3D-resnet
 tmp_ip = """
-& 0.3248 & 0.3601 & 0.3601 & 0.2120 & 0.3352 & 0.3185 
+& 0.3248 & 0.3601 & 0.3601 & 0.2120 & 0.3352 & 0.3185
 & 0.0256 & 0.0320 & 0.0185 & 0.0105 & 0.0184 & 0.0210   
 & 0.4427 & 0.4767 & 0.4998 & 0.3230 & 0.4675 & 0.4420 
 & 0.6216 & 0.6753 & 0.6836 & 0.5228 & 0.6456 & 0.6298
 """
 
+# HRNet, CAM-DAN+, Amb-fac, DAN
 spa_ip = """
 & 0.5923 & 0.6912 & 0.6436 & 0.5195 & 0.6273 & 0.6148
-& 0.5882 & 0.6550 & 0.6326 & 0.5003 & 0.6199 & 0.5992 
+& 0.5882 & 0.6550 & 0.6326 & 0.5003 & 0.6199 & 0.5992
+& 0.5858 & 0.6750 & 0.5997 & 0.4971 & 0.5765 & 0.5868 
 & 0.5693 & 0.6254 & 0.6070 & 0.4855 & 0.6025 & 0.5779 
-& 0.5300 & 0.5580 & 0.5815 & 0.4493 & 0.5708 & 0.5379 
 """
+
+# Bi-modal CNN-LSTM, ResNet, CRNet,  PersEmoN
+spa_ip__ = """
+& 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000
+& 0.1561 & 0.1902 & 0.1355 & 0.0838 & 0.1373 & 0.1406
+& 0.3748 & 0.3646 & 0.3987 & 0.2390 & 0.3226 & 0.3399
+& 0.2067 & 0.2441 & 0.2675 & 0.1369 & 0.1768 & 0.2064
+"""
+
 
 tmp_tp = """
 & -0.0478  &  0.0102 &  0.0478 &  0.0499 & -0.0240 &  0.0072  
@@ -39,22 +50,20 @@ def clean_data(data):
     return data_arr
 
 
-def compute_p_value(modality1, modality2):
-    p_value_list = []
-    for i in range(6):
-        t_stat, p_value = stats.ttest_rel(modality1[:, i], modality2[:, i])
-        p_value_list.append(p_value)
-    print(p_value_list)
-
-
 def print_latex_table(modality1, modality2):
     for i in range(6):
         t_stat, p_value = stats.ttest_rel(modality1[:, i], modality2[:, i])
         print(f"{p_value:.6f} & ", end="")
+    print()
 
 
-tmp = clean_data(tmp_tp)
-spa = clean_data(spa_tp)
+if __name__ == '__main__':
 
-print_latex_table(tmp, spa)
+    tmp = clean_data(tmp_ip)
+    spa = clean_data(spa_ip)
+    print_latex_table(tmp, spa)
+
+    # tmp = clean_data(tmp_tp)
+    # spa = clean_data(spa_tp)
+    # print_latex_table(tmp, spa)
 

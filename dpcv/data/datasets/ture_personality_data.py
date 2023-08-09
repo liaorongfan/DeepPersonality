@@ -35,6 +35,7 @@ class Chalearn21FrameData(Dataset):
             traits="OCEAN",
             visual_clip=-1,
             audio_clip=-1.0,
+            other_data="",
     ):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
@@ -64,6 +65,7 @@ class Chalearn21FrameData(Dataset):
             self.all_images = self.assemble_images()
         self.trans = trans
         self.traits = [self.TRAITS_ID[t] for t in traits]
+        self.other_data = other_data
 
     def __len__(self):
         return len(self.all_images)
@@ -83,8 +85,20 @@ class Chalearn21FrameData(Dataset):
                 img_ls = [self.trans(img) for img in img_ls]
             img = torch.stack(img_ls, dim=0)
         if len(self.traits) != 5:
-           label = label[self.traits] 
-        return {"image": img, "label": torch.as_tensor(label, dtype=torch.float32)}
+           label = label[self.traits]
+
+        if len(self.other_data) > 0:
+            other_data = self.get_other_data(img_file)
+            return {
+                "image": img,
+                "label": torch.as_tensor(label, dtype=torch.float32),
+                "other_data": other_data,
+            }
+
+        return {
+            "image": img,
+            "label": torch.as_tensor(label, dtype=torch.float32),
+        }
 
     def get_ocean_label(self, img_file):
         *_, session, part, frame = img_file.split("/")
@@ -166,6 +180,23 @@ class Chalearn21FrameData(Dataset):
             return file
         else:
             return file[0]
+
+    def get_other_data(self, img_file):
+        raise NotImplementedError(
+            "get_other_data method should be implemented in subclass"
+        )
+
+
+class Chalearn21FrameDataWithOtherData(Chalearn21FrameData):
+
+    def get_other_data(self, img_file):
+        *_, session, part, frame = img_file.split("/")
+        if self.type == "face":
+            part = part.replace("_face", "")
+        part = part.replace(self.task_mark, "T")
+        participant_id = self.session_id[str(int(session))][part]
+        other_data = self.other_data[participant_id]
+        return other_data
 
 
 class Chlearn21AudioData(Chalearn21FrameData):
@@ -622,6 +653,35 @@ def all_true_personality_dataloader(cfg, mode):
     return data_loader
 
 
+@DATA_LOADER_REGISTRY.register()
+def all_true_personality_with_other_data_loader(cfg, mode):
+    from torch.utils.data.dataset import ConcatDataset
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    transform = build_transform_spatial(cfg)
+    datasets = []
+    # for session in ["ghost",]:
+    for session in ["ghost", "animal", "talk", "lego"]:
+
+        dataset = Chalearn21FrameDataWithOtherData(
+            data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,
+            data_type=cfg.DATA.TYPE,
+            trans=transform,
+            traits=cfg.DATA.TRAITS,
+        )
+        datasets.append(dataset)
+    conca_datasets = ConcatDataset(datasets)
+    data_loader = DataLoader(
+        dataset=conca_datasets,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
 
 
 @DATA_LOADER_REGISTRY.register()

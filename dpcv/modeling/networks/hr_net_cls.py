@@ -534,6 +534,135 @@ class HighResolutionNet(nn.Module):
             self.load_state_dict(model_dict)
 
 
+class HighResolutionNetWithOtherData(HighResolutionNet):
+    def __init__(
+        self, cfg,
+        init_weights=True, normalize_output=True, return_feature=False,
+        with_other_data=True,
+        other_data_dim=0,
+        **kwargs,
+    ):
+        super(HighResolutionNet, self).__init__()
+        self.normalize_output = normalize_output
+        self.return_feature = return_feature
+        self.input_dim_for_other_data = other_data_dim
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(64, momentum=BN_MOMENTUM)
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(64, momentum=BN_MOMENTUM)
+        self.relu = nn.ReLU(inplace=True)
+
+        self.stage1_cfg = cfg['MODEL']['EXTRA']['STAGE1']
+        num_channels = self.stage1_cfg['NUM_CHANNELS'][0]
+        block = blocks_dict[self.stage1_cfg['BLOCK']]
+        num_blocks = self.stage1_cfg['NUM_BLOCKS'][0]
+        self.layer1 = self._make_layer(block, 64, num_channels, num_blocks)
+        stage1_out_channel = block.expansion * num_channels
+
+        self.stage2_cfg = cfg['MODEL']['EXTRA']['STAGE2']
+        num_channels = self.stage2_cfg['NUM_CHANNELS']
+        block = blocks_dict[self.stage2_cfg['BLOCK']]
+        num_channels = [
+            num_channels[i] * block.expansion for i in range(len(num_channels))
+        ]
+        self.transition1 = self._make_transition_layer(
+            [stage1_out_channel], num_channels
+        )
+        self.stage2, pre_stage_channels = self._make_stage(
+            self.stage2_cfg, num_channels
+        )
+        self.stage3_cfg = cfg['MODEL']['EXTRA']['STAGE3']
+        num_channels = self.stage3_cfg['NUM_CHANNELS']
+        block = blocks_dict[self.stage3_cfg['BLOCK']]
+        num_channels = [
+            num_channels[i] * block.expansion for i in range(len(num_channels))
+        ]
+        self.transition2 = self._make_transition_layer(
+            pre_stage_channels, num_channels
+        )
+        self.stage3, pre_stage_channels = self._make_stage(
+            self.stage3_cfg, num_channels
+        )
+        self.stage4_cfg = cfg['MODEL']['EXTRA']['STAGE4']
+        num_channels = self.stage4_cfg['NUM_CHANNELS']
+        block = blocks_dict[self.stage4_cfg['BLOCK']]
+        num_channels = [
+            num_channels[i] * block.expansion for i in range(len(num_channels))
+        ]
+        self.transition3 = self._make_transition_layer(
+            pre_stage_channels, num_channels
+        )
+        self.stage4, pre_stage_channels = self._make_stage(
+            self.stage4_cfg, num_channels, multi_scale_output=True
+        )
+
+        # Classification Head
+        self.incre_modules, self.downsamp_modules, \
+        self.final_layer = self._make_head(pre_stage_channels)
+        if with_other_data:
+            self.classifier = nn.Linear(
+                2048 + other_data_dim, cfg["MODEL"]["NUM_CLASSES"],
+            )
+        self.classifier = nn.Linear(2048, cfg["MODEL"]["NUM_CLASSES"])
+
+        if init_weights:
+            initialize_weights(self)
+
+    def forward(self, x, other_data=None):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.relu(x)
+        x = self.layer1(x)
+
+        x_list = []
+        for i in range(self.stage2_cfg['NUM_BRANCHES']):
+            if self.transition1[i] is not None:
+                x_list.append(self.transition1[i](x))
+            else:
+                x_list.append(x)
+        y_list = self.stage2(x_list)
+
+        x_list = []
+        for i in range(self.stage3_cfg['NUM_BRANCHES']):
+            if self.transition2[i] is not None:
+                x_list.append(self.transition2[i](y_list[-1]))
+            else:
+                x_list.append(y_list[i])
+        y_list = self.stage3(x_list)
+
+        x_list = []
+        for i in range(self.stage4_cfg['NUM_BRANCHES']):
+            if self.transition3[i] is not None:
+                x_list.append(self.transition3[i](y_list[-1]))
+            else:
+                x_list.append(y_list[i])
+        y_list = self.stage4(x_list)
+
+        # Classification Head
+        y = self.incre_modules[0](y_list[0])
+        for i in range(len(self.downsamp_modules)):
+            y = self.incre_modules[i + 1](y_list[i + 1]) + self.downsamp_modules[i](y)
+
+        y = self.final_layer(y)
+
+        if torch._C._get_tracing_state():
+            y = y.flatten(start_dim=2).mean(dim=2)
+        else:
+            y = F.avg_pool2d(y, kernel_size=y.size()[2:]).view(y.size(0), -1)
+        feat = y
+        if self.with_other_data:
+            y = torch.cat([y, other_data], dim=1)
+        y = self.classifier(y)
+        if self.normalize_output:
+            y = torch.sigmoid(y)
+        if self.return_feature:
+            return y, feat
+        return y
+
+
 def get_hr_net_model(cfg=None, **kwargs):
     config = hr_net_cfg
     model = HighResolutionNet(config, **kwargs)
@@ -557,6 +686,22 @@ def hr_net_true_personality(cfg=None, **kwargs):
     config.MODEL.NUM_CLASSES = cfg.MODEL.NUM_CLASS
     return_feat = cfg.MODEL.RETURN_FEATURE
     model = HighResolutionNet(config, normalize_output=False, return_feature=return_feat, **kwargs)
+    model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return model
+
+
+@NETWORK_REGISTRY.register()
+def hr_net_true_personality_with_meta_data(cfg=None, **kwargs):
+    config = hr_net_cfg
+    config.MODEL.NUM_CLASSES = cfg.MODEL.NUM_CLASS
+    return_feat = cfg.MODEL.RETURN_FEATURE
+    with_other_data = cfg.MODEL.WITH_OTHER_DATA
+    other_data_input_dim = cfg.MODEL.OTHER_DATA_DIM
+    model = HighResolutionNetWithOtherData(
+        config, normalize_output=False, return_feature=return_feat,
+        with_other_data=with_other_data, other_data_dim=other_data_input_dim,
+        **kwargs,
+    )
     model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return model
 

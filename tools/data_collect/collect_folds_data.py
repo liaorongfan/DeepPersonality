@@ -10,9 +10,9 @@ from copy import deepcopy
 
 class FoldDataCollect:
 
-    def __init__(self, data_root="results/folds_tp", print_info=False):
+    def __init__(self, data_root="results/folds_tmp/tmp_fold_tp", print_info=True):
         self.data_root = data_root
-        self.models = os.listdir(f"{self.data_root}/fold_0")
+        self.models = os.listdir(f"{self.data_root}/fold_1")
         self.log_files = collect_files(data_root)
         self.model_folds_log = self.separate_model_logs()
         self.model_folds_statistic = self.folds_data_statistic()
@@ -113,12 +113,12 @@ def collect_log_file_data(log_files_list):
     for log in log_files_list:
         with open(log, 'r') as fo:
             line = fo.readlines()[-1]
-            assert "ccc" in line, "not correct data line"
+            assert "ccc" in line, f"error in {log}"
             data = filter_data(line)
             records.append(data)
-    assert len(records) == 10, "not complete collection"
+    # assert len(records) == 10, "not complete collection"
     data_array = np.array(records)
-    trait_mean = data_array.mean(axis=1).round(4).reshape(10, 1)
+    trait_mean = data_array.mean(axis=1).round(4).reshape(len(records), 1)
     data_array_exp = np.hstack((data_array, trait_mean))
     mean = data_array_exp.mean(axis=0).round(4)
     # the mean of std of each trait
@@ -148,6 +148,6 @@ if __name__ == "__main__":
     # collector.compute_p_value("02_hrnet_face")
     # collector.compute_p_value("03_aud_crnet")
     # collector.modality_p_value_tp()
-    collector.modality_p_value_ip()
+    # collector.modality_p_value_ip()
 
 

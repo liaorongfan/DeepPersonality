@@ -1,0 +1,16 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data_neutral_face/train_data_face"
+  VALID_IMG_DATA: "image_data_neutral_face/valid_data_face"
+  TEST_IMG_DATA: "image_data_neutral_face/test_data_face"
+DATA_LOADER:
+  NAME: "single_frame_data_loader"
+  TRANSFORM: "vit_image_transform"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "get_vit_model"
+SOLVER:
+  LR_INIT: 0.001
+TRAIN:
+  MAX_EPOCH: 80
+  OUTPUT_DIR: "results/unified_face_images/09_vit_face"
