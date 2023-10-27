@@ -22,6 +22,7 @@ datasets/folds
 datasets/extracted_feature_tp
 datasets/extracted_feature_impression
 datasets/chalearn2021_neutral_face
+datasets/image_data_neutral_face
 pretrained/
 mlruns/
 /snippet
@@ -31,6 +32,7 @@ plot
 # ingore output data
 output/
 /results
+/results_linear
 results_second_stage_tp
 results_second_stage
 results_true_personality
