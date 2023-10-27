@@ -21,6 +21,7 @@ datasets/chalearn21_fold_*
 datasets/folds
 datasets/extracted_feature_tp
 datasets/extracted_feature_impression
+datasets/chalearn2021_neutral_face
 pretrained/
 mlruns/
 /snippet

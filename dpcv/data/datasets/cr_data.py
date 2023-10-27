@@ -20,7 +20,7 @@ class CRNetData(VideoData):
         sample_size=100,
         num_videos=-1,
         traits="OCEAN",
-        specify_videos=None,
+        specify_videos="",
     ):
         super().__init__(data_root, img_dir, label_file, audio_dir, traits=traits)
         self.transform = transform
@@ -28,7 +28,7 @@ class CRNetData(VideoData):
         self.face_img_dir_ls = self.get_face_img_dir(face_img_dir)
         if num_videos > 0:
             self.img_dir_ls = self.img_dir_ls[: num_videos]
-        if specify_videos is not None:
+        if len(specify_videos) > 0:
             self.img_dir_ls = self.select_img_dir(specify_videos)
 
     def select_img_dir(self, specify_videos):
@@ -175,6 +175,42 @@ class AllFrameCRNetData(CRNetData):
         loc_img_ls, glo_img_ls = [], []
         # separate = np.linspace(0, len(loc_imgs), self.sample_size, endpoint=False, dtype=np.int16)
         separate = list(range(len(loc_imgs)))
+        for img_index in separate:
+            try:
+                loc_img_pt = loc_imgs[img_index]
+            except IndexError:
+                loc_img_pt = loc_imgs[0]
+
+            glo_img_pt = self._match_img(loc_img_pt)
+
+            loc_img_ls.append(loc_img_pt)
+            glo_img_ls.append(glo_img_pt)
+
+        loc_img_obj_ls = [Image.open(loc_img) for loc_img in loc_img_ls]
+        glo_img_obj_ls = [Image.open(glo_img) for glo_img in glo_img_ls]
+
+        return glo_img_obj_ls, loc_img_obj_ls, idx
+
+class ETRFrameCRNetData(AllFrameCRNetData):
+
+    def get_imgs(self, idx):
+        glo_img_dir = self.img_dir_ls[idx]
+        if "train" in glo_img_dir:
+            loc_img_dir = glo_img_dir.replace("train_data", "train_data_face")
+        elif "valid" in glo_img_dir:
+            loc_img_dir = glo_img_dir.replace("valid_data", "valid_data_face")
+        else:
+            loc_img_dir = glo_img_dir.replace("test_data", "test_data_face")
+        # in case some video doesn't get aligned face images
+        if os.path.basename(loc_img_dir) not in self.face_img_dir_ls:
+            return self.get_imgs(idx + 1)
+
+        loc_imgs = glob.glob(loc_img_dir + "/*.jpg")
+        loc_imgs = sorted(loc_imgs, key=lambda x: int(Path(x).stem[5:]))
+
+        loc_img_ls, glo_img_ls = [], []
+        separate = np.linspace(0, len(loc_imgs), 32, endpoint=False, dtype=np.int16)
+        # separate = list(range(len(loc_imgs)))
         for img_index in separate:
             try:
                 loc_img_pt = loc_imgs[img_index]

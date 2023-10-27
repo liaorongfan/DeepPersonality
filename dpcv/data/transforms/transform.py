@@ -42,9 +42,9 @@ def strong_frame_transform(cfg):
     transforms = transforms.Compose([
         transforms.Resize(256),
         transforms.RandomHorizontalFlip(0.5),
-        transforms.RandomRotation(15),
-        transforms.ColorJitter(brightness=0.3, saturation=0.3),
-        transforms.RandomResizedCrop(size=224, scale=(0.5, 1)),
+        transforms.RandomRotation(5),
+        transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1),
+        transforms.RandomResizedCrop(size=224, scale=(0.5, 1), ratio=(0.99,1)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])

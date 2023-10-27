@@ -22,3 +22,5 @@ TRAIN:
   TRAINER: "MultiModalTrainer"
   MAX_EPOCH: 300
   OUTPUT_DIR: "results/folds/fold_6/aud_multi_modal_pred"
+TEST:
+  SAVE_DATASET_OUTPUT: "./post_fuse/fold_6/vggish"

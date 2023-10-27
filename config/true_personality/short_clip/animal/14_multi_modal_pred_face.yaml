@@ -4,7 +4,7 @@ DATA:
   TYPE: "face"
 DATA_LOADER:
   NAME: "multi_modal_data_loader"
-  TRAIN_BATCH_SIZE: 32
+  TRAIN_BATCH_SIZE: 256
   NUM_WORKERS: 0
 MODEL:
   NAME: "multi_modal_visual_model"
@@ -16,8 +16,9 @@ SOLVER:
   LR_INIT: 0.01
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [15, 18]
+  MILESTONE: [150, 180]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 20
+  LOG_INTERVAL: 30
+  MAX_EPOCH: 200
   OUTPUT_DIR: "results_true_personality/short_clip_m/animal/14_multi_modal_pred"

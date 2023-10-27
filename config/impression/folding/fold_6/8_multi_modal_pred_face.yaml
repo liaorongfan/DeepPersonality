@@ -4,7 +4,7 @@ DATA:
   TYPE: "face"
 DATA_LOADER:
   NAME: "fold_multi_modal_impression_data_loader"
-  TRAIN_BATCH_SIZE: 64
+  TRAIN_BATCH_SIZE: 256
   NUM_WORKERS: 0
 MODEL:
   NAME: "multi_modal_visual_model"
@@ -13,11 +13,13 @@ LOSS:
 SOLVER:
   NAME: "sgd"
   SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.01
+  LR_INIT: 0.02
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [300, 400]
+  MILESTONE: [100, 150, 200]
 TRAIN:
   TRAINER: "MultiModalTrainer"
-  MAX_EPOCH: 50
+  MAX_EPOCH: 300
   OUTPUT_DIR: "results/folds/fold_6/8_multi_modal_pred"
+TEST:
+  SAVE_DATASET_OUTPUT: "./post_fuse/fold_6/fac"

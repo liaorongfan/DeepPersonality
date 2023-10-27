@@ -148,6 +148,12 @@ class CRNet2(nn.Module):
         out = self.out_map(out_reg)
         out = out.view(out.size(0), -1)
         if self.return_feature:
+            # ETR feature fusion
+            glo_reg = guided_glo_reg.mean(dim=1)
+            loc_reg = guided_loc_reg.mean(dim=1)
+            wav_reg = guided_wav_reg.mean(dim=1)
+
+            out_reg = (glo_reg * 7 / 15) + (loc_reg * 5 / 15) + (wav_reg * 3 / 15)
             return cls_guide, out, out_reg
         return cls_guide, out
 

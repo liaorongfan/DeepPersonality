@@ -1,7 +1,7 @@
 DATA:
   TRAIN_AUD_DATA: "folds/fold_7/voice_data/voice_librosa/train_data"
   VALID_AUD_DATA: "folds/fold_7/voice_data/voice_librosa/valid_data"
-  TEST_AUD_DATA: "folds/fold_7/voice_data/voice_librosa/test_data"
+  TEST_AUD_DATA: "folds/fold_7/voice_data/voice_librosa/valid_data"
 DATA_LOADER:
   NAME: "build_audio_loader"
   DATASET: "VoiceCRNetData"

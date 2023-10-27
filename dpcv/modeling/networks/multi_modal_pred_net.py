@@ -172,7 +172,7 @@ class VisualFCNet(nn.Module):
 
 class AudioFCNet(nn.Module):
 
-    def __init__(self, input_dim, out_dim=5, spectrum_channel=15, use_sigmoid=True, return_feature=False):
+    def __init__(self, input_dim, out_dim=5, spectrum_channel=15, use_sigmoid=False, return_feature=False):
         super().__init__()
         self.spectrum_channel = spectrum_channel
         self.return_feature = return_feature
