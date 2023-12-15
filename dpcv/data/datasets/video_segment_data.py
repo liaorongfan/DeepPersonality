@@ -122,10 +122,11 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
         self, data_root, data_split, task, data_type, video_loader, 
         spa_trans=None, tem_trans=None, 
         traits="OCEAN", visual_clip=-1,
+        video_nums=-1,
     ):
         super().__init__(
             data_root, data_split, task, data_type, even_downsample=2000, trans=None, segment=True, 
-            traits=traits, visual_clip=visual_clip,
+            traits=traits, visual_clip=visual_clip, video_nums=video_nums,
         )
         self.loader = video_loader
         self.spa_trans = spa_trans

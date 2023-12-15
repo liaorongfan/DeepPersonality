@@ -35,6 +35,7 @@ class Chalearn21FrameData(Dataset):
             traits="OCEAN",
             visual_clip=-1,
             audio_clip=-1.0,
+            video_nums=0.25,
     ):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
@@ -58,7 +59,13 @@ class Chalearn21FrameData(Dataset):
         else:
             raise TypeError(f"type should be 'face' or 'frame' or 'audio', but got {type}")
         # for debug usage
-        # self.img_dir_ls = self.img_dir_ls[:4]
+        if video_nums > 0:
+            if isinstance(video_nums, int):
+                self.img_dir_ls = self.img_dir_ls[:video_nums]
+            elif isinstance(video_nums, float):
+                video_nums = int(len(self.img_dir_ls) * video_nums)
+                self.img_dir_ls = self.img_dir_ls[:video_nums]
+
         self.segment = segment
         if not data_type == "audio":
             self.all_images = self.assemble_images()

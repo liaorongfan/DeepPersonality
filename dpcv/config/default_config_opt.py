@@ -38,7 +38,7 @@ __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
 __C.DATA.TRAIN_OTHER_DATA = ""
 __C.DATA.TRAIN_SPECIFY_VIDEOS = ""
 __C.DATA.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
-__C.DATA.TRAIN_NUM_VIDEOS = -1
+__C.DATA.TRAIN_NUM_VIDEOS = -1.
 
 __C.DATA.VALID_IMG_DATA = "image_data/valid_data"
 __C.DATA.VALID_IMG_FACE_DATA = "image_data/valid_data_face"

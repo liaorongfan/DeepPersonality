@@ -164,6 +164,9 @@ def true_per_vat_data_loader(cfg, mode="train"):
     else:
         video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
 
+    video_nums = -1
+    if mode == "train":
+        video_nums = data_cfg.TRAIN_NUM_VIDEOS
     data_set = VATTruePerData(
         data_root="datasets/chalearn2021",
         data_split=mode,
@@ -172,7 +175,8 @@ def true_per_vat_data_loader(cfg, mode="train"):
         video_loader=video_loader,
         spa_trans=spatial_transform,
         tem_trans=temporal_transform,
-        visual_clip=data_cfg.VISUAL_CLIP
+        visual_clip=data_cfg.VISUAL_CLIP,
+        video_nums=video_nums,
     )
 
     shuffle = True if mode == "train" else False
