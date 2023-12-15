@@ -92,7 +92,7 @@ class ExpRunner:
 
     def after_train(self, cfg):
         # cfg = self.cfg.TRAIN
-        self.collector.draw_epo_info(log_dir=self.log_dir)
+        # self.collector.draw_epo_info(log_dir=self.log_dir)
         self.logger.info(
             "{} done, best acc: {} in :{}".format(
                 datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
