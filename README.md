@@ -2,7 +2,7 @@
 ## Introduction
 This is the official code repo of *An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition* (https://arxiv.org/abs/2210.09138).
 
-The accepted supplementary material is provided in Personality_benchmark_Supplementary_.pdf
+The accepted supplementary material is provided in [Personality_benchmark_Supplementary_.pdf](https://github.com/liaorongfan/DeepPersonality/blob/add_new_data_loader/Personality_benchmark_Supplementary_.pdf)
 
 In this project, **seven visual models**, **six audio models** and **five audio-visual models** have been reproduced 
 and evaluated. Besides, **seven widely-used visual deep learning models**, which have not been applied to video-based 
