@@ -167,11 +167,12 @@ From which the models are reproduced
 
 If you use our code for a publication, please kindly cite it as:
 ```
-@article{liao2022open,
-  title={An Open-source Benchmark of Deep Learning Models for Audio-visual Apparent and Self-reported Personality Recognition},
+@article{liao2024open,
+  title={An open-source benchmark of deep learning models for audio-visual apparent and self-reported personality recognition},
   author={Liao, Rongfan and Song, Siyang and Gunes, Hatice},
-  journal={arXiv preprint arXiv:2210.09138},
-  year={2022}
+  journal={IEEE Transactions on Affective Computing},
+  year={2024},
+  publisher={IEEE}
 }
 ```
 
