@@ -1,0 +1,24 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data_neutral_face/train_data_face"
+  VALID_IMG_DATA: "image_data_neutral_face/valid_data_face"
+  TEST_IMG_DATA: "image_data_neutral_face/test_data_face"
+DATA_LOADER:
+  NAME: "single_frame_data_loader"
+  TRANSFORM: "face_image_x2_transform"
+  TRAIN_BATCH_SIZE: 8
+  NUM_WORKERS: 4
+MODEL:
+  NAME: "interpret_dan_model"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.05
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [100, 200]
+TRAIN:
+  TRAINER: "ImageModalTrainer"
+  MAX_EPOCH: 40
+  OUTPUT_DIR: "results/unified_face_images/06_interpret_cnn"

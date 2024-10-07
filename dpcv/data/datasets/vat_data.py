@@ -8,7 +8,7 @@ from dpcv.data.datasets.tpn_data import FullTestTPNData as FullTestVATData
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop, TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
 from dpcv.data.datasets.build import DATA_LOADER_REGISTRY
-from dpcv.data.transforms.build import build_transform_spatial
+from dpcv.data.transforms.build import build_transform_spatial, build_transform_temporal
 from dpcv.data.datasets.common import VideoLoader
 
 
@@ -71,9 +71,7 @@ def vat_data_loader(cfg, mode="train"):
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid' or 'trainval'"
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
-    # temporal_transform = [TemporalDownsample(length=16)]
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform =  build_transform_temporal(cfg)   # temporal_transform = [TemporalDownsample(length=16)]
 
     data_cfg = cfg.DATA
     if "face" in data_cfg.TRAIN_IMG_DATA:
@@ -89,6 +87,9 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            data_cfg.TRAIN_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.TRAIN_SPECIFY_VIDEOS,
         )
     elif mode == "valid":
         data_set = VATData(
@@ -98,6 +99,9 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            data_cfg.VALID_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.VALID_SPECIFY_VIDEOS,
         )
     elif mode == "trainval":
         data_set = VATData(
@@ -107,6 +111,7 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            traits=data_cfg.TRAITS,
         )
     elif mode == "full_test":
         temporal_transform = [TemporalDownsample(length=100), TemporalEvenCropDownsample(16, 6)]
@@ -118,6 +123,8 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.TEST_SPECIFY_VIDEOS,
         )
     else:
         data_set = VATData(
@@ -127,6 +134,9 @@ def vat_data_loader(cfg, mode="train"):
             video_loader,
             spatial_transform,
             temporal_transform,
+            data_cfg.TEST_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.TEST_SPECIFY_VIDEOS,
         )
 
     loader_cfg = cfg.DATA_LOADER
@@ -154,6 +164,9 @@ def true_per_vat_data_loader(cfg, mode="train"):
     else:
         video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
 
+    video_nums = -1
+    if mode == "train":
+        video_nums = data_cfg.TRAIN_NUM_VIDEOS
     data_set = VATTruePerData(
         data_root="datasets/chalearn2021",
         data_split=mode,
@@ -162,12 +175,58 @@ def true_per_vat_data_loader(cfg, mode="train"):
         video_loader=video_loader,
         spa_trans=spatial_transform,
         tem_trans=temporal_transform,
+        visual_clip=data_cfg.VISUAL_CLIP,
+        video_nums=video_nums,
     )
 
     shuffle = True if mode == "train" else False
     loader_cfg = cfg.DATA_LOADER
     data_loader = DataLoader(
         dataset=data_set,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=loader_cfg.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def all_true_per_vat_data_loader(cfg, mode="train"):
+    from torch.utils.data.dataset import ConcatDataset
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid' or 'trainval'"
+    spatial_transform = build_transform_spatial(cfg)
+    temporal_transform = build_transform_temporal(cfg)
+    # temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
+    # temporal_transform = TemporalCompose(temporal_transform)
+
+    data_cfg = cfg.DATA
+    if data_cfg.TYPE == "face":
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"face_{x}.jpg")
+    else:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
+
+
+    datasets = []
+    # for session in ["ghost"]:
+    for session in ["ghost", "animal", "talk", "lego"]:
+        data_set = VATTruePerData(
+            data_root=data_cfg.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,
+            data_type=data_cfg.TYPE,
+            video_loader=video_loader,
+            spa_trans=spatial_transform,
+            tem_trans=temporal_transform,
+            traits=data_cfg.TRAITS
+        )
+        datasets.append(data_set)
+    concat_dataset = ConcatDataset(datasets)
+
+    shuffle = True if mode == "train" else False
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset=concat_dataset,
         batch_size=loader_cfg.TRAIN_BATCH_SIZE,
         shuffle=shuffle,
         num_workers=loader_cfg.NUM_WORKERS,

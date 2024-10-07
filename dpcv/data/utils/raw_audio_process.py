@@ -3,11 +3,12 @@ import librosa
 import opensmile
 import numpy as np
 from python_speech_features import logfbank
+from pathlib import Path
 import scipy.io.wavfile as wav
 import glob
 
 
-class RawAudioProcessor():
+class RawAudioProcessor:
 
     def __init__(self, mode, aud_dir, save_to):
         self.mode = mode
@@ -76,6 +77,37 @@ def audio_process(mode, aud_dir, saved_dir):
         processor[idx]
 
 
+class TPRawAudioProcessor(RawAudioProcessor):
+
+    def __init__(self, mode, aud_dir):
+        self.mode = mode
+        if mode == "opensmile":
+            self.smile = opensmile.Smile(
+                feature_set=opensmile.FeatureSet.emobase,
+                feature_level=opensmile.FeatureLevel.Functionals,
+            )
+        self.aud_file_ls = list(glob.glob(f"{aud_dir}/*/*/*.wav"))
+
+    def opensmile_extract(self, wav_file_path, video_name):
+        try:
+            out = self.smile.process_file(wav_file_path)
+            arr = np.array(out)
+            np.save(f"{wav_file_path}.npy", arr)
+        except Exception:
+            print("error:", wav_file_path)
+
+
+def tp_audio_process(mode, aud_dir):
+    from tqdm import tqdm
+
+    processor = TPRawAudioProcessor(mode, aud_dir)
+    for idx in tqdm(range(len(processor))):
+        processor[idx]
+
+
+
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -85,6 +117,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output-dir", default=None, type=str, help="path to save processed audio files")
     args = parser.parse_args()
 
-    audio_process(args.mode, args.audio_dir, args.output_dir)
+    # audio_process(args.mode, args.audio_dir, args.output_dir)
+    tp_audio_process(args.mode, args.audio_dir)
 
 

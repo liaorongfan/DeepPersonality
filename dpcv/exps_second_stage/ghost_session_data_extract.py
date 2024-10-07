@@ -1,5 +1,5 @@
 from exps_second_stage.feature_extract import feature_extract_true_personality
-from dpcv.data.datasets.feature_extract_true_personality_dataset import (
+from dpcv.data.datasets.feature_extract_dataset_tp import (
     set_true_personality_dataloader,
     set_audiovisual_true_personality_dataloader,
     set_persemon_true_personality_dataloader,

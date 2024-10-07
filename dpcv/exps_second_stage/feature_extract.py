@@ -1,11 +1,11 @@
 import os
 from dpcv.checkpoint.save import load_model
 from dpcv.config.default_config_opt import cfg, cfg_from_file
-from dpcv.data.datasets.feature_extract_dataset import (
+from dpcv.data.datasets.feature_extract_dataset_ip import (
     setup_dataloader, setup_crnet_dataloader,
     setup_persemon_dataloader, setup_bimodal_resnet_dataloader,
 )
-from dpcv.data.datasets.feature_extract_true_personality_dataset import (
+from dpcv.data.datasets.feature_extract_dataset_tp import (
     set_true_personality_dataloader,
     set_audiovisual_true_personality_dataloader,
     set_persemon_true_personality_dataloader,
@@ -14,33 +14,32 @@ from dpcv.data.datasets.feature_extract_true_personality_dataset import (
 from dpcv.experiment.exp_runner import ExpRunner
 
 
-def feature_extract(cfg_file, model_weight, data_loader, output_dir, return_feat=False):
+def feature_extract(cfg_file, model_weight, data_loader, output_dir, return_feat=False, test_only=False):
 
     cfg_from_file(cfg_file)
     cfg.MODEL.RETURN_FEATURE = return_feat
 
     runner = ExpRunner(cfg)
     runner.model = load_model(runner.model, model_weight)
-    # ocean_acc_avg, ocean_acc, dataset_output, dataset_label = runner.trainer.full_test(
-    #     data_loader(cfg, mode="test"), runner.model
-    # )
-    # print(ocean_acc_avg, ocean_acc)
 
-    for mode in ["train", "valid", "test"]:
+    split = ["train", "test"] if not test_only else ["test"]
+    for mode in split:
         # note if cuda out of memory, run each mode separately
         dataloader = data_loader(cfg, mode=mode)
         output_sub_dir = os.path.join(output_dir, mode)
         runner.data_extract(dataloader, output_sub_dir)
 
 
-def feature_extract_true_personality(cfg_file, model_weight, data_loader, output_dir, return_feat=False):
+def feature_extract_true_personality(
+    cfg_file, model_weight, data_loader, output_dir, return_feat=False, test_only=False
+):
     cfg_from_file(cfg_file)
     cfg.MODEL.RETURN_FEATURE = return_feat
 
     runner = ExpRunner(cfg, feature_extract=True)
     runner.model = load_model(runner.model, model_weight)
-
-    for mode in ["train", "valid", "test"]:
+    split = ["train", "valid", "test"] if not test_only else ["test"]
+    for mode in split:
         # note if cuda out of memory, run each mode separately
         dataloader = data_loader(cfg, mode=mode)
         output_sub_dir = os.path.join(output_dir, mode, f"{cfg.DATA.SESSION}_{mode}")
@@ -48,6 +47,68 @@ def feature_extract_true_personality(cfg_file, model_weight, data_loader, output
 
 
 if __name__ == "__main__":
+
+    # feature_extract(
+    #     cfg_file="config/impression/sequence_prediction_extract/05_slow_fast_face.yaml",
+    #     model_weight="results/unified_face_images/05_slow_fast_face/checkpoint_25_slow_fast_acc_8650.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/slow_fast",
+    # )
+    #
+
+    # feature_extract(
+    #     cfg_file="config/impression/sequence_prediction_extract/05_slow_fast_face.yaml",
+    #     model_weight="results/unified_face_images/05_slow_fast_face/checkpoint_25_slow_fast_acc_8650.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/slow_fast",
+    # )
+
+    # ============================================ Single-Trait: O ================================
+    # feature_extract(
+    #     cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait.yaml",
+    #     model_weight="results/single_traits/O/07_vat_face_vl/05-15_05-24/checkpoint_17.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/second_stage/vat_A",
+    #     test_only=True,
+    # )
+
+    # ============================================ Single-Trait: C ================================
+    feature_extract(
+        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_C.yaml",
+        model_weight="sig_trait_C_vat.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/vat_C",
+        test_only=True,
+    )
+
+    # ============================================ Single-Trait: E ================================
+    feature_extract(
+        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_E.yaml",
+        model_weight="sig_trait_vat_E.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/vat_E",
+        test_only=True,
+    )
+
+    # ============================================ Single-Trait: A ================================
+    feature_extract(
+        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_A.yaml",
+        model_weight="results/single_traits/A/07_vat_face_vl/05-16_01-12/checkpoint_15.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/vat_AA",
+        test_only=True,
+    )
+
+    # ============================================ Single-Trait: N ================================
+    feature_extract(
+        cfg_file="config/impression/sequence_prediction_extract/07_vat_face_single_trait_N.yaml",
+        model_weight="results/single_traits/N/07_vat_face_vl/05-16_14-36/checkpoint_18.pkl",
+        data_loader=setup_dataloader,
+        output_dir="datasets/second_stage/vat_N",
+        test_only=True,
+    )
+
+
 
     # # interpret_cnn feature extract
     # feature_extract(
@@ -107,10 +168,11 @@ if __name__ == "__main__":
     # )
 
     # deep_bimodal_regression feature extract
-    feature_extract(
-        cfg_file="config/unified_frame_images/01_deep_bimodal_regression.yaml",
-        model_weight="results/unified_frame_images/01_deep_bimodal/12-06_00-50/checkpoint_84.pkl",
-        data_loader=setup_dataloader,
-        output_dir="datasets/second_stage/deep_bimodal_reg_extract",
-    )
+    # feature_extract(
+    #     cfg_file="config/true_personality/all_sessions/02_hrnet_face.yaml",
+    #     model_weight="results_true_personality/all_sesstion/unified_face_images_all/02_hrnet/03-14_08-56/checkpoint_1.pkl",
+    #     data_loader=setup_dataloader,
+    #     output_dir="datasets/model_output_features/02_hrnet_face",
+    # )
+    pass
 

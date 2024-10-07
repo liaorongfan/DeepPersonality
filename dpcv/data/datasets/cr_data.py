@@ -13,11 +13,34 @@ from dpcv.data.transforms.build import build_transform_spatial
 
 
 class CRNetData(VideoData):
-    def __init__(self, data_root, img_dir, face_img_dir, audio_dir, label_file, transform=None, sample_size=100):
-        super().__init__(data_root, img_dir, label_file, audio_dir)
+    def __init__(
+        self,
+        data_root, img_dir, face_img_dir, audio_dir,
+        label_file, transform=None,
+        sample_size=100,
+        num_videos=-1,
+        traits="OCEAN",
+        specify_videos="",
+    ):
+        super().__init__(data_root, img_dir, label_file, audio_dir, traits=traits)
         self.transform = transform
         self.sample_size = sample_size
         self.face_img_dir_ls = self.get_face_img_dir(face_img_dir)
+        if num_videos > 0:
+            self.img_dir_ls = self.img_dir_ls[: num_videos]
+        if len(specify_videos) > 0:
+            self.img_dir_ls = self.select_img_dir(specify_videos)
+
+    def select_img_dir(self, specify_videos):
+        with open(specify_videos, 'r') as fo:
+            videos = [line.strip("\n") for line in fo.readlines()]
+        videos_path = [
+            os.path.join(self.data_root, self.img_dir, vid) for vid in videos
+        ]
+
+        return videos_path
+   
+
 
     def get_face_img_dir(self, face_img_dir):
         dir_ls = os.listdir(os.path.join(self.data_root, face_img_dir))
@@ -35,6 +58,10 @@ class CRNetData(VideoData):
         wav_aud = torch.as_tensor(wav_aud, dtype=glo_img.dtype)
         anno_score = torch.as_tensor(anno_score, dtype=glo_img.dtype)
         anno_cls_encode = torch.as_tensor(anno_cls_encode)
+
+        if len(self.traits) != 5:
+            anno_score = anno_score[self.traits]
+            anno_cls_encode = anno_cls_encode[self.traits]
 
         sample = {
             "glo_img": glo_img, "loc_img": loc_img, "wav_aud": wav_aud,
@@ -164,6 +191,42 @@ class AllFrameCRNetData(CRNetData):
 
         return glo_img_obj_ls, loc_img_obj_ls, idx
 
+class ETRFrameCRNetData(AllFrameCRNetData):
+
+    def get_imgs(self, idx):
+        glo_img_dir = self.img_dir_ls[idx]
+        if "train" in glo_img_dir:
+            loc_img_dir = glo_img_dir.replace("train_data", "train_data_face")
+        elif "valid" in glo_img_dir:
+            loc_img_dir = glo_img_dir.replace("valid_data", "valid_data_face")
+        else:
+            loc_img_dir = glo_img_dir.replace("test_data", "test_data_face")
+        # in case some video doesn't get aligned face images
+        if os.path.basename(loc_img_dir) not in self.face_img_dir_ls:
+            return self.get_imgs(idx + 1)
+
+        loc_imgs = glob.glob(loc_img_dir + "/*.jpg")
+        loc_imgs = sorted(loc_imgs, key=lambda x: int(Path(x).stem[5:]))
+
+        loc_img_ls, glo_img_ls = [], []
+        separate = np.linspace(0, len(loc_imgs), 32, endpoint=False, dtype=np.int16)
+        # separate = list(range(len(loc_imgs)))
+        for img_index in separate:
+            try:
+                loc_img_pt = loc_imgs[img_index]
+            except IndexError:
+                loc_img_pt = loc_imgs[0]
+
+            glo_img_pt = self._match_img(loc_img_pt)
+
+            loc_img_ls.append(loc_img_pt)
+            glo_img_ls.append(glo_img_pt)
+
+        loc_img_obj_ls = [Image.open(loc_img) for loc_img in loc_img_ls]
+        glo_img_obj_ls = [Image.open(glo_img) for glo_img in glo_img_ls]
+
+        return glo_img_obj_ls, loc_img_obj_ls, idx
+
 
 def make_data_loader(cfg, mode=None):
     assert (mode in ["train", "valid", "test"]), " 'mode' only supports 'train' and 'valid'"
@@ -220,6 +283,9 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TRAIN_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.TRAIN_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
+            num_videos=data_cfg.TRAIN_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.TRAIN_SPECIFY_VIDEOS,
         )
     elif mode == "valid":
         dataset = CRNetData(
@@ -229,6 +295,9 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.VALID_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.VALID_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
+            num_videos=data_cfg.VALID_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.VALID_SPECIFY_VIDEOS,
         )
     elif mode == "full_test":
         return AllFrameCRNetData(
@@ -238,6 +307,8 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TEST_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
+            traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.TEST_SPECIFY_VIDEOS,
         )
     else:
         dataset = CRNetData(
@@ -247,6 +318,9 @@ def crnet_data_loader(cfg, mode=None):
             data_cfg.TEST_AUD_DATA,  # "voice_data/train_data",  # default train_data_244832 form librosa
             data_cfg.TEST_LABEL_DATA,  # "annotation/annotation_training.pkl",
             transforms,
+            num_videos=data_cfg.TEST_NUM_VIDEOS,
+            traits=data_cfg.TRAITS,
+            specify_videos=data_cfg.TEST_SPECIFY_VIDEOS,
         )
     loader_cfg = cfg.DATA_LOADER
     data_loader = DataLoader(

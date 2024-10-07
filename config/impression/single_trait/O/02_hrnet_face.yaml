@@ -1,0 +1,16 @@
+DATA:
+  TRAIN_IMG_DATA: "image_data/train_data_face"
+  VALID_IMG_DATA: "image_data/valid_data_face"
+  TEST_IMG_DATA: "image_data/test_data_face"
+  TRAITS: "O"
+DATA_LOADER:
+  NAME: "single_frame_data_loader"
+  TRANSFORM: "face_image_x2_transform"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "hr_net_model"
+  NUM_CLASS: 1
+TRAIN:
+  MAX_EPOCH: 200
+  OUTPUT_DIR: "results/single_traits/O/02_hrnet_face"

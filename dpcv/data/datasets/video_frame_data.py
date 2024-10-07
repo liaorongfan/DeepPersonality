@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from PIL import Image
 import numpy as np
 import glob
+import os
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.transforms.transform import set_transform_op
 from dpcv.data.transforms.build import build_transform_spatial
@@ -11,22 +12,48 @@ from .build import DATA_LOADER_REGISTRY
 
 
 class SingleFrameData(VideoData):
-    def __init__(self, data_root, img_dir, label_file, trans=None):
+
+    TRAITS_ID = {
+        "O": 0, "C": 1, "E": 2, "A": 3, "N": 4,
+    }
+
+    def __init__(
+        self, data_root, img_dir, label_file, trans=None, number_vdieo=-1, traits="OCEAN", specify_videos=""
+    ):
         super().__init__(data_root, img_dir, label_file)
         self.trans = trans
+        if number_vdieo > 0:
+            self.img_dir_ls = self.img_dir_ls[:number_vdieo]
+        if len(specify_videos) > 0:
+            self.img_dir_ls = self.select_img_dir(specify_videos)
+
+        self.traits = [self.TRAITS_ID[t] for t in traits]
+
+    def select_img_dir(self, specify_videos):
+        with open(specify_videos, 'r') as fo:
+            videos = [line.strip("\n") for line in fo.readlines()]
+        videos_path = [
+            os.path.join(self.data_root, self.img_dir, vid) for vid in videos
+        ]
+
+        return videos_path
 
     def __getitem__(self, index):
         img = self.get_image_data(index)
         label = self.get_ocean_label(index)
-
+        label = torch.as_tensor(label)
         if self.trans:
             img = self.trans(img)
-
-        return {"image": img, "label": torch.as_tensor(label)}
+        if len(self.traits) != 5:
+            label = label[self.traits]
+        return {"image": img, "label": label}
 
     def get_image_data(self, index):
         img_dir = self.img_dir_ls[index]
         img_path = self.image_sample(img_dir)
+        if not img_path:
+            # print(f"image path {img_path} does not exist, go to next video")
+            return self.get_image_data(index + 1)
         img = Image.open(img_path).convert("RGB")
         return img
 
@@ -34,6 +61,9 @@ class SingleFrameData(VideoData):
     def image_sample(img_dir):
         img_path_ls = glob.glob(f"{img_dir}/*.jpg")
         num_img = len(img_path_ls)
+        if num_img == 0:
+            # raise ValueError(f"no image found in {img_dir}")
+            return None
         # downsample the frames to 100 / video
         sample_frames = np.linspace(0, num_img, 100, endpoint=False, dtype=np.int16)
         selected = random.choice(sample_frames)
@@ -79,9 +109,13 @@ class AllSampleFrameData2(VideoData):
     def get_sample_frames(self, idx):
         img_dir = self.img_dir_ls[idx]
         # Note randomly ordered after glob search
-        img_path_ls = sorted(glob.glob(f"{img_dir}/*.jpg"))
+        img_path_ls = list(sorted(glob.glob(f"{img_dir}/*.jpg")))
         img_obj_ls = [Image.open(img_path) for img_path in img_path_ls]
-        return img_obj_ls
+        print(img_dir, len(img_obj_ls))
+        if len(img_obj_ls) > 64:
+            return img_obj_ls
+        else:
+            return self.get_sample_frames(idx + 1)
 
 
 def make_data_loader(cfg, mode="train"):
@@ -127,24 +161,34 @@ def make_data_loader(cfg, mode="train"):
 
 @DATA_LOADER_REGISTRY.register()
 def single_frame_data_loader(cfg, mode="train"):
+    from dpcv.data.transforms.transform import standard_frame_transform
 
     assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
         "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
     shuffle = cfg.DATA_LOADER.SHUFFLE
-    transform = build_transform_spatial(cfg)
+    training_transform = build_transform_spatial(cfg)
+    # standard_transform = standard_frame_transform(cfg)
+    # TODO: set different transform methods in train and valid stage
+    standard_transform = build_transform_spatial(cfg)
     if mode == "train":
         data_set = SingleFrameData(
             cfg.DATA.ROOT,
             cfg.DATA.TRAIN_IMG_DATA,
             cfg.DATA.TRAIN_LABEL_DATA,
-            transform,
+            training_transform,
+            cfg.DATA.TRAIN_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.TRAIN_SPECIFY_VIDEOS,
         )
     elif mode == "valid":
         data_set = SingleFrameData(
             cfg.DATA.ROOT,
             cfg.DATA.VALID_IMG_DATA,
             cfg.DATA.VALID_LABEL_DATA,
-            transform,
+            standard_transform,
+            cfg.DATA.VALID_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.VALID_SPECIFY_VIDEOS,
         )
         shuffle = False
     elif mode == "trainval":
@@ -152,21 +196,28 @@ def single_frame_data_loader(cfg, mode="train"):
             cfg.DATA.ROOT,
             cfg.DATA.TRAINVAL_IMG_DATA,
             cfg.DATA.TRAINVAL_LABEL_DATA,
-            transform,
+            training_transform,
+            cfg.DATA.TRAIN_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
         )
     elif mode == "full_test":
         return AllSampleFrameData(
             cfg.DATA.ROOT,
             cfg.DATA.TEST_IMG_DATA,
             cfg.DATA.TEST_LABEL_DATA,
-            transform,
+            standard_transform,
+            traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.TEST_SPECIFY_VIDEOS,
         )
     else:
         data_set = SingleFrameData(
             cfg.DATA.ROOT,
             cfg.DATA.TEST_IMG_DATA,
             cfg.DATA.TEST_LABEL_DATA,
-            transform,
+            standard_transform,
+            cfg.DATA.TEST_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.TEST_SPECIFY_VIDEOS,
         )
         shuffle = False
 

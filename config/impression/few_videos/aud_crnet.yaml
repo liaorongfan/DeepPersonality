@@ -1,0 +1,28 @@
+DATA:
+  TRAIN_AUD_DATA: "voice_data/voice_librosa/train_data"
+  TRAIN_NUM_VIDEOS: 232
+  VALID_AUD_DATA: "voice_data/voice_librosa/valid_data"
+  VALID_NUM_VIDEOS: 36
+  TEST_AUD_DATA: "voice_data/voice_librosa/test_data"
+  TEST_NUM_VIDEOS: 22
+DATA_LOADER:
+  NAME: "build_audio_loader"
+  DATASET: "VoiceCRNetData"
+  TRAIN_BATCH_SIZE: 32
+  TEST_BATCH_SIZE: 2
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "get_crnet_aud_model"
+LOSS:
+  NAME: "crnet_loss_func"
+SOLVER:
+  NAME: "crnet_solver"
+  SCHEDULER: "crnet_multi_step_scale"
+  LR_INIT: 0.002
+  WEIGHT_DECAY: 0.005
+  MOMENTUM: 0.9
+  MILESTONE: [80, 90]
+TRAIN:
+  TRAINER: "CRNetAudTrainer"
+  MAX_EPOCH: 80
+  OUTPUT_DIR: "results/few_videos/aud_crnet"

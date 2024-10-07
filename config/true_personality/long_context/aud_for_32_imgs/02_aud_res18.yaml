@@ -1,0 +1,17 @@
+DATA:
+  ROOT: "datasets/chalearn2021"
+  SESSION: "all"
+  AUDIO_LEN: 1.07
+DATA_LOADER:
+  NAME: "all_true_personality_audio_dataloader"
+  TRAIN_BATCH_SIZE: 4
+MODEL:
+  NAME: "get_audio_resnet_model"
+SOLVER:
+  LR_INIT: 0.01
+  MILESTONE: [200, 250]
+TRAIN:
+  TRAINER: "AudioTrainer"
+  MAX_EPOCH: 100
+  LOG_INTERVAL: 120
+  OUTPUT_DIR: "results_true_personality/audio_talk/02_aud_res18_32frames"

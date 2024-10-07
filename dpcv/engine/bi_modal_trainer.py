@@ -134,10 +134,15 @@ class BiModalTrainer(object):
         ocean_acc_avg_rand = np.round(ocean_acc_avg.astype("float64"), 4)
         self.tb_writer.add_scalar("test_acc", ocean_acc_avg_rand)
         keys = ["O", "C", "E", "A", "N"]
+        try:
+            traits = data_loader.dataset.datasets[0].traits
+        except:
+            traits = data_loader.dataset.traits
         ocean_mse_dict, ocean_acc_dict = {}, {}
-        for i, k in enumerate(keys):
-            ocean_mse_dict[k] = np.round(ocean_mse[i], 4)
-            ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
+        # for i, k in enumerate(keys):
+        for i, k in enumerate(traits):
+            ocean_mse_dict[keys[k]] = np.round(ocean_mse[i], 4)
+            ocean_acc_dict[keys[k]] = np.round(ocean_acc[i], 4)
 
         return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label, (ocean_mse_dict, ocean_mse_mean_rand)
 
@@ -210,6 +215,155 @@ class BiModalTrainer(object):
         # wav_in = torch.stack([wav] * 100, 0).to(self.device)
         wav_in = wav.repeat(len(images), 1, 1, 1).to(self.device)
         return (wav_in, images_in), label
+
+
+@TRAINER_REGISTRY.register()
+class SequenceBiModalTrain(BiModalTrainer):
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                batch_size = 32
+                # out_ls, feat_ls = [], []
+                batch_input = []
+                for i in range(math.floor(inputs.shape[0] / batch_size)):
+                    mini_batch_1 = inputs[(i * batch_size): (i + 1) * batch_size]
+                    bs, c, h, w = mini_batch_1.shape
+                    mini_batch = mini_batch_1.reshape(3, bs, h, w)  # for VAT (1, bs, 3, h, w)
+                    batch_input.append(mini_batch)
+                
+                batch_input = (torch.stack(batch_input, dim=0),)
+
+                if model.return_feature:
+                    out, feat = model(*batch_input)
+                    # out_ls.append(out.cpu())
+                    # feat_ls.append(feat.cpu())
+                else:
+                    out = model(*batch_input)
+                    feat = torch.tensor([0])
+                    # out_ls.append(out.cpu())
+                    # feat_ls.append(torch.tensor([0]))
+                # out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
+                video_extract = {
+                    "video_frames_pred": out.cpu(),
+                    "video_frames_feat": feat.cpu(),
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+    def full_test_data_fmt(self, data):
+        images,  label = data["all_images"],  data["label"]
+        images_in = torch.stack(images, 0).to(self.device)
+        # wav_in = torch.stack([wav] * 100, 0).to(self.device)
+        return images_in, label
+
+
+@TRAINER_REGISTRY.register()
+class SequenceTPNTrain(BiModalTrainer):
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                batch_size = 16
+                out_ls, feat_ls = [], []
+                for i in range(math.floor(inputs.shape[0] / batch_size)):
+                    mini_batch_1 = inputs[(i * batch_size): (i + 1) * batch_size]
+                    bs, c, h, w = mini_batch_1.shape
+                    mini_batch_1 = mini_batch_1.reshape(1, 3, bs, h, w)
+                    data_input = {
+                        "num_modalities": [1], 
+                        "img_group_0": mini_batch_1, 
+                        "img_meta": None, 
+                        "gt_label": label,
+                    }
+                    # mini_batch = (mini_batch_1,)
+                    if model.return_feature:
+                        out, feat = model(**data_input)
+                        out_ls.append(out.cpu())
+                        feat_ls.append(feat.cpu())
+                    else:
+                        out = model(**data_input)
+                        out_ls.append(out[1].cpu())
+                        feat_ls.append(torch.tensor([0]))
+                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
+                video_extract = {
+                    "video_frames_pred": out_pred,
+                    "video_frames_feat": out_feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+    def full_test_data_fmt(self, data):
+        images,  label = data["all_images"],  data["label"]
+        images_in = torch.stack(images, 0).to(self.device)
+        # wav_in = torch.stack([wav] * 100, 0).to(self.device)
+        return images_in, label.to(self.device)
+
+
+@TRAINER_REGISTRY.register()
+class SequenceSlowFastTrain(BiModalTrainer):
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                batch_size = 64
+                out_ls, feat_ls = [], []
+                for i in range(math.ceil(inputs.shape[0] / batch_size)):
+                    mini_batch_1 = inputs[(i * batch_size): (i + 1) * batch_size]
+                    bs, c, h, w = mini_batch_1.shape
+                    mini_batch_1 = mini_batch_1.reshape(3, bs, h, w)
+                    frame_list = self.pack_pathway_output(mini_batch_1)
+                    mini_batch = (frame_list,)
+                    try:
+                        if model.return_feature:
+                            out, feat = model(*mini_batch)
+                            out_ls.append(out.cpu())
+                            feat_ls.append(feat.cpu())
+                        else:
+                            out = model(*mini_batch)
+                            out_ls.append(out.cpu())
+                            feat_ls.append(torch.tensor([0]))
+                    except:
+                        print("invalid batch input")
+                        continue
+                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
+                video_extract = {
+                    "video_frames_pred": out_pred,
+                    "video_frames_feat": out_feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+    def full_test_data_fmt(self, data):
+        images,  label = data["all_images"],  data["label"]
+        images_in = torch.stack(images, 0)#.to(self.device)
+        # wav_in = torch.stack([wav] * 100, 0).to(self.device)
+        return images_in, label
+
+    def pack_pathway_output(self, frames):
+        fast_pathway = frames
+        slow_pathway = torch.index_select(
+            frames,
+            1,
+            torch.linspace(
+                0, frames.shape[1] - 1, frames.shape[1] // 4
+            ).long(),
+        )
+        frame_list = [slow_pathway[None].to(self.device), fast_pathway[None].to(self.device)]
+
+        return frame_list
 
 
 @TRAINER_REGISTRY.register()
@@ -286,6 +440,182 @@ class ImageModalTrainer(BiModalTrainer):
 
 
 @TRAINER_REGISTRY.register()
+class VATTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["image"], data["label"]
+        return (inputs,), labels
+
+    def full_test_data_fmt(self, data):
+        images, label = data["all_images"], data["label"]
+        images_in = images[None].to(self.device)
+        return (images_in, ), label
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                out, feat = 0, 0
+                if model.return_feature:
+                    out, feat = model(*inputs)
+                    out, feat = out.cpu(), feat.cpu()
+                else:
+                    out = model(*inputs)
+                    out = out.cpu()
+                    
+                video_extract = {
+                    "video_frames_pred": out,
+                    "video_frames_feat": feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+
+@TRAINER_REGISTRY.register()
+class SlowFastTPTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["image"], data["label"]
+        return (inputs,), labels
+
+    def full_test_data_fmt(self, data):
+        images, label = data["all_images"], data["label"]
+        images_in = [img_ten.to(self.device) for img_ten in images]
+        return (images_in, ), label
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                out, feat = 0, 0
+                if model.return_feature:
+                    out, feat = model(*inputs)
+                    out, feat = out.cpu(), feat.cpu()
+                else:
+                    out = model(*inputs)
+                    out = out.cpu()
+                    
+                video_extract = {
+                    "video_frames_pred": out,
+                    "video_frames_feat": feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+
+@TRAINER_REGISTRY.register()
+class MetaDataTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feat_meta"], data["video_label"]
+        return (inputs,), labels.repeat(1000, 1)
+
+
+@TRAINER_REGISTRY.register()
+class AUTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        data = [item.to(self.device).type(torch.float32) for item in data]
+        inputs, labels = data
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
+class AUsPredBimodalTrain(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        data = [item.to(self.device).type(torch.float32) for item in data]
+        inputs, labels = data
+        bs, h, w = inputs.shape
+        inputs = inputs.reshape(bs, 1, 1, -1)
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
+class AUsPred2DBimodalTrain(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        data = [item.to(self.device).type(torch.float32) for item in data]
+        inputs, labels = data
+        bs, h, w = inputs.shape
+        inputs = inputs.reshape(bs, 1, h, w)
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
+class AUsPred1DBimodalTrain(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        data = [item.to(self.device).type(torch.float32) for item in data]
+        inputs, labels = data
+        bs, h, w = inputs.shape
+        inputs = inputs.permute(0, 2, 1)
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
+class SoundTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        inputs, labels = data["feature"], data["label"]
+        inputs = inputs.squeeze().to(self.device)
+        labels = labels.type(torch.float32)
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
+class MetaCRNetDataTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feat_meta"], data["video_label"]
+        return (inputs,), labels.squeeze()
+
+
+@TRAINER_REGISTRY.register()
+class MMetaDataTrainer(BiModalTrainer):
+    """
+    for model only image data used
+    """
+    def data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feat_meta"], data["video_label"]
+        return (inputs,), labels
+
+
+@TRAINER_REGISTRY.register()
 class MultiModalTrainer(BiModalTrainer):
     """
     for model only image data used
@@ -294,6 +624,33 @@ class MultiModalTrainer(BiModalTrainer):
         for k, v in data.items():
             data[k] = v.to(self.device)
         inputs, labels = data["feature"], data["label"]
+        return (inputs,), labels
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                out, feat = 0, 0
+                if model.return_feature:
+                    out, feat = model(*inputs)
+                    out, feat = out.cpu(), feat.cpu()
+                else:
+                    out = model(*inputs).cpu()
+             
+                video_extract = {
+                    "video_frames_pred": out,
+                    "video_frames_feat": feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+    def full_test_data_fmt(self, data):
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        inputs, labels = data["feature"][None], data["label"]
         return (inputs,), labels
 
 
@@ -460,10 +817,34 @@ class TPNTrainer(BiModalTrainer):
 
     def full_test_data_fmt(self, data):
         inputs, labels = data["all_images"], data["label"]
-        inputs = torch.stack(inputs, 0).to(self.device)
-        labels_repeats = labels.repeat(6, 1).to(self.device)
-        data_input = {"num_modalities": [1], "img_group_0": inputs, "img_meta": None, "gt_label": labels_repeats}
-        return data_input, labels_repeats
+        # inputs = torch.stack(inputs, 0).to(self.device)
+        # labels_repeats = labels.repeat(6, 1).to(self.device)
+        inputs = inputs[None].to(self.device)
+        labels = labels.to(self.device)
+        data_input = {"num_modalities": [1], "img_group_0": inputs, "img_meta": None, "gt_label": labels}
+        return data_input, labels
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                out, feat = 0, 0
+                if model.return_feature:
+                    out, feat = model(**inputs)
+                    out, feat = out.cpu(), feat.cpu()
+                else:
+                    out = model(**inputs)
+                    out = out[1].cpu()
+                    
+                video_extract = {
+                    "video_frames_pred": out,
+                    "video_frames_feat": feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
 
 
 @TRAINER_REGISTRY.register()

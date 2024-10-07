@@ -77,12 +77,12 @@ class CRNet(nn.Module):
 
 
 class CRNet2(nn.Module):
-    def __init__(self, init_weights=True, return_feat=False):
+    def __init__(self, init_weights=True, return_feat=False, num_classes=5):
         super(CRNet2, self).__init__()
         self.train_guider_epo = 1
         self.return_feature = return_feat
         self.train_regressor = False
-
+        self.num_classes = num_classes
         self.global_img_branch = AudioVisualResNet(
             in_channels=3, init_stage=VisInitStage,
             block=BiModalBasicBlock, conv=[vis_conv3x3, vis_conv1x1],
@@ -102,9 +102,9 @@ class CRNet2(nn.Module):
             out_spatial=(1, 4)
         )
 
-        self.global_cls_guide = nn.Conv2d(512, 20, 2)
-        self.local_cls_guide = nn.Conv2d(512, 20, 2)
-        self.wav_cls_guide = nn.Conv2d(512, 20, (1, 4))
+        self.global_cls_guide = nn.Conv2d(512, 4 * self.num_classes, 2)
+        self.local_cls_guide = nn.Conv2d(512, 4 * self.num_classes, 2)
+        self.wav_cls_guide = nn.Conv2d(512, 4 * self.num_classes, (1, 4))
         self.out_map = nn.Linear(512, 1)
 
         if init_weights:
@@ -125,9 +125,9 @@ class CRNet2(nn.Module):
         loc_cls = self.local_cls_guide(loc_feature)       # (bs, 5, 4)
         wav_cls = self.wav_cls_guide(aud_feature)         # (bs, 5, 4)
 
-        glo_cls = glo_cls.view(glo_cls.size(0), 5, -1)
-        loc_cls = loc_cls.view(loc_cls.size(0), 5, -1)
-        wav_cls = wav_cls.view(wav_cls.size(0), 5, -1)
+        glo_cls = glo_cls.view(glo_cls.size(0), self.num_classes, -1)
+        loc_cls = loc_cls.view(loc_cls.size(0), self.num_classes, -1)
+        wav_cls = wav_cls.view(wav_cls.size(0), self.num_classes, -1)
         cls_guide = torch.stack([glo_cls + loc_cls + wav_cls], dim=-1).mean(dim=-1).squeeze()
         if not self.train_regressor:
             return cls_guide
@@ -148,14 +148,22 @@ class CRNet2(nn.Module):
         out = self.out_map(out_reg)
         out = out.view(out.size(0), -1)
         if self.return_feature:
+            # ETR feature fusion
+            glo_reg = guided_glo_reg.mean(dim=1)
+            loc_reg = guided_loc_reg.mean(dim=1)
+            wav_reg = guided_wav_reg.mean(dim=1)
+
+            out_reg = (glo_reg * 7 / 15) + (loc_reg * 5 / 15) + (wav_reg * 3 / 15)
             return cls_guide, out, out_reg
         return cls_guide, out
 
 
 class CRNetAud(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes=5, return_feature=False):
         super(CRNetAud, self).__init__()
-        self.train_guider_epo = 30  # default train 50 epochs for classification guidence
+        self.num_classes = num_classes
+        self.return_feature = return_feature
+        self.train_guider_epo = 1  # default train 50 epochs for classification guidence
         self.train_regressor = False
         self.audio_branch = AudioVisualResNet(
             in_channels=1, init_stage=AudInitStage,
@@ -164,7 +172,7 @@ class CRNetAud(nn.Module):
             out_spatial=(1, 4)
         )
 
-        self.wav_cls_guide = nn.Conv2d(512, 20, (1, 4))
+        self.wav_cls_guide = nn.Conv2d(512, 4 * self.num_classes, (1, 4))
         self.out_map = nn.Linear(512, 1)
 
     def set_train_classifier_epo(self, epo):
@@ -178,7 +186,7 @@ class CRNetAud(nn.Module):
         # ---- first training stage class guide -----
         wav_cls = self.wav_cls_guide(aud_feature)
 
-        wav_cls = wav_cls.view(wav_cls.size(0), 5, -1)
+        wav_cls = wav_cls.view(wav_cls.size(0), self.num_classes, -1)
         cls_guide = wav_cls  # torch.stack([wav_cls], dim=-1).mean(dim=-1).squeeze()
         if not self.train_regressor:
             return wav_cls
@@ -190,7 +198,8 @@ class CRNetAud(nn.Module):
         out_reg = guided_wav_reg
         out = self.out_map(out_reg)
         out = out.view(out.size(0), -1)
-
+        if self.return_feature:
+            return cls_guide, out, out_reg
         return cls_guide, out
 
 
@@ -278,13 +287,13 @@ def get_crnet_model(only_train_guider=True):
 
 @NETWORK_REGISTRY.register()
 def crnet_model(cfg=None):
-    cr_net = CRNet2(return_feat=cfg.MODEL.RETURN_FEATURE)
+    cr_net = CRNet2(return_feat=cfg.MODEL.RETURN_FEATURE, num_classes=cfg.MODEL.NUM_CLASS)
     return cr_net.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
 @NETWORK_REGISTRY.register()
 def get_crnet_aud_model(cfg):
-    cr_net_aud = CRNetAud()
+    cr_net_aud = CRNetAud(num_classes=cfg.MODEL.NUM_CLASS, return_feature=cfg.MODEL.RETURN_FEATURE)
     return cr_net_aud.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 

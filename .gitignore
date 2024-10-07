@@ -12,10 +12,18 @@ datasets/raw_voice
 datasets/chalearn
 datasets/102flowers
 datasets/missed_files.txt
-datasets/*.txt
+# datasets/*.txt
 datasets/annotation
 datasets/va_data
+datasets/chalearn21
 datasets/chalearn2021
+datasets/chalearn21_fold_*
+datasets/folds
+datasets/extracted_feature_tp
+datasets/extracted_feature_impression
+datasets/chalearn2021_neutral_face
+/datasets/image_data_neutral_face/
+datasets/image_data_neutral_face/test_data_face_aus/
 pretrained/
 mlruns/
 /snippet
@@ -28,7 +36,9 @@ output/
 results_second_stage_tp
 results_second_stage
 results_true_personality
+/results_linear
 #temp/*.txt
+/tmp
 
 events.out*
 # current output files
@@ -75,4 +85,8 @@ model_ts*.txt
 .vscode
 _darcs
 
+tmp*
 /datasets/ChaLearn2016_tiny
+/datasets/extracted_feature_tp
+/datasets/extracted_feature_tp_short_m
+/hy-tmp

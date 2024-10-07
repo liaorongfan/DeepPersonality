@@ -18,23 +18,43 @@ step 7 : set test metric
 # ------------------------------------------- step 1 : dataset config node ---------------------------------------------
 __C.DATA = CfgNode()
 __C.DATA.ROOT = "datasets"
+__C.DATA.ANN_DIR = ""
 __C.DATA.TYPE = "frame"
+__C.DATA.FEATURE_ROOT = ""
 __C.DATA.SESSION = "talk"
+__C.DATA.TRAITS = "OCEAN"
+__C.DATA.AU = ""
+__C.DATA.TOP_SAMPLE = 600
+__C.DATA.VISUAL_CLIP = -1
+__C.DATA.AUDIO_CLIP = -1
+__C.DATA.AUDIO_LEN = -1.
+# used for temporal inputs
+__C.DATA.DOWNSAMPLE = 100
+__C.DATA.FRAMES = 16
 
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
 __C.DATA.TRAIN_AUD_DATA = "raw_voice/trainingData"
+__C.DATA.TRAIN_OTHER_DATA = ""
+__C.DATA.TRAIN_SPECIFY_VIDEOS = ""
 __C.DATA.TRAIN_LABEL_DATA = "annotation/annotation_training.pkl"
+__C.DATA.TRAIN_NUM_VIDEOS = -1.
 
 __C.DATA.VALID_IMG_DATA = "image_data/valid_data"
 __C.DATA.VALID_IMG_FACE_DATA = "image_data/valid_data_face"
 __C.DATA.VALID_AUD_DATA = "raw_voice/validationData"
+__C.DATA.VALID_OTHER_DATA = ""
+__C.DATA.VALID_SPECIFY_VIDEOS = ""
 __C.DATA.VALID_LABEL_DATA = "annotation/annotation_validation.pkl"
+__C.DATA.VALID_NUM_VIDEOS = -1
 
 __C.DATA.TEST_IMG_DATA = "image_data/test_data"
 __C.DATA.TEST_IMG_FACE_DATA = "image_data/test_data_face"
 __C.DATA.TEST_AUD_DATA = "raw_voice/testData"
+__C.DATA.TEST_OTHER_DATA = ""
+__C.DATA.TEST_SPECIFY_VIDEOS = ""
 __C.DATA.TEST_LABEL_DATA = "annotation/annotation_test.pkl"
+__C.DATA.TEST_NUM_VIDEOS = -1
 
 __C.DATA.VA_ROOT = "datasets"
 __C.DATA.VA_DATA = "va_data/cropped_aligned"
@@ -46,8 +66,10 @@ __C.DATA_LOADER = CfgNode()
 __C.DATA_LOADER.NAME = "single_frame_data_loader"
 __C.DATA_LOADER.DATASET = ""
 __C.DATA_LOADER.TRANSFORM = "standard_frame_transform"
+__C.DATA_LOADER.TRANSFORM_TMP = "set_tmp_transform"
 __C.DATA_LOADER.TRAIN_BATCH_SIZE = 32
 __C.DATA_LOADER.VALID_BATCH_SIZE = 32
+__C.DATA_LOADER.TEST_BATCH_SIZE = 32
 __C.DATA_LOADER.NUM_WORKERS = 4
 __C.DATA_LOADER.SHUFFLE = True
 __C.DATA_LOADER.DROP_LAST = True
@@ -63,6 +85,9 @@ __C.MODEL.PRETRAIN = False
 __C.MODEL.NUM_CLASS = 5
 __C.MODEL.SPECTRUM_CHANNEL = 50
 __C.MODEL.RETURN_FEATURE = False
+__C.MODEL.INPUT_DIM = 1024
+__C.MODEL.WITH_OTHER_DATA = False
+__C.MODEL.OTHER_DATA_DIM = 0
 
 # ------------------------------------------ step 4 : loss config node -------------------------------------------------
 __C.LOSS = CfgNode()

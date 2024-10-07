@@ -1,4 +1,6 @@
 import os
+import random
+
 import numpy as np
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.datasets.cr_data import CRNetData
@@ -9,17 +11,36 @@ import torch
 
 @DATA_LOADER_REGISTRY.register()
 class AudioData(VideoData):
-    def __init__(self, data_root, aud_dir, label_file):
+    def __init__(self, data_root, aud_dir, label_file, num_videos=-1, traits="OCEAN", specify_videos="", audio_len=-1):
         super().__init__(
             data_root, img_dir=None, audio_dir=aud_dir, label_file=label_file,
             parse_img_dir=False,
             parse_aud_dir=True,
+            traits=traits,
         )
+        if num_videos > 0:
+            self.aud_file_ls = self.aud_file_ls[: num_videos]
+        
+        if len(specify_videos) > 0:
+            self.aud_file_ls = self.select_aud_files(specify_videos)
+        self.audio_len = audio_len
+
+    def select_aud_files(self, specify_videos):
+        with open(specify_videos, 'r') as fo:
+            videos = ["{}.wav.npy".format(line.strip("\n")) for line in fo.readlines()]
+        videos_path = [
+            os.path.join(self.data_root, self.audio_dir, vid) for vid in videos
+        ]
+
+        return videos_path
+   
 
     def __getitem__(self, index):
         aud_data = self.get_wave_data(index)
         aud_data = self.transform(aud_data)
         label = self.get_ocean_label(index)
+        if not len(self.traits) == 5:
+            label = label[self.traits]
         sample = {
             "aud_data": aud_data,
             "aud_label": label,
@@ -67,6 +88,11 @@ class VoiceLogfbank(AudioData):
             aud_trans = aud_padding
         else:
             aud_trans = aud_ft
+        if self.audio_len > 0:
+            sample_len = int(self.audio_len / 15 * 79534)
+            start = random.randint(0, 79534 - sample_len - 1)
+            end = start + sample_len
+            aud_trans = aud_trans[..., start: end]
         return torch.as_tensor(aud_trans, dtype=torch.float32).squeeze()
 
 
@@ -95,6 +121,11 @@ class VoiceLibrosa(AudioData):
             wav_fill = np.zeros((1, 1, 50176))
             wav_fill[..., :wav_tmp.shape[-1]] = wav_tmp
             wav_tmp = wav_fill
+        if self.audio_len > 0:
+            sample_len = int(self.audio_len / 15 * 50176)
+            start = random.randint(0, 50176 - sample_len - 1)
+            end = start + sample_len
+            wav_tmp = wav_tmp[..., start: end]
         return torch.as_tensor(wav_tmp, dtype=torch.float32)
 
 
@@ -106,6 +137,9 @@ class VoiceCRNetData(AudioData):
         aud_data = self.transform(aud_data)
         label = self.get_ocean_label(index)
         label_cls = torch.as_tensor(CRNetData.cls_encode(label), dtype=torch.float32)
+        if len(self.traits) != 5:
+            label = label[self.traits]
+            label_cls = label_cls[self.traits]
         return {
             "aud_data": aud_data,
             "aud_label": label,
@@ -117,6 +151,11 @@ class VoiceCRNetData(AudioData):
             aud_ft_pad = np.zeros((1, 1, 244832))
             aud_ft_pad[..., :aud_ft.shape[-1]] = aud_ft
             aud_ft = aud_ft_pad
+        if self.audio_len > 0:
+            sample_len = int(16000 * self.audio_len)  # audio sample rate 16000
+            start = random.randint(0, int(244832 - sample_len - 1))
+            end = start + sample_len
+            aud_ft = aud_ft[..., start: end]
         return torch.as_tensor(aud_ft, dtype=torch.float32)
 
 
@@ -148,17 +187,26 @@ class VoiceLibrosaSwinTransformer(AudioData):
 @DATA_LOADER_REGISTRY.register()
 def build_audio_loader(cfg, dataset_cls, mode="train"):
     shuffle = cfg.DATA_LOADER.SHUFFLE
+    batch_size = cfg.DATA_LOADER.TRAIN_BATCH_SIZE
     if mode == "train":
         dataset = dataset_cls(
             cfg.DATA.ROOT,
             cfg.DATA.TRAIN_AUD_DATA,
             cfg.DATA.TRAIN_LABEL_DATA,
+            cfg.DATA.TRAIN_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.TRAIN_SPECIFY_VIDEOS,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
     elif mode == "valid":
         dataset = dataset_cls(
             cfg.DATA.ROOT,
             cfg.DATA.VALID_AUD_DATA,
             cfg.DATA.VALID_LABEL_DATA,
+            cfg.DATA.VALID_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.VALID_SPECIFY_VIDEOS,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
         shuffle = False
     elif mode == "test":
@@ -166,14 +214,19 @@ def build_audio_loader(cfg, dataset_cls, mode="train"):
             cfg.DATA.ROOT,
             cfg.DATA.TEST_AUD_DATA,
             cfg.DATA.TEST_LABEL_DATA,
+            cfg.DATA.TEST_NUM_VIDEOS,
+            traits=cfg.DATA.TRAITS,
+            specify_videos=cfg.DATA.TEST_SPECIFY_VIDEOS,
+            audio_len=cfg.DATA.AUDIO_LEN,
         )
         shuffle = False
+        batch_size = cfg.DATA_LOADER.TEST_BATCH_SIZE
     else:
         raise ValueError("mode must be one of 'train' or 'valid' or test' ")
 
     data_loader = DataLoader(
         dataset,
-        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        batch_size=batch_size,
         shuffle=shuffle,
         drop_last=cfg.DATA_LOADER.DROP_LAST,
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,

@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from dpcv.data.datasets.bi_modal_data import VideoData
 from dpcv.data.transforms.transform import set_transform_op
-from dpcv.data.transforms.build import build_transform_spatial
+from dpcv.data.transforms.build import build_transform_spatial, build_transform_temporal
 from .build import DATA_LOADER_REGISTRY
 from dpcv.data.transforms.temporal_transforms import TemporalRandomCrop,  TemporalDownsample, TemporalEvenCropDownsample
 from dpcv.data.transforms.temporal_transforms import Compose as TemporalCompose
@@ -18,11 +18,28 @@ class VideoFrameSegmentData(VideoData):
     """ Dataloader for 3d models, (3d_resnet, slow-fast, tpn, vat)
 
     """
-    def __init__(self, data_root, img_dir, label_file, video_loader, spa_trans=None, tem_trans=None):
-        super().__init__(data_root, img_dir, label_file)
+    def __init__(
+        self, data_root, img_dir, label_file, video_loader, spa_trans=None, tem_trans=None,
+        num_videos=-1, traits="OCEAN", specify_videos="",
+    ):
+        super().__init__(data_root, img_dir, label_file, traits=traits)
         self.loader = video_loader
+        if num_videos > 0:
+            self.img_dir_ls = self.img_dir_ls[: num_videos]
+        if len(specify_videos) > 0:
+            self.img_dir_ls = self.select_img_dir(specify_videos)
         self.spa_trans = spa_trans
         self.tem_trans = tem_trans
+
+    def select_img_dir(self, specify_videos):
+        with open(specify_videos, 'r') as fo:
+            videos = [line.strip("\n") for line in fo.readlines()]
+        videos_path = [
+            os.path.join(self.data_root, self.img_dir, vid) for vid in videos
+        ]
+
+        return videos_path
+
 
     def __getitem__(self, index):
         img = self.get_image_data(index)
@@ -101,8 +118,16 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
     """ Dataloader for 3d models, (3d_resnet, slow-fast, tpn, vat)
 
     """
-    def __init__(self, data_root, data_split, task, data_type, video_loader, spa_trans=None, tem_trans=None):
-        super().__init__(data_root, data_split, task, data_type, even_downsample=2000, trans=None, segment=True)
+    def __init__(
+        self, data_root, data_split, task, data_type, video_loader, 
+        spa_trans=None, tem_trans=None, 
+        traits="OCEAN", visual_clip=-1,
+        video_nums=-1,
+    ):
+        super().__init__(
+            data_root, data_split, task, data_type, even_downsample=2000, trans=None, segment=True, 
+            traits=traits, visual_clip=visual_clip, video_nums=video_nums,
+        )
         self.loader = video_loader
         self.spa_trans = spa_trans
         self.tem_trans = tem_trans
@@ -110,6 +135,8 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
     def __getitem__(self, index):
         img = self.get_image_data(index)
         label = self.get_image_label(index)
+        if len(self.traits) != 5:
+            label = label[self.traits]
         return {"image": img, "label": torch.as_tensor(label, dtype=torch.float32)}
 
     def __len__(self):
@@ -157,11 +184,12 @@ class TruePersonalityVideoFrameSegmentData(Chalearn21FrameData):
         frame_indices = [int(Path(path).stem[6:]) for path in img_path_ls]
         return frame_indices
 
-    @staticmethod
-    def list_face_frames(img_dir):
+    def list_face_frames(self, img_dir):
         img_path_ls = glob.glob(f"{img_dir}/*.jpg")
         img_path_ls = sorted(img_path_ls, key=lambda x: int(Path(x).stem[5:]))
         frame_indices = [int(Path(path).stem[5:]) for path in img_path_ls]
+        if self.visual_clip > 0:
+            frame_indices = frame_indices[: self.visual_clip]
         return frame_indices
 
 
@@ -225,11 +253,7 @@ def spatial_temporal_data_loader(cfg, mode="train"):
         "'mode' should be 'train' , 'valid', 'trainval', 'test' or 'full_test' "
 
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalDownsample(length=100), TemporalRandomCrop(16)]
-    # temporal_transform = [TemporalRandomCrop(16)]
-    # temporal_transform = [TemporalDownsample(32)]
-
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform = build_transform_temporal(cfg)
 
     data_cfg = cfg.DATA
     if "face" in data_cfg.TRAIN_IMG_DATA:
@@ -298,9 +322,7 @@ def spatial_temporal_data_loader(cfg, mode="train"):
 @DATA_LOADER_REGISTRY.register()
 def true_personality_spatial_temporal_data_loader(cfg, mode="train"):
     spatial_transform = build_transform_spatial(cfg)
-    temporal_transform = [TemporalRandomCrop(32)]
-    # temporal_transform = [TemporalDownsample(length=2000), TemporalRandomCrop(16)]
-    temporal_transform = TemporalCompose(temporal_transform)
+    temporal_transform = build_transform_temporal(cfg)
 
     data_cfg = cfg.DATA
 
@@ -323,6 +345,44 @@ def true_personality_spatial_temporal_data_loader(cfg, mode="train"):
     loader_cfg = cfg.DATA_LOADER
     data_loader = DataLoader(
         dataset=data_set,
+        batch_size=loader_cfg.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=loader_cfg.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def all_true_personality_spatial_temporal_data_loader(cfg, mode="train"):
+
+    from torch.utils.data.dataset import ConcatDataset
+    spatial_transform = build_transform_spatial(cfg)
+    temporal_transform = build_transform_temporal(cfg)
+
+    data_cfg = cfg.DATA
+
+    if data_cfg.TYPE == "face":
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"face_{x}.jpg")
+    else:
+        video_loader = VideoLoader(image_name_formatter=lambda x: f"frame_{x}.jpg")
+        
+    datasets = []
+    for session in ["ghost", "animal", "talk", "lego"]:
+        data_set = TruePersonalityVideoFrameSegmentData(
+            data_root=data_cfg.ROOT,
+            data_split=mode,
+            task=session,
+            data_type=data_cfg.TYPE,
+            video_loader=video_loader,
+            spa_trans=spatial_transform,
+            tem_trans=temporal_transform,
+        )
+        datasets.append(data_set)
+    conca_datasets = ConcatDataset(datasets)
+    shuffle = True if mode == "train" else False
+    loader_cfg = cfg.DATA_LOADER
+    data_loader = DataLoader(
+        dataset=conca_datasets,
         batch_size=loader_cfg.TRAIN_BATCH_SIZE,
         shuffle=shuffle,
         num_workers=loader_cfg.NUM_WORKERS,

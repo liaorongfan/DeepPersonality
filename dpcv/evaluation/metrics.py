@@ -45,29 +45,29 @@ def concordance_correlation_coefficient(y_true, y_pred):
     return numerator / denominator
 
 
-def compute_pcc(outputs, labels):
+def compute_pcc(outputs, labels, traits="OCEAN"):
     from scipy.stats import pearsonr
-    keys = ['O', 'C', 'E', 'A', 'N']
+    # keys = ['O', 'C', 'E', 'A', 'N']
     pcc_dic = {}
     pcc_sum = 0
-    for i, key in enumerate(keys):
+    for i, key in enumerate(traits):
         res = pearsonr(outputs[:, i], labels[:, i])
         # res[1] records p-value
         pcc_dic[key] = np.round(res[0], 4)
         pcc_sum += res[0]
-    mean = np.round((pcc_sum / 5), 4)
+    mean = np.round((pcc_sum / len(traits)), 4)
     return pcc_dic, mean
 
 
-def compute_ccc(outputs, labels):
-    keys = ['O', 'C', 'E', 'A', 'N']
+def compute_ccc(outputs, labels, traits="OCEAN"):
+    # keys = ['O', 'C', 'E', 'A', 'N']
     ccc_dic = {}
     ccc_sum = 0
-    for i, key in enumerate(keys):
+    for i, key in enumerate(traits):
         res = concordance_correlation_coefficient(labels[:, i], outputs[:, i])
         ccc_dic[key] = np.round(res, 4)
         ccc_sum += res
-    mean = np.round((ccc_sum / 5), 4)
+    mean = np.round((ccc_sum / len(traits)), 4)
     return ccc_dic, mean
 
 

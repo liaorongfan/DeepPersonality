@@ -1,0 +1,25 @@
+DATA:
+  TRAIN_IMG_DATA: "datasets/second_stage_TP/deep_bimodal_reg_extract/train/animal_train"
+  VALID_IMG_DATA: "datasets/second_stage_TP/deep_bimodal_reg_extract/valid/animal_valid"
+  TEST_IMG_DATA: "datasets/second_stage_TP/deep_bimodal_reg_extract/test/animal_test"
+DATA_LOADER:
+  NAME: "second_stage_data"
+  SECOND_STAGE:
+    METHOD: "spectrum"
+    TYPE: "pred"
+  TRAIN_BATCH_SIZE: 4
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "spectrum_conv_model2"
+  SPECTRUM_CHANNEL: 5
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.01
+  MILESTONE: [10,]
+TRAIN:
+  TRAINER: "SpectrumTrainer"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results_second_stage_tp/01_deep_bimodal_regression_spectrum/animal"

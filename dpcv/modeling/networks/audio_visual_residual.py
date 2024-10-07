@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from dpcv.modeling.module.bi_modal_resnet_module import AudioVisualResNet, AudInitStage
+from dpcv.modeling.module.bi_modal_resnet_module import AudioVisualResNet, AudInitStage, AUsInitStage, AUs2DInitStage
 from dpcv.modeling.module.bi_modal_resnet_module import VisInitStage, BiModalBasicBlock
 from dpcv.modeling.module.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1, vis_conv3x3, vis_conv1x1
 from dpcv.modeling.module.weight_init_helper import initialize_weights
@@ -15,6 +15,7 @@ class AudioVisualResNet18(nn.Module):
         self.audio_branch = AudioVisualResNet(
             in_channels=1, init_stage=AudInitStage,
             block=BiModalBasicBlock, conv=[aud_conv1x9, aud_conv1x1],
+            # channels=[64, 128, 256, 512],
             channels=[32, 64, 128, 256],
             layers=[2, 2, 2, 2]
         )
@@ -22,9 +23,13 @@ class AudioVisualResNet18(nn.Module):
             in_channels=3, init_stage=VisInitStage,
             block=BiModalBasicBlock, conv=[vis_conv3x3, vis_conv1x1],
             channels=[32, 64, 128, 256],
+            # channels=[64, 128, 256, 512],
             layers=[2, 2, 2, 2]
         )
-        self.linear = nn.Linear(512, 5)
+        self.linear = nn.Linear(512, 256)
+        self.linear_norm = nn.LayerNorm(256)
+        self.relu = nn.ReLU()
+        self.linear_out = nn.Linear(256, 5)
 
         if init_weights:
             initialize_weights(self)
@@ -38,6 +43,9 @@ class AudioVisualResNet18(nn.Module):
 
         feat = torch.cat([aud_x, vis_x], dim=-1)
         x = self.linear(feat)
+        x = self.linear_norm(x)
+        x = self.relu(x)
+        x = self.linear_out(x)
         x = torch.sigmoid(x)
         # x = torch.tanh(x)
         # x = (x + 1) / 2  # scale tanh output to [0, 1]
@@ -100,6 +108,46 @@ class AudioResNet18(nn.Module):
         return x
 
 
+class AUsResNet18(nn.Module):
+
+    def __init__(self):
+        super(AUsResNet18, self).__init__()
+        self.audio_branch = AudioVisualResNet(
+            in_channels=1, init_stage=AUsInitStage,
+            block=BiModalBasicBlock, conv=[aud_conv1x9, aud_conv1x1],
+            channels=[32, 64, 128, 256],
+            layers=[2, 2, 2, 2]
+        )
+        self.linear = nn.Linear(256, 5)
+
+    def forward(self, aud_input):
+        aud_x = self.audio_branch(aud_input)
+        aud_x = aud_x.view(aud_x.size(0), -1)
+        x = self.linear(aud_x)
+        x = torch.sigmoid(x)
+        return x
+
+
+class AUs2DResNet18(nn.Module):
+
+    def __init__(self):
+        super(AUs2DResNet18, self).__init__()
+        self.audio_branch = AudioVisualResNet(
+            in_channels=1, init_stage=AUs2DInitStage,
+            block=BiModalBasicBlock, conv=[aud_conv1x9, aud_conv1x1],
+            channels=[64, 128, 256, 512],
+            layers=[2, 2, 2, 2]
+        )
+        self.linear = nn.Linear(512, 5)
+
+    def forward(self, aud_input):
+        aud_x = self.audio_branch(aud_input)
+        aud_x = aud_x.view(aud_x.size(0), -1)
+        x = self.linear(aud_x)
+        x = torch.sigmoid(x)
+        return x
+
+
 @NETWORK_REGISTRY.register()
 def audiovisual_resnet(cfg=None):
     multi_modal_model = AudioVisualResNet18(return_feat=cfg.MODEL.RETURN_FEATURE)
@@ -125,6 +173,20 @@ def get_visual_resnet_model(cfg=None):
     visual_modal_model = VisualResNet18()
     visual_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return visual_modal_model
+
+
+@NETWORK_REGISTRY.register()
+def get_aus_1d_resnet_model(cfg=None):
+    aud_modal_model = AUsResNet18()
+    aud_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return aud_modal_model
+
+
+@NETWORK_REGISTRY.register()
+def get_aus_2d_resnet_model(cfg=None):
+    aud_modal_model = AUs2DResNet18()
+    aud_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return aud_modal_model
 
 
 if __name__ == "__main__":

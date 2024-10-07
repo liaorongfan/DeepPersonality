@@ -273,6 +273,7 @@ class CRNetTrainer2(BiModalTrainer):
         )
 
     def test(self, data_loader, model):
+        num_classes = model.num_classes
         model.eval()
         model.set_train_regressor()
         mse_func = torch.nn.MSELoss(reduction="none")
@@ -297,15 +298,19 @@ class CRNetTrainer2(BiModalTrainer):
             ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
             ocean_mse_mean = ocean_mse.mean()
             ocean_acc_avg = ocean_acc.mean()
-            dataset_output = torch.stack(output_list, dim=0).view(-1, 5).numpy()
-            dataset_label = torch.stack(label_list, dim=0).view(-1, 5).numpy()
+            dataset_output = torch.stack(output_list, dim=0).view(-1, num_classes).numpy()
+            dataset_label = torch.stack(label_list, dim=0).view(-1, num_classes).numpy()
 
         ocean_mse_mean_rand = np.round(ocean_mse_mean, 4)
         keys = ["O", "C", "E", "A", "N"]
+        try:
+            traits = data_loader.dataset.datasets[0].traits
+        except:
+            traits = data_loader.dataset.traits
         ocean_mse_dict, ocean_acc_dict = {}, {}
-        for i, k in enumerate(keys):
-            ocean_mse_dict[k] = np.round(ocean_mse[i], 4)
-            ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
+        for i, k in enumerate(traits):
+            ocean_mse_dict[keys[k]] = np.round(ocean_mse[i], 4)
+            ocean_acc_dict[keys[k]] = np.round(ocean_acc[i], 4)
         return ocean_acc_avg, ocean_acc, dataset_output, dataset_label, (ocean_mse_dict, ocean_mse_mean_rand)
 
     def full_test(self, data_loader, model):
@@ -391,6 +396,41 @@ class CRNetTrainer2(BiModalTrainer):
 
 
 @TRAINER_REGISTRY.register()
+class CRNetTrainerETR(CRNetTrainer2):
+    
+  
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        model.set_train_regressor()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                out_ls, feat_ls = [], []
+
+                mini_batch_i = inputs  
+                if model.return_feature:
+                    _, out, feat = model(*mini_batch_i)
+                    out_ls.append(out.cpu())
+                    feat_ls.append(feat.cpu())
+                else:
+                    _, out = model(*mini_batch_i)
+                    out_ls.append(out.cpu())
+                    feat_ls.append(torch.tensor([0]))
+
+                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
+                video_extract = {
+                    "video_frames_pred": out_pred,
+                    "video_frames_feat": out_feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)
+
+  
+
+
+@TRAINER_REGISTRY.register()
 class CRNetTrainer2Vis(CRNetTrainer2):
 
     def data_fmt(self, data):
@@ -409,3 +449,43 @@ class CRNetAudTrainer(CRNetTrainer2):
         inputs = data["aud_data"]
         cls_label, reg_label = data["aud_label_cls"], data["aud_label"]
         return (inputs,), cls_label, reg_label
+    
+    def full_test_data_fmt(self, data):
+        wav_aud = data["wav_aud"]
+        inputs = wav_aud[None].cuda()
+        label = data["reg_label"]
+        return inputs, label
+
+
+    def data_extract(self, model, data_set, output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        model.eval()
+        model.set_train_regressor()
+        with torch.no_grad():
+            for idx, data in enumerate(tqdm(data_set)):
+                inputs, label = self.full_test_data_fmt(data)
+                # mini_batch_size = 16
+                out_ls, feat_ls = [], []
+                # for i in range(math.ceil(len(inputs[0]) / mini_batch_size)):
+                    # mini_batch_i_1 = inputs[0][(i * mini_batch_size): (i + 1) * mini_batch_size]
+                    # mini_batch_i_2 = inputs[1][(i * mini_batch_size): (i + 1) * mini_batch_size]
+                    # mini_batch_i_3 = inputs[2][(i * mini_batch_size): (i + 1) * mini_batch_size]
+                mini_batch_i = (inputs, )
+                if model.return_feature:
+                    _, out, feat = model(*mini_batch_i)
+                    out_ls.append(out.cpu())
+                    feat_ls.append(feat.cpu())
+                else:
+                    _, out = model(*mini_batch_i)
+                    out_ls.append(out.cpu())
+                    feat_ls.append(torch.tensor([0]))
+
+                # out.shape = (64, 5) feat.shape = (64, 5, 512)
+                out_pred, out_feat = torch.cat(out_ls, dim=0), torch.cat(feat_ls, dim=0)
+                video_extract = {
+                    "video_frames_pred": out_pred,
+                    "video_frames_feat": out_feat,
+                    "video_label": label.cpu()
+                }
+                save_to_file = os.path.join(output_dir, "{:04d}.pkl".format(idx))
+                torch.save(video_extract, save_to_file)

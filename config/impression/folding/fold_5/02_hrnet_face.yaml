@@ -1,0 +1,14 @@
+DATA:
+  TRAIN_IMG_DATA: "folds/fold_5/image_data/train_data_face"
+  VALID_IMG_DATA: "folds/fold_5/image_data/valid_data_face"
+  TEST_IMG_DATA: "folds/fold_5/image_data/valid_data_face"
+DATA_LOADER:
+  NAME: "single_frame_data_loader"
+  TRANSFORM: "face_image_x2_transform"
+  TRAIN_BATCH_SIZE: 4
+  NUM_WORKERS: 8
+MODEL:
+  NAME: "hr_net_model"
+TRAIN:
+  MAX_EPOCH: 200
+  OUTPUT_DIR: "results/folds/fold_5/02_hrnet_face"

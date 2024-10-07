@@ -1,0 +1,24 @@
+DATA:
+  ROOT: "datasets/chalearn2021/model_output_features/07_vat_face_video_level"
+  ANN_DIR: "datasets/chalearn2021/annotation"
+  SESSION: "animal"
+DATA_LOADER:
+  NAME: "multi_model_metadata_fuse_data_loader"
+  TRAIN_BATCH_SIZE: 32
+  NUM_WORKERS: 0
+MODEL:
+  NAME: "meta_fusing_model"
+  INPUT_DIM: 1027
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [15, 18]
+TRAIN:
+  TRAINER: "MMetaDataTrainer"
+  MAX_EPOCH: 20
+  OUTPUT_DIR: "results_true_personality/metadata_fusing/07_vat_face_video_level"

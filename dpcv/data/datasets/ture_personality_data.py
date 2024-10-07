@@ -25,16 +25,26 @@ def norm(aud_ten):
 
 class Chalearn21FrameData(Dataset):
 
+    TRAITS_ID = {
+        "O": 0, "C": 1, "E": 2, "A": 3, "N": 4,
+    }
+
     def __init__(
             self, data_root, data_split, task, data_type="frame",
-            even_downsample=2000, trans=None, segment=False
+            even_downsample=2000, trans=None, segment=False,
+            traits="OCEAN",
+            visual_clip=-1,
+            audio_clip=-1.0,
+            video_nums=0.25,
     ):
         self.data_root = data_root
         self.ann_dir = opt.join(data_root, "annotation", task)
-        self.session_id, self.parts_personality = self.load_annotation(task, data_split)
+        self.session_id, self.parts_personality = self.load_annotation(task)
         self.data_split = data_split
         self.task = task
         self.type = data_type
+        self.visual_clip = visual_clip
+        self.audio_clip = audio_clip
         self.data_dir = opt.join(data_root, data_split, f"{task}_{data_split}")
         self.sessions = os.listdir(self.data_dir)
         self.sample_size = even_downsample
@@ -48,11 +58,19 @@ class Chalearn21FrameData(Dataset):
                 self.img_dir_ls.extend([f"{dire}/FC1_{self.task_mark}_face", f"{dire}/FC2_{self.task_mark}_face"])
         else:
             raise TypeError(f"type should be 'face' or 'frame' or 'audio', but got {type}")
+        # for debug usage
+        if video_nums > 0:
+            if isinstance(video_nums, int):
+                self.img_dir_ls = self.img_dir_ls[:video_nums]
+            elif isinstance(video_nums, float):
+                video_nums = int(len(self.img_dir_ls) * video_nums)
+                self.img_dir_ls = self.img_dir_ls[:video_nums]
 
         self.segment = segment
         if not data_type == "audio":
             self.all_images = self.assemble_images()
         self.trans = trans
+        self.traits = [self.TRAITS_ID[t] for t in traits]
 
     def __len__(self):
         return len(self.all_images)
@@ -71,7 +89,8 @@ class Chalearn21FrameData(Dataset):
             if self.trans:
                 img_ls = [self.trans(img) for img in img_ls]
             img = torch.stack(img_ls, dim=0)
-
+        if len(self.traits) != 5:
+           label = label[self.traits] 
         return {"image": img, "label": torch.as_tensor(label, dtype=torch.float32)}
 
     def get_ocean_label(self, img_file):
@@ -84,16 +103,18 @@ class Chalearn21FrameData(Dataset):
         participant_trait = np.array([float(v) for v in participant_trait.values()])
         return participant_trait
 
-    def load_annotation(self, task, data_split):
-        session_id_path = opt.join(self.ann_dir, f"sessions_{data_split}_id.json")
-        with open(session_id_path, "r") as fo:
-            session_id = json.load(fo)
-
-        parts_personality = opt.join(self.ann_dir, f"parts_{data_split}_personality.json")
-        with open(parts_personality, "r") as fo:
-            parts_personality = json.load(fo)
-
-        return session_id, parts_personality
+    def load_annotation(self, task):
+        all_session_id, all_parts_personality = {}, {}
+        for data_split in ["train", "valid", "test"]:
+            session_id_path = opt.join(self.ann_dir, f"sessions_{data_split}_id.json")
+            with open(session_id_path, "r") as fo:
+                session_id = json.load(fo)
+            all_session_id.update(session_id)
+            parts_personality = opt.join(self.ann_dir, f"parts_{data_split}_personality.json")
+            with open(parts_personality, "r") as fo:
+                parts_personality = json.load(fo)
+            all_parts_personality.update(parts_personality)
+        return all_session_id, all_parts_personality
 
     def sample_img(self, img_dir):
         imgs = glob.glob(opt.join(self.data_dir, img_dir, "*.jpg"))
@@ -103,8 +124,19 @@ class Chalearn21FrameData(Dataset):
             imgs = sorted(imgs, key=lambda x: int(Path(x).stem[5:]))
 
         # evenly sample to self.sample_size frames
-        separate = np.linspace(0, len(imgs), self.sample_size, endpoint=False, dtype=np.int16)
+        if self.visual_clip > 0:
+            if len(imgs) < self.visual_clip:
+                separate = np.arange(len(imgs))
+            else:
+                middle_img_num = int(len(imgs) / 2)
+                offset = int(self.visual_clip / 2)
+                min = middle_img_num - offset
+                max = middle_img_num + offset
+                separate = np.arange(min, max)
+        else:
+            separate = np.linspace(0, len(imgs), self.sample_size, endpoint=False, dtype=np.int16)
         # index = random.choice(separate)
+        
         selected_imgs = [imgs[idx] for idx in separate]
         # that will cost too much memory on disk
         # label = self.parse_label(selected_imgs[1])
@@ -144,10 +176,24 @@ class Chalearn21FrameData(Dataset):
 
 
 class Chlearn21AudioData(Chalearn21FrameData):
-    def __init__(self, data_root, data_split, task, sample_len=244832, suffix_type="npy", data_type="audio"):
-        super().__init__(data_root, data_split, task, data_type=data_type, segment=True)
+    def __init__(
+        self, data_root, data_split, task, 
+        sample_len=244832, 
+        suffix_type="npy", 
+        data_type="audio", 
+        traits="OCEAN",
+        audio_clip=-1,
+        sample_rate=16000,
+        audio_len=-1.0,
+    ):
+        super().__init__(
+            data_root, data_split, task, data_type=data_type, segment=True, traits=traits, audio_clip=audio_clip,
+        )
         self.sample_len = sample_len
         self.suffix = suffix_type
+        self.audio_clip = audio_clip
+        self.sample_rate = sample_rate
+        self.audio_len = audio_len
 
     def __len__(self):
         return len(self.img_dir_ls)
@@ -166,10 +212,30 @@ class Chlearn21AudioData(Chalearn21FrameData):
         aud_file = opt.join(self.data_dir, f"{img_dir}.{self.suffix}")
         aud_data = np.load(aud_file)
         data_len = aud_data.shape[-1]
-        start = np.random.randint(data_len - self.sample_len)
-        end = start + self.sample_len
-        return aud_data[:, :, start: end]
-
+        if data_len < self.sample_len:
+            data_len = self.sample_len - 1
+        if self.audio_clip > 0:
+            # clip select
+            # take one second more for sampling
+            # clip `audio_clip` seconds audio segment from file
+            # select the middle point of the audio segment
+            sample_len = int(self.sample_rate * self.audio_clip)
+            sample_offset = int(sample_len / 2)
+            middle_point = int(data_len / 2)
+            start = middle_point - sample_offset
+            end = middle_point + sample_offset
+        elif self.audio_len > 0:
+            # random select 
+            sample_len = int(self.sample_rate * self.audio_len)
+            start = random.randint(0, data_len - sample_len - 1)
+            end = start + sample_len
+        else:
+            # random select 
+            start = np.random.randint(data_len - self.sample_len)
+            end = start + self.sample_len
+        sample = aud_data[:, :, start: end]
+        return sample
+    
     def get_ocean_label(self, img_dir):
         *_, session, part = img_dir.split("/")
         part = part.replace(self.task_mark, "T")
@@ -262,7 +328,6 @@ class Chalearn21CRNetData(Chalearn21FrameData):
 
         label = self.get_ocean_label(img_file)
         label_cls_encode = self.cls_encode(label)
-
         wav = self.get_wave_data(img_file)
         if self.trans:
             img = self.trans["frame"](img)
@@ -270,6 +335,9 @@ class Chalearn21CRNetData(Chalearn21FrameData):
 
         wav = torch.as_tensor(wav, dtype=img.dtype)
         label = torch.as_tensor(label, dtype=img.dtype)
+        if not len(self.traits) == 5:
+            label = label[self.traits]
+            label_cls_encode = label_cls_encode[self.traits]
         return {"glo_img": img, "loc_img": loc_img, "wav_aud": wav,
                 "reg_label": label, "cls_label": label_cls_encode}
 
@@ -282,6 +350,10 @@ class Chalearn21CRNetData(Chalearn21FrameData):
             aud_file = f"{dir_name}.npy"
         aud_data = np.load(aud_file)
         data_len = aud_data.shape[-1]
+        if self.audio_clip > 0:
+            data_len = int(data_len * self.audio_clip)
+            if data_len < self.sample_len: 
+                data_len = self.sample_len - 1
         start = np.random.randint(data_len - self.sample_len)
         end = start + self.sample_len
         return aud_data[:, :, start: end]
@@ -317,14 +389,19 @@ class Chalearn21CRNetData(Chalearn21FrameData):
 
 class CRNetAudioTruePersonality(Chlearn21AudioData):
 
-    def __init__(self, data_root, data_split, task, sample_len=244832):
-        super().__init__(data_root, data_split, task, sample_len)
+    def __init__(self, data_root, data_split, task, sample_len=244832, traits="OCEAN", audio_clip=-1, audio_len=-1):
+        super().__init__(
+            data_root, data_split, task, sample_len, traits=traits, audio_clip=audio_clip, audio_len=audio_len
+        )
 
     def __getitem__(self, idx):
         img_dir = self.img_dir_ls[idx]
         aud_data = self.sample_audio_data(img_dir)
         aud_label = self.get_ocean_label(img_dir)
         label_cls = self.cls_encode(aud_label)
+        if not len(self.traits) == 5:
+            aud_label = aud_label[self.traits]
+            label_cls = label_cls[self.traits]
         return {
             "aud_data": torch.as_tensor(aud_data, dtype=torch.float32),
             "aud_label": torch.as_tensor(aud_label, dtype=torch.float32),
@@ -510,9 +587,73 @@ def true_personality_dataloader(cfg, mode):
         task=cfg.DATA.SESSION,  # "talk"
         data_type=cfg.DATA.TYPE,
         trans=transform,
+        visual_clip=cfg.DATA.VISUAL_CLIP,
     )
     data_loader = DataLoader(
         dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def all_true_personality_dataloader(cfg, mode):
+    from torch.utils.data.dataset import ConcatDataset
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    transform = build_transform_spatial(cfg)
+    datasets = []
+    # for session in ["ghost",]:
+    for session in ["ghost", "animal", "talk", "lego"]:
+
+        dataset = Chalearn21FrameData(
+            data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,
+            data_type=cfg.DATA.TYPE,
+            trans=transform,
+            traits=cfg.DATA.TRAITS,
+        )
+        datasets.append(dataset)
+    conca_datasets = ConcatDataset(datasets)
+    data_loader = DataLoader(
+        dataset=conca_datasets,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def fold_all_true_personality_dataloader(cfg, mode):
+    from torch.utils.data.dataset import ConcatDataset
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+    if mode == "test":
+        mode = "valid"
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    transform = build_transform_spatial(cfg)
+    datasets = []
+    # for session in ["ghost",]:
+    for session in ["ghost", "animal", "talk", "lego"]:
+
+        dataset = Chalearn21FrameData(
+            data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,  
+            data_type=cfg.DATA.TYPE,
+            trans=transform,
+            traits=cfg.DATA.TRAITS,
+        )
+        datasets.append(dataset)
+    conca_datasets = ConcatDataset(datasets)
+    data_loader = DataLoader(
+        dataset=conca_datasets,
         batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
         shuffle=shuffle,
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
@@ -539,6 +680,34 @@ def true_personality_audio_dataloader(cfg, mode):
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,
     )
     return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def all_true_personality_audio_dataloader(cfg, mode):
+    from torch.utils.data.dataset import ConcatDataset
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    datasets = []
+    for session in ["ghost", "animal", "talk", "lego"]:
+        dataset = Chlearn21AudioData(
+            data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,  # "talk"
+            audio_len=cfg.DATA.AUDIO_LEN,
+        )
+        datasets.append(dataset)
+    conca_datasets = ConcatDataset(datasets)
+    
+    data_loader = DataLoader(
+        dataset=conca_datasets,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+    )
+    return data_loader
+
 
 
 @DATA_LOADER_REGISTRY.register()
@@ -596,12 +765,47 @@ def true_personality_crnet_dataloader(cfg, mode):
         data_split=mode,
         task=cfg.DATA.SESSION,  # "talk"
         trans=transforms,
+        visual_clip=cfg.DATA.VISUAL_CLIP, 
+        audio_clip=cfg.DATA.AUDIO_CLIP,
     )
     data_loader = DataLoader(
         dataset=dataset,
         batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
         shuffle=shuffle,
         num_workers=0,
+        drop_last=cfg.DATA_LOADER.DROP_LAST,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def all_true_personality_crnet_dataloader(cfg, mode):
+    from torch.utils.data.dataset import ConcatDataset
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    transforms = build_transform_spatial(cfg)
+    num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 1
+
+    datasets = []
+    for session in ["ghost"]:
+    # for session in ["talk", "lego", "ghost", "animal"]:
+        dataset = Chalearn21CRNetData(
+            data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,  # "talk"
+            trans=transforms,
+            traits=cfg.DATA.TRAITS
+        )
+        datasets.append(dataset)
+    
+    concat_dataset = ConcatDataset(datasets)
+    data_loader = DataLoader(
+        dataset=concat_dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=num_worker,
     )
     return data_loader
 
@@ -617,9 +821,42 @@ def true_personality_crnet_audio_dataloader(cfg, mode):
         data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
         data_split=mode,
         task=cfg.DATA.SESSION,  # "talk"
+        audio_clip=cfg.DATA.AUDIO_CLIP,
     )
     data_loader = DataLoader(
         dataset=dataset,
+        batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
+        shuffle=shuffle,
+        num_workers=num_worker,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
+def all_true_personality_crnet_audio_dataloader(cfg, mode):
+    from torch.utils.data.dataset import ConcatDataset
+
+    assert (mode in ["train", "valid", "trainval", "test", "full_test"]), \
+        "'mode' should be 'train' , 'valid', 'trainval', 'test', 'full_test' "
+
+    shuffle = False if mode in ["valid", "test", "full_test"] else True
+    num_worker = cfg.DATA_LOADER.NUM_WORKERS if mode in ["valid", "train"] else 1
+
+    datasets = []
+    # for session in ["ghost"]:
+    for session in ["ghost", "animal", "talk", "lego"]:
+        dataset = CRNetAudioTruePersonality(
+            data_root=cfg.DATA.ROOT,  # "datasets/chalearn2021",
+            data_split=mode,
+            task=session,  # "talk"
+            traits=cfg.DATA.TRAITS,
+            audio_clip=cfg.DATA.AUDIO_CLIP,
+            audio_len=cfg.DATA.AUDIO_LEN,
+        )
+        datasets.append(dataset)
+    concat_dataset = ConcatDataset(datasets)
+    data_loader = DataLoader(
+        dataset=concat_dataset,
         batch_size=cfg.DATA_LOADER.TRAIN_BATCH_SIZE,
         shuffle=shuffle,
         num_workers=num_worker,

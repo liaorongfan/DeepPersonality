@@ -116,7 +116,10 @@ class ExpRunner:
             self.model = load_model(self.model, cfg.WEIGHT)
         else:
             try:
-                weights = [file for file in os.listdir(self.log_dir) if file.endswith(".pkl") and ("last" not in file)]
+                weights = [
+                    file for file in os.listdir(self.log_dir)
+                    if file.endswith(".pkl") and ("last" not in file)
+                ]
                 weights = sorted(weights, key=lambda x: int(x[11:-4]))
                 weight_file = os.path.join(self.log_dir, weights[-1])
             except IndexError:
@@ -136,11 +139,11 @@ class ExpRunner:
         self.logger.info("acc: {} mean: {}".format(ocean_acc, ocean_acc_avg))
 
         if cfg.COMPUTE_PCC:
-            pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label)
+            pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label, self.cfg.DATA.TRAITS)
             self.logger.info(f"pcc: {pcc_dict} mean: {pcc_mean}")
 
         if cfg.COMPUTE_CCC:
-            ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label)
+            ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label, self.cfg.DATA.TRAITS)
             self.logger.info(f"ccc: {ccc_dict} mean: {ccc_mean}")
 
         if cfg.SAVE_DATASET_OUTPUT:

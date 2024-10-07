@@ -98,7 +98,7 @@ class AudLinearRegressor(nn.Module):
 
 @NETWORK_REGISTRY.register()
 def get_aud_linear_regressor(cfg=None):
-    model = AudLinearRegressor()
+    model = AudLinearRegressor(input_units=cfg.MODEL.INPUT_DIM)
     model.to(device=(torch.device("cuda" if torch.cuda.is_available() else "cpu")))
     return model
 
@@ -122,7 +122,7 @@ def dan_model(cfg):
 
     if cfg.MODEL.PRETRAIN:
         print("load pretained model weights")
-        pretrained_dict = torch.load("../pre_trained_weights/vgg16_bn-6c64b313.pth")
+        pretrained_dict = torch.load("./pre_trained_weights/vgg16_bn-6c64b313.pth")
         model_dict = dan.state_dict()
         # 1. filter out unnecessary keys -------------------------------------------------------------------------------
         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
@@ -167,13 +167,3 @@ if __name__ == "__main__":
     # x = torch.randn(2, 3, 244, 244).cuda()
     # y = model(x)
     # print(y, y.shape)
-
-"""
-questions:
-    1) concatenate or add ,if add more weights saved
-    2) hidden layers 50176 --> 1024 --> 5, mapping efficient
-    3) L2 norm vs batch norm
-    4) dropout or not
-    5) freeze batch norm or not when training 
-    6) pre-trained models from imagenet or face-net 
-"""
