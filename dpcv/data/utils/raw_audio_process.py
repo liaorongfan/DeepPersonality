@@ -24,10 +24,14 @@ class RawAudioProcessor:
     def __getitem__(self, idx):
         wav_file_path = self.aud_file_ls[idx]
         video_name = os.path.basename(wav_file_path)  # .replace(".wav", "")
+        print("mode: ",self.mode)
+        print(f"processing {idx + 1}/{len(self.aud_file_ls)}: {video_name}")
         if self.mode == "librosa":
             self.librosa_extract(wav_file_path, video_name)
+            print(f"librosa: processed {idx + 1}/{len(self.aud_file_ls)}: {video_name}")
         elif self.mode == "logfbank":
             self.logfbank_extract(wav_file_path, video_name)
+            print(f"logfbank: processed {idx + 1}/{len(self.aud_file_ls)}: {video_name}")
         elif self.mode == "opensmile":
             self.opensmile_extract(wav_file_path, video_name)
 
@@ -37,12 +41,14 @@ class RawAudioProcessor:
     def librosa_extract(self, wav_file_path, video_name):
         try:
             # sample rate 16000 Hz
-            wav_ft = librosa.load(wav_file_path, 16000)[0][None, None, :]  # output_shape = (1, 1, 244832)
+            wav_ft = librosa.load(wav_file_path, sr=16000)[0][None, None, :]  # output_shape = (1, 1, 244832)
             # wav_ft = librosa.load(wav_path, 3279)[0][None, None, :]  # output_shape = (1, 1, 50176)
 
             np.save(f"{self.saved_file}/{video_name}.npy", wav_ft)
         except Exception:
             print("error:", wav_file_path)
+            import traceback
+            traceback.print_exc()
 
     def logfbank_extract(self, wav_file_path, video_name):
         try:
@@ -53,6 +59,9 @@ class RawAudioProcessor:
             np.save(f"{self.saved_file}/{video_name}.npy", single_vec_feat)
         except Exception:
             print("error:", wav_file_path)
+            import traceback
+            traceback.print_exc()
+
 
     def opensmile_extract(self, wav_file_path, video_name):
         try:
@@ -61,6 +70,9 @@ class RawAudioProcessor:
             np.save(f"{self.saved_file}/{video_name}.npy", arr)
         except Exception:
             print("error:", wav_file_path)
+            import traceback
+            traceback.print_exc()
+
 
     @staticmethod
     def processed_files(save_to):
@@ -79,14 +91,16 @@ def audio_process(mode, aud_dir, saved_dir):
 
 class TPRawAudioProcessor(RawAudioProcessor):
 
-    def __init__(self, mode, aud_dir):
+    def __init__(self, mode, aud_dir, save_to):
         self.mode = mode
+        self.saved_file = save_to
         if mode == "opensmile":
             self.smile = opensmile.Smile(
                 feature_set=opensmile.FeatureSet.emobase,
                 feature_level=opensmile.FeatureLevel.Functionals,
             )
         self.aud_file_ls = list(glob.glob(f"{aud_dir}/*/*/*.wav"))
+        print(f"total audio files: {len(self.aud_file_ls)}")
 
     def opensmile_extract(self, wav_file_path, video_name):
         try:
@@ -117,7 +131,9 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output-dir", default=None, type=str, help="path to save processed audio files")
     args = parser.parse_args()
 
-    # audio_process(args.mode, args.audio_dir, args.output_dir)
-    tp_audio_process(args.mode, args.audio_dir)
+    audio_process(args.mode, args.audio_dir, args.output_dir)
+    # print(f"audio dir: {args.audio_dir}")
+    # print(f"output dir: {args.output_dir}")
+    # tp_audio_process(args.mode, args.audio_dir)
 
 

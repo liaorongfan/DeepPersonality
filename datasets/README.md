@@ -153,10 +153,10 @@ voice_data/voice_raw/train_data/
 ```
 
 #### Process raw audio files
-The audio data processing methods we used include `librasa`, `logfbank`, `mfcc` and `opensmile`, Here we take `librasa` 
+The audio data processing methods we used include `librosa`, `logfbank`, `mfcc` and `opensmile`, Here we take `librosa` 
 as an example.
 ```shell
-python dpcv/data/utils/raw_audio_process.py --mode <librasa/logfbank/opensmile> \
+python dpcv/data/utils/raw_audio_process.py --mode <librosa/logfbank/opensmile> \
     --audio-dir /path/to/audio_dir \
     --output-dir /path/to/output_dir 
 ```
